@@ -1,4 +1,14 @@
-﻿<h3>Login</h3>
+﻿@page "/login"
+
+<div style="min-height:80vh" class="d-flex justify-center align-center">
+	<MudForm>
+		<div style="width:600px" class="d-flex justify-center align-center gap-3 flex-column">
+			<MudText Typo="Typo.h5" >Bienvenid@@, inicia sesión</MudText>
+			<MudTextField FullWidth=true Label="Username" T="string"></MudTextField>
+			<MudTextField FullWidth=true Label="Password" T="string" InputType="InputType.Password"></MudTextField>
+		</div>
+	</MudForm>
+</div>
 
 @code {
 
