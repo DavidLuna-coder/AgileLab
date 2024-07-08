@@ -28,6 +28,8 @@ namespace TFG.Application.Services.Auth
                 UserName = model.Email,
             };
 
+            try
+            {
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded) return result;
@@ -45,6 +47,11 @@ namespace TFG.Application.Services.Auth
             }
 
             return IdentityResult.Success;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         public async Task<Result<string>> LoginAsync(RegistrationDto model)
         {

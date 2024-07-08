@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TFG.Infrastructure.Data;
@@ -13,8 +15,16 @@ namespace TFG.Infrastructure
         public static IServiceCollection RegisterAppInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(
-            options => options.UseInMemoryDatabase("AppDb"));
-            services.AddIdentity<User, IdentityRole>()
+            options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<User, IdentityRole>(options => 
+            options.Password = new PasswordOptions()
+            {
+                RequireDigit = true,
+                RequiredLength = 8,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireNonAlphanumeric = true,
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

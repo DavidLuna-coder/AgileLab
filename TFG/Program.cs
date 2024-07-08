@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using TFG.Application.Services;
 using TFG.Infrastructure;
+using TFG.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +17,12 @@ builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.Services.RegisterAppServices();
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    context.Database.Migrate();
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
