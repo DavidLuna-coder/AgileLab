@@ -6,18 +6,20 @@ using System.Security.Claims;
 using System.Text;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.GitlabApiIntegration;
+using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Auth
 {
-    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration) : IAuthService
+    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration) : IAuthService
     {
         private readonly UserManager<User> _userManager = userManager;
         private readonly SignInManager<User> _signInManager = signInManager;
         private readonly IConfiguration _configuration = configuration;
         private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
+        private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
         public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
         {
 
@@ -25,34 +27,83 @@ namespace TFG.Application.Services.Auth
             {
                 Email = model.Email,
                 EmailConfirmed = true,
-                UserName = model.Email,
+                UserName = model.UserName,
+                IsAdmin = model.IsAdmin,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
             };
 
+            bool userCreated = false;
             try
             {
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded) return result;
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded) return result;
+                userCreated = true;
+                var gitlabResult = await RegisterGitlab(model);
+                if (!gitlabResult.Succeeded)
+                {
 
+                    await _userManager.DeleteAsync(user);
+                    return gitlabResult;
+                }
+
+                var openProjectResult = await RegisterOpenProject(model);
+                if (!openProjectResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return openProjectResult;
+                }
+
+                return IdentityResult.Success;
+
+            }
+            catch (Exception ex)
+            {
+                if (userCreated)
+                {
+                    await _userManager.DeleteAsync(user);
+                }
+                var errors = new[]
+                {
+                    new IdentityError { Description = ex.Message },
+                };
+                return IdentityResult.Failed(errors);
+            }
+        }
+
+        private async Task<IdentityResult> RegisterOpenProject(RegistrationDto model)
+        {
+            var openProjectResult = await _openProjectApiIntegration.CreateUser(model);
+            if (!openProjectResult.Success)
+            {
+                var errors = new[]
+                {
+                   new IdentityError { Description = string.Join(",", openProjectResult.Errors) },
+                };
+
+                return IdentityResult.Failed(errors);
+            }
+            return IdentityResult.Success;
+        }
+
+        private async Task<IdentityResult> RegisterGitlab(RegistrationDto model)
+        {
             var gitLabResult = await _gitlabApiIntegration.CreateUser(model);
             if (!gitLabResult.Success)
             {
 
                 var errors = new[]
                 {
-                    new IdentityError { Description = string.Join(",", gitLabResult.Errors) },
-                };
+                        new IdentityError { Description = string.Join(",", gitLabResult.Errors) },
+                    };
 
                 return IdentityResult.Failed(errors);
             }
 
             return IdentityResult.Success;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
         }
+
         public async Task<Result<string>> LoginAsync(RegistrationDto model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);

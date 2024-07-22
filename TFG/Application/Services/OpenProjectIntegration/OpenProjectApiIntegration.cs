@@ -1,17 +1,13 @@
 ﻿using Shared.DTOs;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using TFG.Application.Interfaces.GitlabApiIntegration;
+using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Domain.Results;
 using TFG.Model.Entities;
 
-namespace TFG.Application.Services.GitlabIntegration
+namespace TFG.Application.Services.OpenProjectIntegration
 {
-    public class GitlabApiIntegration(GitLabApi api) : IGitlabApiIntegration
+    public class OpenProjectApiIntegration(OpenProjectApi api) : IOpenProjectApiIntegration
     {
-        private readonly GitLabApi _api = api;
-        private JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
+        private readonly OpenProjectApi _api = api;
         public Task CreateProject(Project project)
         {
             throw new NotImplementedException();
@@ -19,18 +15,22 @@ namespace TFG.Application.Services.GitlabIntegration
 
         public async Task<Result<bool>> CreateUser(RegistrationDto user)
         {
-            GitlabUserRequest gitlabUserRequest = new()
+            OpenProjectCreateUserRequest request = new()
             {
+                Admin = user.IsAdmin,
                 Email = user.Email,
-                Name = user.Email,
-                Password = user.Password,
-                Username = user.UserName
+                Login = user.UserName,
+                FirstName = user.UserName,
+                LastName = user.UserName,
+                Language = "es",
+                Password = user.Password
             };
             try
             {
-                var response = await _api.PostAsync("users", gitlabUserRequest);
+                var response = await _api.PostAsync("users", request);
                 return true;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return new Result<bool>([ex.Message]);
             }
