@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Shared.DTOs;
 using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 using TFG.Application.Interfaces;
@@ -49,18 +50,24 @@ namespace TFG.Application.Services.Auth
 
                 //OpenProject registration
                 var openProjectResult = await RegisterOpenProject(model);
-                if (!openProjectResult.Succeeded)
+                if (!openProjectResult.Success)
                 {
                     await _gitlabApiIntegration.DeleteUser(user);
-                    return openProjectResult;
+                    return CreateIdentityError(openProjectResult.Errors);
                 }
+                user.OpenProjectId = openProjectResult.Value.ToString();
 
                 //SonarQube registration Falta por implementar.
 
                 //App registration
                 var result = await _userManager.CreateAsync(user, model.Password);
-                if (!result.Succeeded) return result;
-                return IdentityResult.Success;
+                if (!result.Succeeded)
+                {
+                    await _gitlabApiIntegration.DeleteUser(user);
+                    await _openProjectApiIntegration.DeleteUser(user);
+                } 
+
+                return result;
 
             }
             catch (Exception ex)
@@ -78,19 +85,10 @@ namespace TFG.Application.Services.Auth
             }
         }
 
-        private async Task<IdentityResult> RegisterOpenProject(RegistrationDto model)
+        private async Task<Result<int>> RegisterOpenProject(RegistrationDto model)
         {
             var openProjectResult = await _openProjectApiIntegration.CreateUser(model);
-            if (!openProjectResult.Success)
-            {
-                var errors = new[]
-                {
-                   new IdentityError { Description = string.Join(",", openProjectResult.Errors) },
-                };
-
-                return IdentityResult.Failed(errors);
-            }
-            return IdentityResult.Success;
+            return openProjectResult;
         }
 
         private async Task<Result<int>> RegisterGitlab(RegistrationDto model)
