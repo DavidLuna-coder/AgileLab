@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Shared.DTOs;
+using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -20,6 +21,8 @@ namespace TFG.Application.Services.Auth
         private readonly IConfiguration _configuration = configuration;
         private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
         private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
+
+        #region REGISTER
         public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
         {
 
@@ -31,30 +34,32 @@ namespace TFG.Application.Services.Auth
                 IsAdmin = model.IsAdmin,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
+                OpenProjectId = string.Empty,
+                GitlabId = string.Empty,
+                SonarQubeId = string.Empty,
             };
 
             bool userCreated = false;
             try
             {
+                //Gitlab registration
+                Result<int> gitlabResult = await RegisterGitlab(model);
+                if (!gitlabResult.Success) return CreateIdentityError(gitlabResult.Errors);
+                user.GitlabId = gitlabResult.Value.ToString();
 
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (!result.Succeeded) return result;
-                userCreated = true;
-                var gitlabResult = await RegisterGitlab(model);
-                if (!gitlabResult.Succeeded)
-                {
-
-                    await _userManager.DeleteAsync(user);
-                    return gitlabResult;
-                }
-
+                //OpenProject registration
                 var openProjectResult = await RegisterOpenProject(model);
                 if (!openProjectResult.Succeeded)
                 {
-                    await _userManager.DeleteAsync(user);
+                    await _gitlabApiIntegration.DeleteUser(user);
                     return openProjectResult;
                 }
 
+                //SonarQube registration Falta por implementar.
+
+                //App registration
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded) return result;
                 return IdentityResult.Success;
 
             }
@@ -63,6 +68,7 @@ namespace TFG.Application.Services.Auth
                 if (userCreated)
                 {
                     await _userManager.DeleteAsync(user);
+                    await _gitlabApiIntegration.DeleteUser(user);
                 }
                 var errors = new[]
                 {
@@ -87,23 +93,14 @@ namespace TFG.Application.Services.Auth
             return IdentityResult.Success;
         }
 
-        private async Task<IdentityResult> RegisterGitlab(RegistrationDto model)
+        private async Task<Result<int>> RegisterGitlab(RegistrationDto model)
         {
             var gitLabResult = await _gitlabApiIntegration.CreateUser(model);
-            if (!gitLabResult.Success)
-            {
-
-                var errors = new[]
-                {
-                        new IdentityError { Description = string.Join(",", gitLabResult.Errors) },
-                    };
-
-                return IdentityResult.Failed(errors);
-            }
-
-            return IdentityResult.Success;
+            return gitLabResult;
         }
+        #endregion
 
+        #region LOGIN
         public async Task<Result<string>> LoginAsync(RegistrationDto model)
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
@@ -116,6 +113,7 @@ namespace TFG.Application.Services.Auth
             var token = GenerateJwtToken(user);
             return token;
         }
+
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -138,6 +136,16 @@ namespace TFG.Application.Services.Auth
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        #endregion
 
+
+        private IdentityResult CreateIdentityError(ImmutableArray<string> error)
+        {
+            var errors = new[]
+            {
+                new IdentityError { Description = string.Join(",", error) },
+            };
+            return IdentityResult.Failed(errors);
+        }
     }
 }
