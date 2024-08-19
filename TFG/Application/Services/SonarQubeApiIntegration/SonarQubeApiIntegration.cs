@@ -1,9 +1,9 @@
 ﻿using Shared.DTOs;
 using System.Text.Json;
-using TFG.Application.Interfaces.SonarQubeApiIntegration;
+using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Domain.Results;
 
-namespace TFG.Application.Services.SonarQubeApiIntegration
+namespace TFG.Application.Services.SonarQubeIntegration
 {
     public class SonarQubeApiIntegration(SonarQubeApi sonarQubeApi) : ISonarQubeApiIntegration
     {

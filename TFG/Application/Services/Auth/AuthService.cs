@@ -9,7 +9,7 @@ using System.Text;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
-using TFG.Application.Interfaces.SonarQubeApiIntegration;
+using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
@@ -23,7 +23,6 @@ namespace TFG.Application.Services.Auth
         private readonly IConfiguration _configuration = configuration;
         private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
         private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
-        //Falta inyectar
         private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
         #region REGISTER
         public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
@@ -60,6 +59,13 @@ namespace TFG.Application.Services.Auth
                 user.OpenProjectId = openProjectResult.Value.ToString();
 
                 //SonarQube registration Falta por implementar.
+                var sonarQubeResult = await _sonarQubeApiIntegration.CreateUser(model);
+                if (!sonarQubeResult.Success)
+                {
+                    await _gitlabApiIntegration.DeleteUser(user);
+                    await _openProjectApiIntegration.DeleteUser(user);
+                }
+                user.SonarQubeId = sonarQubeResult.Value;
 
                 //App registration
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -67,6 +73,7 @@ namespace TFG.Application.Services.Auth
                 {
                     await _gitlabApiIntegration.DeleteUser(user);
                     await _openProjectApiIntegration.DeleteUser(user);
+                    await _sonarQubeApiIntegration.DeleteUser(user.SonarQubeId);
                 } 
 
                 return result;

@@ -1,14 +1,14 @@
 ﻿using System.Text;
 using System.Text.Json;
 
-namespace TFG.Application.Services.SonarQubeApiIntegration
+namespace TFG.Application.Services.SonarQubeIntegration
 {
     public class SonarQubeApi
     {
         private readonly HttpClient _httpClient;
         private readonly string SONARQUBE_BASE_ADDRESS;
         private readonly string SONARQUBE_API_KEY;
-        private JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
+        private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
 
         public SonarQubeApi(IConfiguration configuration)
         {

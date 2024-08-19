@@ -2,7 +2,7 @@
 using TFG.Domain.Results;
 using TFG.Model.Entities;
 
-namespace TFG.Application.Interfaces.SonarQubeApiIntegration
+namespace TFG.Application.Interfaces.SonarQubeIntegration
 {
     public interface ISonarQubeApiIntegration
     {
