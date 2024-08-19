@@ -51,7 +51,6 @@ namespace TFG.Application.Services.GitlabIntegration
 
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
         {
-
             var response = await _httpClient.DeleteAsync(endpoint);
             response.EnsureSuccessStatusCode();
             return response;

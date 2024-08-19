@@ -9,20 +9,22 @@ using System.Text;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
+using TFG.Application.Interfaces.SonarQubeApiIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Auth
 {
-    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration) : IAuthService
+    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration) : IAuthService
     {
         private readonly UserManager<User> _userManager = userManager;
         private readonly SignInManager<User> _signInManager = signInManager;
         private readonly IConfiguration _configuration = configuration;
         private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
         private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
-
+        //Falta inyectar
+        private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
         #region REGISTER
         public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
         {
