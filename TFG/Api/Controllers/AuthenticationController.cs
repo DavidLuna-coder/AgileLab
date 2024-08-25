@@ -27,7 +27,7 @@ namespace TFG.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] RegistrationDto model)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
         {
 
             var result = await _authService.LoginAsync(model);

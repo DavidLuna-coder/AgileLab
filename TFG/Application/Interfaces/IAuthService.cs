@@ -8,6 +8,6 @@ namespace TFG.Application.Interfaces
     public interface IAuthService
     {
         Task<IdentityResult> RegisterAsync(RegistrationDto model);
-        Task<Result<string>> LoginAsync(RegistrationDto model);
+        Task<Result<LoginResponseDto>> LoginAsync(LoginRequestDto model);
     }
 }

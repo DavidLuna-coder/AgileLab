@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using TFG.Application.Services;
 using TFG.Infrastructure;
 using TFG.Infrastructure.Data;

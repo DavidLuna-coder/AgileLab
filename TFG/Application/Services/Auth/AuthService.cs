@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Shared.DTOs;
+using Shared.Utils.DateTimeProvider;
 using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection.Metadata.Ecma335;
@@ -16,143 +17,150 @@ using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Auth
 {
-    public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration) : IAuthService
-    {
-        private readonly UserManager<User> _userManager = userManager;
-        private readonly SignInManager<User> _signInManager = signInManager;
-        private readonly IConfiguration _configuration = configuration;
-        private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
-        private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
-        private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
-        #region REGISTER
-        public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
-        {
+	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IDateTimeProvider dateTimeProvider) : IAuthService
+	{
+		private readonly UserManager<User> _userManager = userManager;
+		private readonly SignInManager<User> _signInManager = signInManager;
+		private readonly IConfiguration _configuration = configuration;
+		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
+		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
+		private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
+		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		#region REGISTER
+		public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
+		{
 
-            var user = new User()
-            {
-                Email = model.Email,
-                EmailConfirmed = true,
-                UserName = model.UserName,
-                IsAdmin = model.IsAdmin,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                OpenProjectId = string.Empty,
-                GitlabId = string.Empty,
-                SonarQubeId = string.Empty,
-            };
+			var user = new User()
+			{
+				Email = model.Email,
+				EmailConfirmed = true,
+				UserName = model.UserName,
+				IsAdmin = model.IsAdmin,
+				FirstName = model.FirstName,
+				LastName = model.LastName,
+				OpenProjectId = string.Empty,
+				GitlabId = string.Empty,
+				SonarQubeId = string.Empty,
+			};
 
-            bool userCreated = false;
-            try
-            {
-                //Gitlab registration
-                Result<int> gitlabResult = await RegisterGitlab(model);
-                if (!gitlabResult.Success) return CreateIdentityError(gitlabResult.Errors);
-                user.GitlabId = gitlabResult.Value.ToString();
+			bool userCreated = false;
+			try
+			{
+				//Gitlab registration
+				Result<int> gitlabResult = await RegisterGitlab(model);
+				if (!gitlabResult.Success) return CreateIdentityError(gitlabResult.Errors);
+				user.GitlabId = gitlabResult.Value.ToString();
 
-                //OpenProject registration
-                var openProjectResult = await RegisterOpenProject(model);
-                if (!openProjectResult.Success)
-                {
-                    await _gitlabApiIntegration.DeleteUser(user);
-                    return CreateIdentityError(openProjectResult.Errors);
-                }
-                user.OpenProjectId = openProjectResult.Value.ToString();
+				//OpenProject registration
+				var openProjectResult = await RegisterOpenProject(model);
+				if (!openProjectResult.Success)
+				{
+					await _gitlabApiIntegration.DeleteUser(user);
+					return CreateIdentityError(openProjectResult.Errors);
+				}
+				user.OpenProjectId = openProjectResult.Value.ToString();
 
-                //SonarQube registration Falta por implementar.
-                var sonarQubeResult = await _sonarQubeApiIntegration.CreateUser(model);
-                if (!sonarQubeResult.Success)
-                {
-                    await _gitlabApiIntegration.DeleteUser(user);
-                    await _openProjectApiIntegration.DeleteUser(user);
-                }
-                user.SonarQubeId = sonarQubeResult.Value;
+				//SonarQube registration Falta por implementar.
+				var sonarQubeResult = await _sonarQubeApiIntegration.CreateUser(model);
+				if (!sonarQubeResult.Success)
+				{
+					await _gitlabApiIntegration.DeleteUser(user);
+					await _openProjectApiIntegration.DeleteUser(user);
+				}
+				user.SonarQubeId = sonarQubeResult.Value;
 
-                //App registration
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (!result.Succeeded)
-                {
-                    await _gitlabApiIntegration.DeleteUser(user);
-                    await _openProjectApiIntegration.DeleteUser(user);
-                    await _sonarQubeApiIntegration.DeleteUser(user.SonarQubeId);
-                } 
+				//App registration
+				var result = await _userManager.CreateAsync(user, model.Password);
+				if (!result.Succeeded)
+				{
+					await _gitlabApiIntegration.DeleteUser(user);
+					await _openProjectApiIntegration.DeleteUser(user);
+					await _sonarQubeApiIntegration.DeleteUser(user.SonarQubeId);
+				}
 
-                return result;
+				return result;
 
-            }
-            catch (Exception ex)
-            {
-                if (userCreated)
-                {
-                    await _userManager.DeleteAsync(user);
-                    await _gitlabApiIntegration.DeleteUser(user);
-                }
-                var errors = new[]
-                {
-                    new IdentityError { Description = ex.Message },
-                };
-                return IdentityResult.Failed(errors);
-            }
-        }
+			}
+			catch (Exception ex)
+			{
+				if (userCreated)
+				{
+					await _userManager.DeleteAsync(user);
+					await _gitlabApiIntegration.DeleteUser(user);
+				}
+				var errors = new[]
+				{
+					new IdentityError { Description = ex.Message },
+				};
+				return IdentityResult.Failed(errors);
+			}
+		}
 
-        private async Task<Result<int>> RegisterOpenProject(RegistrationDto model)
-        {
-            var openProjectResult = await _openProjectApiIntegration.CreateUser(model);
-            return openProjectResult;
-        }
+		private async Task<Result<int>> RegisterOpenProject(RegistrationDto model)
+		{
+			var openProjectResult = await _openProjectApiIntegration.CreateUser(model);
+			return openProjectResult;
+		}
 
-        private async Task<Result<int>> RegisterGitlab(RegistrationDto model)
-        {
-            var gitLabResult = await _gitlabApiIntegration.CreateUser(model);
-            return gitLabResult;
-        }
-        #endregion
+		private async Task<Result<int>> RegisterGitlab(RegistrationDto model)
+		{
+			var gitLabResult = await _gitlabApiIntegration.CreateUser(model);
+			return gitLabResult;
+		}
+		#endregion
 
-        #region LOGIN
-        public async Task<Result<string>> LoginAsync(RegistrationDto model)
-        {
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-            if (!result.Succeeded)
-            {
-                return new Result<string>(["Login failed"]);
-            }
+		#region LOGIN
+		public async Task<Result<LoginResponseDto>> LoginAsync(LoginRequestDto model)
+		{
+			var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+			if (!result.Succeeded)
+			{
+				return new Result<LoginResponseDto>(["Login failed"]);
+			}
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            var token = GenerateJwtToken(user);
-            return token;
-        }
+			var user = await _userManager.FindByEmailAsync(model.Email);
+			var token = GenerateJwtToken(user);
+			return new LoginResponseDto()
+			{
+				ExpirationDate = DateTime.UtcNow.AddMinutes(30),
+				Token = token,
+			};
+		}
 
-        private string GenerateJwtToken(User user)
-        {
-            var jwtSettings = _configuration.GetSection("JwtSettings").Get<JwtSettings>();
-            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+		private string GenerateJwtToken(User user)
+		{
+			var jwtSettings = _configuration.GetSection("JwtSettings").Get<JwtSettings>();
+			var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret));
+			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+			var claims = new[]
+			{
+				new Claim(JwtRegisteredClaimNames.Email, user.Email),
+				new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+				new Claim("IsAdmin", user.IsAdmin.ToString()),
+				new Claim("Id", user.Id),
+			};
 
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings.Issuer,
-                audience: jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds
-            );
+			var token = new JwtSecurityToken(
+				issuer: jwtSettings.Issuer,
+				audience: jwtSettings.Audience,
+				claims: claims,
+				expires: _dateTimeProvider.UtcNow.AddMinutes(30),
+				signingCredentials: creds
+			);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-        #endregion
+			return new JwtSecurityTokenHandler().WriteToken(token);
+		}
+		#endregion
 
 
-        private IdentityResult CreateIdentityError(ImmutableArray<string> error)
-        {
-            var errors = new[]
-            {
-                new IdentityError { Description = string.Join(",", error) },
-            };
-            return IdentityResult.Failed(errors);
-        }
-    }
+		private IdentityResult CreateIdentityError(ImmutableArray<string> error)
+		{
+			var errors = new[]
+			{
+				new IdentityError { Description = string.Join(",", error) },
+			};
+			return IdentityResult.Failed(errors);
+		}
+	}
 }

@@ -1,5 +1,9 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Front.ApiClient
+@using Front.Helpers
+@using Front.Pages
+@inherits LayoutComponentBase
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager Nav
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -8,27 +12,34 @@
 <MudThemeProvider />
 
 <MudLayout>
-    @if (_isLoggedIn)
-    {
-        <MudAppBar Elevation="1">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-            <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
-            <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-        </MudAppBar>
-        <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-            @*NavMenu*@
-        </MudDrawer>
-    }
-    <MudMainContent>
-        @Body
-    </MudMainContent>
+
+	<MudAppBar Elevation="1">
+		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+		<MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+		<MudSpacer />
+		<MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+	</MudAppBar>
+	<MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+		@*NavMenu*@
+	</MudDrawer>
+
+	<MudMainContent>
+		@Body
+	</MudMainContent>
 </MudLayout>
 @code {
-    bool _drawerOpen = true;
-    bool _isLoggedIn = false;
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		await AuthenticationService.Initialize();
+		if (!AuthenticationService.IsAuthenticated())
+		{
+			Nav.NavigateTo<Login>();
+		}
+		await base.OnInitializedAsync();
+	}
+	bool _drawerOpen = true;
+	void DrawerToggle()
+	{
+		_drawerOpen = !_drawerOpen;
+	}
 }

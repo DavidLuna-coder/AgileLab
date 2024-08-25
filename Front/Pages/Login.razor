@@ -1,15 +1,31 @@
 ﻿@page "/login"
+@layout EmptyLayout
+@using Front.Validators
+@using Shared.DTOs
 
 <div style="min-height:80vh" class="d-flex justify-center align-center">
-	<MudForm>
+	<MudForm ValidationDelay="0" @ref=form Validation="validator.ValidateValues" Model="loginModel">
 		<div style="width:600px" class="d-flex justify-center align-center gap-3 flex-column">
 			<MudText Typo="Typo.h5" >Bienvenid@@, inicia sesión</MudText>
-			<MudTextField FullWidth=true Label="Username" T="string"></MudTextField>
-			<MudTextField FullWidth=true Label="Password" T="string" InputType="InputType.Password"></MudTextField>
+			<MudTextField Immediate=true For="() => loginModel.Email" RequiredError="Es necesario introducir un email válido" FullWidth=true Label="Email" @bind-Value="loginModel.Email" T="string"></MudTextField>
+			<MudTextField Immediate=true For="() => loginModel.Password" RequiredError="La contraseña no puede estar vacía" FullWidth=true Label="Password" T="string" @bind-Value="loginModel.Password" InputType="InputType.Password"></MudTextField>
+			<MudButton OnClick="Submit">Submit</MudButton>
 		</div>
 	</MudForm>
 </div>
 
 @code {
+	LoginRequestDto loginModel = new();
+	MudForm form;
+	LoginFormValidator validator = new LoginFormValidator();
 
+	private async Task Submit()
+	{
+		await form.Validate();
+
+		if (form.IsValid)
+		{
+			Console.WriteLine("Submitted!");
+		}
+	}
 }

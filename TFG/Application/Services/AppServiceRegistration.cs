@@ -1,4 +1,5 @@
-﻿using TFG.Application.Interfaces;
+﻿using Shared.Utils.DateTimeProvider;
+using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.SonarQubeIntegration;
@@ -24,6 +25,7 @@ namespace TFG.Application.Services
             services.AddScoped<SonarQubeApi, SonarQubeApi>();
             services.AddScoped<ISonarQubeApiIntegration, SonarQubeApiIntegration>();
 
+            services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             return services;
         }
     }
