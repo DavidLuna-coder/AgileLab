@@ -22,7 +22,6 @@ namespace Front.ApiClient
 		public void UpdateAuthenticationToken(string token)
 		{
 			Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-			throw new NotImplementedException();
 		}
 
 		public async Task<T> GetAsync<T>(string endpoint)
