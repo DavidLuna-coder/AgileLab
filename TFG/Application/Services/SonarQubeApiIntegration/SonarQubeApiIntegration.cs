@@ -17,8 +17,9 @@ namespace TFG.Application.Services.SonarQubeIntegration
             {
                 Email = registrationDto.Email,
                 Password = registrationDto.Password,
+                Login = registrationDto.UserName,
                 Local = true,
-                Name = registrationDto.UserName,
+                Name = $"{registrationDto.FirstName} {registrationDto.LastName}",
                 ScmAccounts = [],
             };
             try

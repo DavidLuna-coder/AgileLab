@@ -1,7 +1,9 @@
 ﻿@page "/login"
 @layout EmptyLayout
+@using Front.ApiClient
 @using Front.Validators
 @using Shared.DTOs
+@inject IAuthenticationService AuthenticationService
 
 <div style="min-height:80vh" class="d-flex justify-center align-center">
 	<MudForm ValidationDelay="0" @ref=form Validation="validator.ValidateValues" Model="loginModel">
@@ -25,7 +27,7 @@
 
 		if (form.IsValid)
 		{
-			Console.WriteLine("Submitted!");
+			await AuthenticationService.Login(loginModel);
 		}
 	}
 }

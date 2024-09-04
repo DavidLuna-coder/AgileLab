@@ -1,21 +1,29 @@
 ﻿using Blazored.LocalStorage;
+using Shared.DTOs;
 using Shared.Utils.DateTimeProvider;
 
 namespace Front.ApiClient
 {
-	public class AuthenticationService(ILocalStorageService localStorageService, IDateTimeProvider dateTimeProvider) : IAuthenticationService
+	public class AuthenticationService(ILocalStorageService localStorageService, IDateTimeProvider dateTimeProvider, IApiHttpClient apiHttpClient) : IAuthenticationService
 	{
 		public LocalUserInfo? User { get; private set; }
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly ILocalStorageService _localstorageService = localStorageService;
+		private readonly IApiHttpClient _httpClient = apiHttpClient;
 		public async Task Initialize()
 		{
+			if (User != null) return;
+			
 			User = await _localstorageService.GetItemAsync<LocalUserInfo>("user");
+			if (User != null)
+				_httpClient.UpdateAuthenticationToken(User.Token);
 		}
-		public async Task Login()
+		public async Task Login(LoginRequestDto request)
 		{
-			LocalUserInfo userInfo = new();
-			await _localstorageService.SetItemAsync("user", userInfo);
+			User = await _httpClient.PostAsync<LoginRequestDto, LocalUserInfo>("/api/Authentication/login", request);
+			await _localstorageService.SetItemAsync("user", User);
+			_httpClient.UpdateAuthenticationToken(User.Token);
+
 		}
 
 		public async Task Logout()

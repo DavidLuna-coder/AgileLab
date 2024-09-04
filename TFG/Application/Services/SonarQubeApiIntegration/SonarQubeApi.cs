@@ -32,8 +32,9 @@ namespace TFG.Application.Services.SonarQubeIntegration
         {
             string json = JsonSerializer.Serialize(content, _serializerOptions);
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+            endpoint = GetEndpointWithVersion(endpoint, version);
 
-            var response = await _httpClient.PostAsync(GetEndpointWithVersion(endpoint,version), jsonContent);
+			var response = await _httpClient.PostAsync(endpoint, jsonContent);
             response.EnsureSuccessStatusCode();
             return response;
         }

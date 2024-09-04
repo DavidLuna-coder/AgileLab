@@ -66,11 +66,12 @@ namespace TFG.Application.Services.Auth
 				{
 					await _gitlabApiIntegration.DeleteUser(user);
 					await _openProjectApiIntegration.DeleteUser(user);
+					return CreateIdentityError(sonarQubeResult.Errors);
 				}
 				user.SonarQubeId = sonarQubeResult.Value;
 
 				//App registration
-				var result = await _userManager.CreateAsync(user, model.Password);
+				                                                                                                                                                                var result = await _userManager.CreateAsync(user, model.Password);
 				if (!result.Succeeded)
 				{
 					await _gitlabApiIntegration.DeleteUser(user);
@@ -112,13 +113,14 @@ namespace TFG.Application.Services.Auth
 		#region LOGIN
 		public async Task<Result<LoginResponseDto>> LoginAsync(LoginRequestDto model)
 		{
-			var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+			var user = await _userManager.FindByEmailAsync(model.Email);
+			if (user == null) return new Result<LoginResponseDto>(["User Not found"]);
+			var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, false, false);
 			if (!result.Succeeded)
 			{
 				return new Result<LoginResponseDto>(["Login failed"]);
 			}
 
-			var user = await _userManager.FindByEmailAsync(model.Email);
 			var token = GenerateJwtToken(user);
 			return new LoginResponseDto()
 			{
