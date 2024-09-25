@@ -1,0 +1,27 @@
+﻿@page "/projects"
+@using Front.ApiClient.Interfaces
+@using Front.Helpers
+@using Front.Pages.Projects
+@inject IProjectsApi ProjectsApi
+@inject NavigationManager Nav
+
+<PageTitle>Proyectos</PageTitle>
+
+@if(_projects.Count == 0)
+{
+	<div class="d-flex justify-center align-center gap-4" style="height:90vh">
+		<div class="d-flex flex-column justify-center">
+			<MudText>No se han encontrado proyectos</MudText>
+			<MudButton OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear un proyecto</MudButton>
+		</div>
+	</div>
+}
+
+@code {
+	List<int> _projects = [];
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+	}
+}

@@ -1,10 +1,12 @@
 ﻿@page "/login"
 @layout EmptyLayout
-@using Front.ApiClient
 @using Front.Validators
+@using Front.ApiClient.Interfaces
+@using Front.Helpers
 @using Shared.DTOs
 @inject IAuthenticationService AuthenticationService
-
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
 <div style="min-height:80vh" class="d-flex justify-center align-center">
 	<MudForm ValidationDelay="0" @ref=form Validation="validator.ValidateValues" Model="loginModel">
 		<div style="width:600px" class="d-flex justify-center align-center gap-3 flex-column">
@@ -27,7 +29,15 @@
 
 		if (form.IsValid)
 		{
-			await AuthenticationService.Login(loginModel);
+			try
+			{
+				await AuthenticationService.Login(loginModel);
+				Nav.NavigateTo<Index>();
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add("Nombre de usuario o contraseña incorrecta");
+			}
 		}
 	}
 }

@@ -6,41 +6,56 @@ using TFG.Infrastructure.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.Services.RegisterAppServices();
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+	var services = scope.ServiceProvider;
+	var context = services.GetRequiredService<ApplicationDbContext>();
+	context.Database.Migrate();
 }
+
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+	endpoints.MapRazorPages();
+	endpoints.MapControllers();
+	endpoints.MapFallbackToFile("index.html");
+});
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
+
 app.UseCors(cors => cors
-				.AllowAnyMethod()
-				.AllowAnyHeader()
-				.SetIsOriginAllowed(origin => true)
-				.AllowCredentials()
-			);
+	.AllowAnyMethod()
+	.AllowAnyHeader()
+	.SetIsOriginAllowed(origin => true)
+	.AllowCredentials()
+);
+
 app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapSwagger();
+	app.MapSwagger();
 }
+
+if (app.Environment.IsDevelopment())
+{
+	app.UseSwagger();
+	app.UseSwaggerUI();
+}
+
 app.Run();
