@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.Services.RegisterAppServices();
 builder.Services.AddRazorPages();
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

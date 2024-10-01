@@ -1,18 +1,21 @@
 ﻿using Front.ApiClient.Interfaces;
-using Shared.DTOs;
+using Shared.DTOs.Projects;
 
 namespace Front.ApiClient.Implementations
 {
-    public class ProjectsApi(IApiHttpClient client) : IProjectsApi
+	public class ProjectsApi(IApiHttpClient client) : IProjectsApi
     {
-        public Task CreateProject()
-        {
-            return Task.CompletedTask;
-        }
+        private const string PROJECTS_ENDPOINT = "api/projects";
+		public async Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto)
+		{
+			ProjectDto createdProject = await client.PostAsync<CreateProjectDto, ProjectDto>(PROJECTS_ENDPOINT, createProjectDto);
+            return createdProject;
+		}
 
-        public Task GetProjects()
+		public async Task<IEnumerable<PaginatedProjectDto>> GetProjects()
         {
-            return Task.CompletedTask;
-        }
+			IEnumerable<PaginatedProjectDto> projects = await client.GetAsync<IEnumerable<PaginatedProjectDto>>(PROJECTS_ENDPOINT);
+			return projects;
+		}
     }
 }

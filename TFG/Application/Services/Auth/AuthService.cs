@@ -147,7 +147,7 @@ namespace TFG.Application.Services.Auth
 				issuer: jwtSettings.Issuer,
 				audience: jwtSettings.Audience,
 				claims: claims,
-				expires: _dateTimeProvider.UtcNow.AddMinutes(30),
+				expires: _dateTimeProvider.UtcNow.AddMinutes(1440),
 				signingCredentials: creds
 			);
 

@@ -1,9 +1,11 @@
-﻿namespace Front.ApiClient.Interfaces
+﻿using Shared.DTOs.Projects;
+
+namespace Front.ApiClient.Interfaces
 {
     public interface IProjectsApi
     {
-        public Task CreateProject();
-        public Task GetProjects();
+        public Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto);
+        public Task<IEnumerable<PaginatedProjectDto>> GetProjects();
 
     }
 }
