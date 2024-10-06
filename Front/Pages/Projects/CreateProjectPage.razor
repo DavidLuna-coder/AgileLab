@@ -15,7 +15,7 @@
 @code {
 	CreateProjectDto _createProjectDto = new CreateProjectDto();
 	MudForm? _form;
-	bool _loading = false;
+	bool _loading;
 	async Task CreateProject()
 	{
 		if(_form is null) return;

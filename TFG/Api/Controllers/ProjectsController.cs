@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
@@ -14,12 +15,37 @@ namespace TFG.Api.Controllers
 		private readonly ApplicationDbContext _context = context;
 		private readonly IMapper _mapper = mapper;
 
-		// GET: api/Projects
-		[HttpGet]
-		public async Task<ActionResult<IEnumerable<PaginatedProjectDto>>> GetProjects()
+		// POST: api/Projects/search
+		[HttpPost("search")]
+		public async Task<ActionResult<PaginatedResponseDto<PaginatedProjectDto>>> SearchProjects([FromBody] PaginatedRequestDto<ProjectQueryParameters> request)
 		{
-			var projects = await _context.Projects.ToListAsync();
-			return _mapper.Map<List<PaginatedProjectDto>>(projects);
+			var projectsQuery = _context.Projects.AsQueryable();
+
+			// Aplicar filtros
+			if (request.Filters != null)
+			{
+				if (!string.IsNullOrEmpty(request.Filters.Name))
+				{
+					projectsQuery = projectsQuery.Where(p => p.Name.Contains(request.Filters.Name));
+				}
+			}
+
+			// Paginación
+			var totalItems = await projectsQuery.CountAsync();
+			var projects = await projectsQuery
+				.Skip((request.Page) * request.PageSize)
+				.Take(request.PageSize)
+				.ToListAsync();
+
+			List<PaginatedProjectDto> items = _mapper.Map<List<PaginatedProjectDto>>(projects);
+
+			return new PaginatedResponseDto<PaginatedProjectDto>
+			{
+				Items = items,
+				TotalCount = totalItems,
+				PageNumber = request.Page,
+				PageSize = request.PageSize
+			};
 		}
 
 		// GET: api/Projects/5

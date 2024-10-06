@@ -1,21 +1,21 @@
 ﻿using Front.ApiClient.Interfaces;
+using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 
 namespace Front.ApiClient.Implementations
 {
 	public class ProjectsApi(IApiHttpClient client) : IProjectsApi
-    {
-        private const string PROJECTS_ENDPOINT = "api/projects";
+	{
+		private const string PROJECTS_ENDPOINT = "api/projects";
 		public async Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto)
 		{
 			ProjectDto createdProject = await client.PostAsync<CreateProjectDto, ProjectDto>(PROJECTS_ENDPOINT, createProjectDto);
-            return createdProject;
+			return createdProject;
 		}
-
-		public async Task<IEnumerable<PaginatedProjectDto>> GetProjects()
-        {
-			IEnumerable<PaginatedProjectDto> projects = await client.GetAsync<IEnumerable<PaginatedProjectDto>>(PROJECTS_ENDPOINT);
-			return projects;
+		public async Task<PaginatedResponseDto<PaginatedProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request)
+		{
+			var response = await client.PostAsync<PaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<PaginatedProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
+			return response;
 		}
-    }
+	}
 }

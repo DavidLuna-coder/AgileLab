@@ -2,9 +2,9 @@
 {
 	public record PaginatedResponseDto<T>
 	{
-		public List<T> Items { get; set; }
-		public int ItemsCount { get; set; }
-		public int Page { get; set; } = 0;
-		public int PageCount { get; set; }
+		public IEnumerable<T> Items { get; set; } = [];
+		public int TotalCount { get; set; }
+		public int PageNumber { get; set; }
+		public int PageSize { get; set; }
 	}
 }
