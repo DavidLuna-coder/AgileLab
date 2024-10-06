@@ -2,26 +2,64 @@
 @using Front.ApiClient.Interfaces
 @using Front.Helpers
 @using Front.Pages.Projects
+@using Shared.DTOs.Projects
 @inject IProjectsApi ProjectsApi
 @inject NavigationManager Nav
 
 <PageTitle>Proyectos</PageTitle>
 
-@if(_projects.Count == 0)
-{
-	<div class="d-flex justify-center align-center gap-4" style="height:90vh">
-		<div class="d-flex flex-column justify-center">
-			<MudText>No se han encontrado proyectos</MudText>
+<MudContainer Fixed="true" Class="mt-6">
+	<MudTable Bordered="true" Elevation="1" Items="_projects">
+		<ToolBarContent>
+			<div class="d-flex align-baseline justify-center gap-3">
+				<MudText Typo="Typo.h6">Proyectos</MudText>
+				<MudButton Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear proyecto</MudButton>
+			</div>
+			<MudSpacer />
+			<MudTextField T="string" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+		</ToolBarContent>
+		<ColGroup>
+			<col style="width:66%;" />
+			<col style="width:33%;" />
+		</ColGroup>
+		<HeaderContent>
+			<MudTh>Nombre</MudTh>
+			<MudTh>Fecha de creación</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd DataLabel="Nombre">@context.Name</MudTd>
+			<MudTd DataLabel="Fecha de creación">@context.CreatedAt</MudTd>
+		</RowTemplate>
+		<NoRecordsContent>
+			<MudText>Todavía no existen proyectos</MudText>
 			<MudButton OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear un proyecto</MudButton>
-		</div>
-	</div>
-}
+		</NoRecordsContent>
+		<PagerContent>
+			@if(_projects.Count != 0)
+			{
+				<MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
+			}
+		</PagerContent>
+	</MudTable>
+</MudContainer>
+
 
 @code {
-	List<int> _projects = [];
+	List<PaginatedProjectDto> _projects = [];
 
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		_projects = (await ProjectsApi.GetProjects()).ToList();
+		await base.OnInitializedAsync();
+	}
+
+	private async Task ReloadProjects()
+	{
+		_projects = (await ProjectsApi.GetProjects()).ToList();
 	}
 }
