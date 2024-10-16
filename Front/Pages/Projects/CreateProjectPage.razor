@@ -1,14 +1,18 @@
 ﻿@page "/project/create"
 @using Front.ApiClient.Interfaces
+@using Front.Components.Tables
 @using Shared.DTOs.Projects
+@using Shared.DTOs.Users
 @inject IProjectsApi ProjectsApi
+@inject IUsersApi UserApi
 @inject ISnackbar Snackbar
 <PageTitle>Crear Proyecto</PageTitle>
 
 <MudContainer Class="mt-5" MaxWidth="MaxWidth.Medium">
 	<MudForm @ref=_form Model="_createProjectDto">
-		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name"  Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
+		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
 		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Description" Label="Descripción" />
+		<UsersSelectionTable></UsersSelectionTable>
 		<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
 	</MudForm>
 </MudContainer>
@@ -18,7 +22,7 @@
 	bool _loading;
 	async Task CreateProject()
 	{
-		if(_form is null) return;
+		if (_form is null) return;
 
 		await _form.Validate();
 		if (!_form.IsValid) return;

@@ -19,4 +19,5 @@ builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IApiHttpClient, ApiHttpClient>();
 builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
+builder.Services.AddScoped<IUsersApi, UsersApi>();
 await builder.Build().RunAsync();

@@ -1,0 +1,35 @@
+﻿@using Front.ApiClient.Interfaces
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Users
+@inject IUsersApi UsersApi
+<MudTable T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
+    <HeaderContent>
+        <MudTh>Nombre</MudTh>
+        <MudTh>Email</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+    </RowTemplate>
+
+</MudTable>
+
+@code {
+    [Parameter]
+    public IEnumerable<FilteredUserDto> Users { get; set; } = new List<FilteredUserDto>();
+
+    [Parameter]
+    public HashSet<FilteredUserDto> SelectedUsers { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<IEnumerable<FilteredUserDto>> SelectedUsersChanged { get; set; }
+
+    async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
+    {
+        GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
+        var request = new PaginatedRequestDto<GetUsersQueryParameters> {Filters=getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
+        var response = await UsersApi.GetFilteredUsers(request);
+
+		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };
+	}
+}
