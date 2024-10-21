@@ -8,7 +8,7 @@ namespace TFG.Api.Mappers
 	{
 		public ProjectsMapperProfile()
 		{
-			CreateMap<Project, PaginatedProjectDto>();
+			CreateMap<Project, FilteredProjectDto>();
 			CreateMap<CreateProjectDto, Project>();
 			CreateMap<Project, ProjectDto>();
 		}

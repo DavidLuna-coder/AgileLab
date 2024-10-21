@@ -22,7 +22,7 @@
     public HashSet<FilteredUserDto> SelectedUsers { get; set; } = new();
 
     [Parameter]
-    public EventCallback<IEnumerable<FilteredUserDto>> SelectedUsersChanged { get; set; }
+    public EventCallback<HashSet<FilteredUserDto>> SelectedUsersChanged { get; set; }
 
     async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
     {

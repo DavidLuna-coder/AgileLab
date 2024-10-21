@@ -12,7 +12,7 @@
 	<MudForm @ref=_form Model="_createProjectDto">
 		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
 		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Description" Label="Descripción" />
-		<UsersSelectionTable></UsersSelectionTable>
+		<UsersSelectionTable @bind-SelectedUsers=_users></UsersSelectionTable>
 		<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
 	</MudForm>
 </MudContainer>
@@ -20,6 +20,7 @@
 	CreateProjectDto _createProjectDto = new CreateProjectDto();
 	MudForm? _form;
 	bool _loading;
+	HashSet<FilteredUserDto> _users = [];
 	async Task CreateProject()
 	{
 		if (_form is null) return;
@@ -29,6 +30,7 @@
 
 		try
 		{
+			_createProjectDto.UsersIds = _users.Select(u => u.Id).ToList();
 			_loading = true;
 			await ProjectsApi.CreateProject(_createProjectDto);
 		}

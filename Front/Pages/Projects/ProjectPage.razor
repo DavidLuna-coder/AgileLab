@@ -1,0 +1,47 @@
+﻿@page "/projects/{ProjectId}"
+@using Front.ApiClient.Interfaces
+@using Front.Helpers
+@using Shared.DTOs.Projects
+
+@inject IProjectsApi ProjectsApi
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+@if (loading)
+{
+	<MudProgressLinear Indeterminate />
+}
+else
+{
+	<MudContainer>
+		<MudPaper Elevation="3" Class="p-4">
+			<MudText Typo="Typo.h4">@project.Name</MudText>
+			<MudText Typo="Typo.body1">@project.Description</MudText>
+		</MudPaper>
+	</MudContainer>
+}
+
+@code {
+	[Parameter]
+	public string ProjectId { get; set; } = string.Empty;
+	ProjectDto project = default!;
+	bool loading = true;
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			project = await ProjectsApi.GetProject(new Guid(ProjectId));
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+			Snackbar.Add("Error al cargar el proyecto", Severity.Error);
+			Nav.NavigateTo<ProjectsPage>();
+		}
+		finally
+		{
+			loading = false;
+		}
+		await base.OnInitializedAsync();
+	}
+}

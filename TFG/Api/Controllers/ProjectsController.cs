@@ -17,7 +17,7 @@ namespace TFG.Api.Controllers
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
-		public async Task<ActionResult<PaginatedResponseDto<PaginatedProjectDto>>> SearchProjects([FromBody] PaginatedRequestDto<ProjectQueryParameters> request)
+		public async Task<ActionResult<PaginatedResponseDto<FilteredProjectDto>>> SearchProjects([FromBody] PaginatedRequestDto<ProjectQueryParameters> request)
 		{
 			var projectsQuery = _context.Projects.AsQueryable();
 
@@ -37,9 +37,9 @@ namespace TFG.Api.Controllers
 				.Take(request.PageSize)
 				.ToListAsync();
 
-			List<PaginatedProjectDto> items = _mapper.Map<List<PaginatedProjectDto>>(projects);
+			List<FilteredProjectDto> items = _mapper.Map<List<FilteredProjectDto>>(projects);
 
-			return new PaginatedResponseDto<PaginatedProjectDto>
+			return new PaginatedResponseDto<FilteredProjectDto>
 			{
 				Items = items,
 				TotalCount = totalItems,

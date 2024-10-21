@@ -12,9 +12,16 @@ namespace Front.ApiClient.Implementations
 			ProjectDto createdProject = await client.PostAsync<CreateProjectDto, ProjectDto>(PROJECTS_ENDPOINT, createProjectDto);
 			return createdProject;
 		}
-		public async Task<PaginatedResponseDto<PaginatedProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request)
+
+		public async Task<ProjectDto> GetProject(Guid projectId)
 		{
-			var response = await client.PostAsync<PaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<PaginatedProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
+			var response = await client.GetAsync<ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}");
+			return response;
+		}
+
+		public async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request)
+		{
+			var response = await client.PostAsync<PaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
 			return response;
 		}
 	}
