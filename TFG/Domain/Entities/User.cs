@@ -10,5 +10,6 @@ namespace TFG.Model.Entities
         public string GitlabId { get; set; }
         public string OpenProjectId { get; set; }
         public string SonarQubeId { get; set; }
+        public ICollection<Project> Projects { get; set; }
     }
 }

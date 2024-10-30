@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
 using System.Linq.Expressions;
+using TFG.Api.FilterHandlers;
 using TFG.Model.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -22,15 +23,9 @@ namespace TFG.Api.Controllers
 		public IActionResult Get(PaginatedRequestDto<GetUsersQueryParameters> request)
 		{
 			var usersQuery = _userManager.Users.AsQueryable();
+			IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();
 
-			// Aplicar filtros
-			var predicate = PredicateBuilder.New<User>(true);
-			if(request.Filters != null)
-			{
-				predicate = predicate.And(u => request.Filters.Ids == null || request.Filters.Ids.Count == 0 || request.Filters.Ids.Contains(u.Id));
-				predicate = predicate.And(u => string.IsNullOrEmpty(request.Filters.FirstName) || u.FirstName.Contains(request.Filters.FirstName));
-				predicate = predicate.And(u => string.IsNullOrEmpty(request.Filters.LastName) || u.LastName.Contains(request.Filters.LastName));
-			}
+			var predicate = filtersHandler.GetFilters(request.Filters);
 			usersQuery = usersQuery.Where(predicate);
 
 			if (request.PageSize >= 0)

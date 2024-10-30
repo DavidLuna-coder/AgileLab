@@ -1,6 +1,7 @@
 ﻿using Front.ApiClient.Interfaces;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
+using Shared.DTOs.Users;
 
 namespace Front.ApiClient.Implementations
 {
@@ -22,6 +23,12 @@ namespace Front.ApiClient.Implementations
 		public async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request)
 		{
 			var response = await client.PostAsync<PaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
+			return response;
+		}
+
+		public async Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, PaginatedRequestDto<GetUsersQueryParameters> request)
+		{
+			var response = await client.PostAsync<PaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
 			return response;
 		}
 	}

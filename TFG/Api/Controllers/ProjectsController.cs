@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
+using LinqKit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
+using Shared.DTOs.Users;
+using TFG.Api.FilterHandlers;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
@@ -10,10 +14,11 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, IMapper mapper) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, IMapper mapper, UserManager<User> userManager) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly IMapper _mapper = mapper;
+		private readonly UserManager<User> _userManager = userManager;
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
@@ -22,13 +27,9 @@ namespace TFG.Api.Controllers
 			var projectsQuery = _context.Projects.AsQueryable();
 
 			// Aplicar filtros
-			if (request.Filters != null)
-			{
-				if (!string.IsNullOrEmpty(request.Filters.Name))
-				{
-					projectsQuery = projectsQuery.Where(p => p.Name.Contains(request.Filters.Name));
-				}
-			}
+			IFiltersHandler<Project, ProjectQueryParameters> projectFilterHandler = new ProjectFiltersHandler();
+			var predicate = projectFilterHandler.GetFilters(request.Filters);
+			projectsQuery = projectsQuery.Where(predicate);
 
 			// Paginación
 			var totalItems = await projectsQuery.CountAsync();
@@ -120,6 +121,35 @@ namespace TFG.Api.Controllers
 			await _context.SaveChangesAsync();
 
 			return NoContent();
+		}
+
+		[HttpPost("{id}/users/search")]
+		public async Task<IActionResult> GetProjectUsers(Guid id, PaginatedRequestDto<GetUsersQueryParameters> request)
+		{
+			var usersQuery = _userManager.Users.AsQueryable();
+			IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();
+
+			var predicate = filtersHandler.GetFilters(request.Filters);
+			//Only users from this project
+			predicate = predicate.And(u => u.Projects.Any(p => p.Id == id));
+			usersQuery = usersQuery.Where(predicate);
+
+
+			if (request.PageSize >= 0)
+			{
+				usersQuery = usersQuery.Skip((request.Page) * request.PageSize).Take(request.PageSize);
+			}
+
+			List<User> users = [.. usersQuery];
+			List<FilteredUserDto> usersDto = _mapper.Map<List<FilteredUserDto>>(users);
+			PaginatedResponseDto<FilteredUserDto> response = new()
+			{
+				Items = usersDto,
+				TotalCount = usersQuery.Count(),
+				PageNumber = request.Page,
+				PageSize = request.PageSize
+			};
+			return Ok(response);
 		}
 
 		private bool ProjectExists(Guid id)

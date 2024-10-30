@@ -1,0 +1,23 @@
+﻿<MudContainer Fixed MaxWidth="MaxWidth.ExtraExtraLarge" Class="mt-12">
+	<MudGrid Spacing="10">
+		<MudItem xs="10">
+			<MudText Typo="Typo.h3">@Title</MudText>
+		</MudItem>
+		<MudItem xs="2">
+			@Actions
+		</MudItem>
+		<MudItem Class="mt-12" xs="12">
+			@ChildContent
+		</MudItem>
+	</MudGrid>
+</MudContainer>
+
+@code {
+	[Parameter]
+	public string Title { get; set; } = string.Empty;
+
+	[Parameter]
+	public RenderFragment ChildContent { get; set; }
+	[Parameter]
+	public RenderFragment Actions { get; set; }
+}

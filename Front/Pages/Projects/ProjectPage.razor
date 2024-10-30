@@ -1,11 +1,15 @@
 ﻿@page "/projects/{ProjectId}"
 @using Front.ApiClient.Interfaces
+@using Front.Components
 @using Front.Helpers
+@using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
+@using Shared.DTOs.Users
 
 @inject IProjectsApi ProjectsApi
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
+@inject IUsersApi UsersApi
 
 @if (loading)
 {
@@ -13,12 +17,16 @@
 }
 else
 {
-	<MudContainer>
-		<MudPaper Elevation="3" Class="p-4">
-			<MudText Typo="Typo.h4">@project.Name</MudText>
+	<Section Title="@project.Name">
+		<Actions>
+			<MudButton>Editar</MudButton>
+			<MudButton>Eliminar</MudButton>
+		</Actions>
+		<ChildContent>
+			<MudText Typo="Typo.h6">Descripción</MudText>
 			<MudText Typo="Typo.body1">@project.Description</MudText>
-		</MudPaper>
-	</MudContainer>
+		</ChildContent>
+	</Section>
 }
 
 @code {
@@ -43,5 +51,14 @@ else
 			loading = false;
 		}
 		await base.OnInitializedAsync();
+	}
+
+	async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
+	{
+		GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
+		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
+		var response = await UsersApi.GetFilteredUsers(request);
+
+		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };
 	}
 }
