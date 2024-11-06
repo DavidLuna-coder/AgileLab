@@ -28,15 +28,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-	endpoints.MapRazorPages();
-	endpoints.MapControllers();
-	endpoints.MapFallbackToFile("index.html");
-});
+app.UseAuthorization();
+
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
 
 app.UseCors(cors => cors
 	.AllowAnyMethod()
@@ -45,7 +40,9 @@ app.UseCors(cors => cors
 	.AllowCredentials()
 );
 
+app.MapRazorPages();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 if (app.Environment.IsDevelopment())
 {

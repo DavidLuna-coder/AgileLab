@@ -20,11 +20,21 @@ else
 	<Section Title="@project.Name">
 		<Actions>
 			<MudButton>Editar</MudButton>
-			<MudButton>Eliminar</MudButton>
+			<MudButton OnClick="DeleteProject">Eliminar</MudButton>
 		</Actions>
 		<ChildContent>
 			<MudText Typo="Typo.h6">Descripción</MudText>
 			<MudText Typo="Typo.body1">@project.Description</MudText>
+			<MudTable T="FilteredUserDto" ServerData="ReloadUsers">
+				<HeaderContent>
+					<MudTh>Nombre</MudTh>
+					<MudTh>Email</MudTh>
+				</HeaderContent>
+				<RowTemplate>
+					<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+					<MudTd DataLabel="Email">@context.Email</MudTd>
+				</RowTemplate>
+			</MudTable>
 		</ChildContent>
 	</Section>
 }
@@ -32,13 +42,16 @@ else
 @code {
 	[Parameter]
 	public string ProjectId { get; set; } = string.Empty;
+
+	private Guid projectId;
 	ProjectDto project = default!;
 	bool loading = true;
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			project = await ProjectsApi.GetProject(new Guid(ProjectId));
+			projectId = new Guid(ProjectId);
+			project = await ProjectsApi.GetProject(projectId);
 		}
 		catch (Exception ex)
 		{
@@ -57,8 +70,14 @@ else
 	{
 		GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
 		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
-		var response = await UsersApi.GetFilteredUsers(request);
+		var response = await ProjectsApi.GetProjectUsers(new Guid(ProjectId),request);
 
 		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };
+	}
+
+	async Task DeleteProject()
+	{
+		await ProjectsApi.DeleteProject(projectId);
+		Nav.NavigateTo<ProjectsPage>();
 	}
 }

@@ -10,5 +10,6 @@ namespace Front.ApiClient.Interfaces
         public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request);
         public Task<ProjectDto> GetProject(Guid projectId);
         public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, PaginatedRequestDto<GetUsersQueryParameters> request);
+        public Task DeleteProject(Guid projectId);
 	}
 }

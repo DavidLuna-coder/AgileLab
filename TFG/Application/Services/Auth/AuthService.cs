@@ -124,7 +124,7 @@ namespace TFG.Application.Services.Auth
 			var token = GenerateJwtToken(user);
 			return new LoginResponseDto()
 			{
-				ExpirationDate = DateTime.UtcNow.AddMinutes(30),
+				ExpirationDate = DateTime.UtcNow.AddMinutes(1440),
 				Token = token,
 			};
 		}

@@ -14,6 +14,11 @@ namespace Front.ApiClient.Implementations
 			return createdProject;
 		}
 
+		public async Task DeleteProject(Guid projectId)
+		{
+			await client.DeleteAsync($"{PROJECTS_ENDPOINT}/{projectId}");
+		}
+
 		public async Task<ProjectDto> GetProject(Guid projectId)
 		{
 			var response = await client.GetAsync<ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}");

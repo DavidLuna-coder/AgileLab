@@ -1,20 +1,26 @@
 ﻿@page "/project/create"
 @using Front.ApiClient.Interfaces
+@using Front.Components
 @using Front.Components.Tables
+@using Front.Helpers
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Users
 @inject IProjectsApi ProjectsApi
 @inject IUsersApi UserApi
 @inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
 <PageTitle>Crear Proyecto</PageTitle>
 
 <MudContainer Class="mt-5" MaxWidth="MaxWidth.Medium">
-	<MudForm @ref=_form Model="_createProjectDto">
-		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
-		<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Description" Label="Descripción" />
-		<UsersSelectionTable @bind-SelectedUsers=_users></UsersSelectionTable>
-		<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
-	</MudForm>
+	<Section Title="Creación de Proyecto">
+		<MudForm @ref=_form Model="_createProjectDto">
+			<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
+			<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Description" Label="Descripción" />
+			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=_users></UsersSelectionTable>
+			<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
+		</MudForm>
+	</Section>
 </MudContainer>
 @code {
 	CreateProjectDto _createProjectDto = new CreateProjectDto();
@@ -32,7 +38,10 @@
 		{
 			_createProjectDto.UsersIds = _users.Select(u => u.Id).ToList();
 			_loading = true;
-			await ProjectsApi.CreateProject(_createProjectDto);
+			ProjectDto createdProject = await ProjectsApi.CreateProject(_createProjectDto);
+			Dictionary<string, string> parameters = new();
+			parameters.Add(nameof(ProjectPage.ProjectId), createdProject.Id.ToString());
+			Nav.NavigateTo<ProjectPage>(parameters);
 		}
 		catch (Exception ex)
 		{

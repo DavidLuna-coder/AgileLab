@@ -2,7 +2,7 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Users
 @inject IUsersApi UsersApi
-<MudTable T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
+<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
     <HeaderContent>
         <MudTh>Nombre</MudTh>
         <MudTh>Email</MudTh>
@@ -23,6 +23,9 @@
 
     [Parameter]
     public EventCallback<HashSet<FilteredUserDto>> SelectedUsersChanged { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
 
     async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
     {

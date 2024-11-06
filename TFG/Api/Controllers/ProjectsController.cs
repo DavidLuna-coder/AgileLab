@@ -100,11 +100,13 @@ namespace TFG.Api.Controllers
 		public async Task<ActionResult<Project>> CreateProject(CreateProjectDto projectDto)
 		{
 			var project = _mapper.Map<Project>(projectDto);
+			var projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id));
+			project.Users = projectUsers.ToList();
 			project.CreatedAt = DateTime.UtcNow;
 			_context.Projects.Add(project);
 			await _context.SaveChangesAsync();
-
-			return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectDto);
+			ProjectDto projectResponse = _mapper.Map<ProjectDto>(project);
+			return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectResponse);
 		}
 
 		// DELETE: api/Projects/5

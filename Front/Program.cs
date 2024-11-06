@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Front;
 using Front.ApiClient.Implementations;
 using Front.ApiClient.Interfaces;
+using Front.Services.StateService;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
@@ -20,4 +21,6 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IApiHttpClient, ApiHttpClient>();
 builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
 builder.Services.AddScoped<IUsersApi, UsersApi>();
+builder.Services.AddScoped<ProjectStateService>();
+
 await builder.Build().RunAsync();
