@@ -1,38 +1,54 @@
 ﻿@using Front.ApiClient.Interfaces
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Users
+@using System.Diagnostics.CodeAnalysis
 @inject IUsersApi UsersApi
-<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
-    <HeaderContent>
-        <MudTh>Nombre</MudTh>
-        <MudTh>Email</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
-        <MudTd DataLabel="Email">@context.Email</MudTd>
-    </RowTemplate>
+<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" Comparer="new FilteredUserDtoComparer()" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
+	<HeaderContent>
+		<MudTh>Nombre</MudTh>
+		<MudTh>Email</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+		<MudTd DataLabel="Email">@context.Email</MudTd>
+	</RowTemplate>
 
 </MudTable>
 
 @code {
-    [Parameter]
-    public IEnumerable<FilteredUserDto> Users { get; set; } = new List<FilteredUserDto>();
+	[Parameter]
+	public IEnumerable<FilteredUserDto> Users { get; set; } = new List<FilteredUserDto>();
 
-    [Parameter]
-    public HashSet<FilteredUserDto> SelectedUsers { get; set; } = new();
+	[Parameter]
+	public HashSet<FilteredUserDto> SelectedUsers { get; set; } = new();
 
-    [Parameter]
-    public EventCallback<HashSet<FilteredUserDto>> SelectedUsersChanged { get; set; }
+	[Parameter]
+	public EventCallback<HashSet<FilteredUserDto>> SelectedUsersChanged { get; set; }
 
-    [Parameter]
-    public string Class { get; set; }
+	[Parameter]
+	public string Class { get; set; }
 
-    async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
-    {
-        GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
-        var request = new PaginatedRequestDto<GetUsersQueryParameters> {Filters=getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
-        var response = await UsersApi.GetFilteredUsers(request);
+
+	async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
+	{
+		GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
+		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
+		var response = await UsersApi.GetFilteredUsers(request);
 
 		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };
+	}
+
+	class FilteredUserDtoComparer : IEqualityComparer<FilteredUserDto>
+	{
+		public bool Equals(FilteredUserDto x, FilteredUserDto y)
+		{
+			if (x == null && y == null) return true;
+			if (x == null || y == null) return false; 
+			return x.Id == y.Id &&
+				   x.FirstName == y.FirstName && 
+				   x.LastName == y.LastName && 
+				   x.Email == y.Email;
+		}
+		public int GetHashCode(FilteredUserDto obj) { if (obj == null) return 0; int hashId = obj.Id == null ? 0 : obj.Id.GetHashCode(); int hashFirstName = obj.FirstName == null ? 0 : obj.FirstName.GetHashCode(); int hashLastName = obj.LastName == null ? 0 : obj.LastName.GetHashCode(); int hashEmail = obj.Email == null ? 0 : obj.Email.GetHashCode(); return hashId ^ hashFirstName ^ hashLastName ^ hashEmail; }
 	}
 }

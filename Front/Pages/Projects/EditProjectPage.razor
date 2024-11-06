@@ -1,0 +1,59 @@
+﻿@page "/projects/{ProjectId:string}/edit"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Front.Components.Tables
+@using Front.Services.StateService
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Projects
+@using Shared.DTOs.Users
+@inject ProjectStateService ProjectStateService
+@inject IProjectsApi ProjectsApi
+@inject IUsersApi UsersApi
+
+@if (project == null)
+{
+	<MudProgressLinear Indeterminate="true" />
+}
+else
+{
+	<Section Title="@project.Name">
+		<ChildContent>
+			<MudForm Model="model">
+				<MudTextField Label="Nombre" @bind-Value="model.Name" For="() => model.Name" Required />
+				<MudTextField Label="Descripción" @bind-Value="model.Name" For="() => model.Description" />
+				<UsersSelectionTable Class="mt-4" @bind-SelectedUsers="users"></UsersSelectionTable>
+			</MudForm>
+		</ChildContent>
+	</Section>
+}
+<h3>EditProject</h3>
+
+@code {
+	[Parameter]
+	public string ProjectId { get; set; } = string.Empty;
+	private Guid _projectId { get; set; }
+	private ProjectDto project = default!;
+	UpdateProjectDto model = default!;
+	HashSet<FilteredUserDto> users = [];
+
+	protected async override Task OnInitializedAsync()
+	{
+		_projectId = new Guid(ProjectId);
+		if (ProjectStateService.CurrentProject == null || ProjectStateService.CurrentProject.Id != _projectId)
+		{
+			await ProjectStateService.LoadProject(_projectId);
+		}
+		project = ProjectStateService.CurrentProject!;
+		model.Description = ProjectStateService.CurrentProject!.Description; 
+		model.Name = ProjectStateService.CurrentProject.Name;
+		model.UsersIds = ProjectStateService.CurrentProject.UsersIds;
+
+		var parameters = new GetUsersQueryParameters()
+		{
+			Ids = model.UsersIds
+		};
+		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = parameters, Page = 1, PageSize = -1 };
+		users = (await UsersApi.GetFilteredUsers(request)).Items.ToHashSet();
+		await base.OnInitializedAsync();
+	}
+}

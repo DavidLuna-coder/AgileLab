@@ -14,31 +14,31 @@
 
 <MudContainer Class="mt-5" MaxWidth="MaxWidth.Medium">
 	<Section Title="Creación de Proyecto">
-		<MudForm @ref=_form Model="_createProjectDto">
-			<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
-			<MudTextField Class="mb-4" T="string" @bind-Value="@_createProjectDto.Description" Label="Descripción" />
-			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=_users></UsersSelectionTable>
+		<MudForm @ref=form Model="createProjectDto">
+			<MudTextField Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
+			<MudTextField Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
+			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=users></UsersSelectionTable>
 			<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
 		</MudForm>
 	</Section>
 </MudContainer>
 @code {
-	CreateProjectDto _createProjectDto = new CreateProjectDto();
-	MudForm? _form;
-	bool _loading;
-	HashSet<FilteredUserDto> _users = [];
+	CreateProjectDto createProjectDto = new CreateProjectDto();
+	MudForm? form;
+	bool loading;
+	HashSet<FilteredUserDto> users = [];
 	async Task CreateProject()
 	{
-		if (_form is null) return;
+		if (form is null) return;
 
-		await _form.Validate();
-		if (!_form.IsValid) return;
+		await form.Validate();
+		if (!form.IsValid) return;
 
 		try
 		{
-			_createProjectDto.UsersIds = _users.Select(u => u.Id).ToList();
-			_loading = true;
-			ProjectDto createdProject = await ProjectsApi.CreateProject(_createProjectDto);
+			createProjectDto.UsersIds = users.Select(u => u.Id).ToList();
+			loading = true;
+			ProjectDto createdProject = await ProjectsApi.CreateProject(createProjectDto);
 			Dictionary<string, string> parameters = new();
 			parameters.Add(nameof(ProjectPage.ProjectId), createdProject.Id.ToString());
 			Nav.NavigateTo<ProjectPage>(parameters);
@@ -49,7 +49,7 @@
 		}
 		finally
 		{
-			_loading = false;
+			loading = false;
 		}
 	}
 }
