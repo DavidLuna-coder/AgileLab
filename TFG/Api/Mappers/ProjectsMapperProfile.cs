@@ -10,6 +10,7 @@ namespace TFG.Api.Mappers
 		{
 			CreateMap<Project, FilteredProjectDto>();
 			CreateMap<CreateProjectDto, Project>();
+			CreateMap<UpdateProjectDto, Project>();
 			CreateMap<Project, ProjectDto>();
 		}
 	}

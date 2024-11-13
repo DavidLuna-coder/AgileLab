@@ -1,12 +1,11 @@
-﻿using Blazored.LocalStorage;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text;
 using Front.ApiClient.Interfaces;
 
 namespace Front.ApiClient.Implementations
 {
-    public class ApiHttpClient : IApiHttpClient
+	public class ApiHttpClient : IApiHttpClient
     {
         private readonly string _backendBaseAddress;
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
@@ -45,17 +44,19 @@ namespace Front.ApiClient.Implementations
             return JsonSerializer.Deserialize<TResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         }
 
-        public async Task PutAsync<TRequest>(string endpoint, TRequest data)
+        public async Task<TResponse> PutAsync<TRequest,TResponse>(string endpoint, TRequest data)
         {
             var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
             var response = await Client.PutAsync(endpoint, jsonContent);
             response.EnsureSuccessStatusCode();
-        }
+			var content = await response.Content.ReadAsStringAsync();
+			return JsonSerializer.Deserialize<TResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
+		}
 
         public async Task DeleteAsync(string endpoint)
         {
             var response = await Client.DeleteAsync(endpoint);
             response.EnsureSuccessStatusCode();
         }
-    }
+	}
 }

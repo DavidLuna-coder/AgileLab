@@ -36,5 +36,11 @@ namespace Front.ApiClient.Implementations
 			var response = await client.PostAsync<PaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
 			return response;
 		}
+
+		public async Task<ProjectDto> UpdateProject(Guid projectId,UpdateProjectDto updatedProject)
+		{
+			ProjectDto result = await client.PutAsync<UpdateProjectDto, ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}", updatedProject);
+			return result;
+		}
 	}
 }

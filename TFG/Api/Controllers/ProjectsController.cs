@@ -66,14 +66,28 @@ namespace TFG.Api.Controllers
 		// PUT: api/Projects/5
 		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 		[HttpPut("{id}")]
-		public async Task<IActionResult> PutProject(Guid id, Project project)
+		public async Task<IActionResult> PutProject(Guid id, UpdateProjectDto project)
 		{
-			if (id != project.Id)
+			var existingProject = await _context.Projects
+				.Include(p => p.Users) 
+				.FirstOrDefaultAsync(p => p.Id == id);
+
+			if (existingProject == null)
 			{
-				return BadRequest();
+				return NotFound();
 			}
 
-			_context.Entry(project).State = EntityState.Modified;
+			_mapper.Map(project, existingProject);
+
+			var updatedUsers = await _userManager.Users
+				.Where(u => project.UsersIds.Contains(u.Id))
+				.ToListAsync();
+
+			existingProject.Users.Clear(); // Clear existing relationships
+			foreach (var user in updatedUsers)
+			{
+				existingProject.Users.Add(user); // Add the updated users
+			}
 
 			try
 			{
@@ -91,7 +105,8 @@ namespace TFG.Api.Controllers
 				}
 			}
 
-			return NoContent();
+			var response = _mapper.Map<ProjectDto>(existingProject);
+			return Ok(response);
 		}
 
 		// POST: api/Projects
@@ -142,7 +157,7 @@ namespace TFG.Api.Controllers
 				usersQuery = usersQuery.Skip((request.Page) * request.PageSize).Take(request.PageSize);
 			}
 
-			List<User> users = [.. usersQuery];
+			List<User> users = await usersQuery.ToListAsync();
 			List<FilteredUserDto> usersDto = _mapper.Map<List<FilteredUserDto>>(users);
 			PaginatedResponseDto<FilteredUserDto> response = new()
 			{

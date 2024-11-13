@@ -3,7 +3,7 @@
 @using Shared.DTOs.Users
 @using System.Diagnostics.CodeAnalysis
 @inject IUsersApi UsersApi
-<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" Comparer="new FilteredUserDtoComparer()" ServerData="ReloadUsers" @bind-SelectedItems="SelectedUsers">
+<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="SelectedUsers">
 	<HeaderContent>
 		<MudTh>Nombre</MudTh>
 		<MudTh>Email</MudTh>
@@ -27,7 +27,7 @@
 
 	[Parameter]
 	public string Class { get; set; }
-
+	private IEqualityComparer<FilteredUserDto> comparer = new FilteredUserDtoComparer(); 
 
 	async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
 	{

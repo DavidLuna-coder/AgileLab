@@ -1,7 +1,8 @@
-﻿@page "/projects/{ProjectId:string}/edit"
+﻿@page "/projects/{ProjectId}/edit"
 @using Front.ApiClient.Interfaces
 @using Front.Components
 @using Front.Components.Tables
+@using Front.Helpers
 @using Front.Services.StateService
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
@@ -9,6 +10,7 @@
 @inject ProjectStateService ProjectStateService
 @inject IProjectsApi ProjectsApi
 @inject IUsersApi UsersApi
+@inject NavigationManager Nav
 
 @if (project == null)
 {
@@ -18,22 +20,25 @@ else
 {
 	<Section Title="@project.Name">
 		<ChildContent>
-			<MudForm Model="model">
+			<MudForm Model="model" @ref="_form">
 				<MudTextField Label="Nombre" @bind-Value="model.Name" For="() => model.Name" Required />
-				<MudTextField Label="Descripción" @bind-Value="model.Name" For="() => model.Description" />
+				<MudTextField Class="mt-2" Label="Descripción" @bind-Value="model.Description" For="() => model.Description" />
 				<UsersSelectionTable Class="mt-4" @bind-SelectedUsers="users"></UsersSelectionTable>
+				<MudButton OnClick="UpdateProject" Color="Color.Primary" Variant="Variant.Filled">Guardar</MudButton>
+				<MudButton OnClick="GoToProjectPage" Variant="Variant.Filled">Cancelar</MudButton>
 			</MudForm>
 		</ChildContent>
 	</Section>
 }
-<h3>EditProject</h3>
 
 @code {
 	[Parameter]
 	public string ProjectId { get; set; } = string.Empty;
-	private Guid _projectId { get; set; }
-	private ProjectDto project = default!;
-	UpdateProjectDto model = default!;
+
+	MudForm _form = default!;
+	Guid _projectId { get; set; }
+	ProjectDto project = default!;
+	UpdateProjectDto model = new();
 	HashSet<FilteredUserDto> users = [];
 
 	protected async override Task OnInitializedAsync()
@@ -44,16 +49,27 @@ else
 			await ProjectStateService.LoadProject(_projectId);
 		}
 		project = ProjectStateService.CurrentProject!;
-		model.Description = ProjectStateService.CurrentProject!.Description; 
-		model.Name = ProjectStateService.CurrentProject.Name;
-		model.UsersIds = ProjectStateService.CurrentProject.UsersIds;
-
-		var parameters = new GetUsersQueryParameters()
-		{
-			Ids = model.UsersIds
-		};
-		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = parameters, Page = 1, PageSize = -1 };
-		users = (await UsersApi.GetFilteredUsers(request)).Items.ToHashSet();
+		model.Description = project.Description; 
+		model.Name = project.Name;
+		model.UsersIds = project.UsersIds;
 		await base.OnInitializedAsync();
+	}
+
+	async Task UpdateProject()
+	{
+		await _form.Validate();
+		if (!_form.IsValid) return;
+		model.UsersIds = users.Select(u => u.Id).ToList();
+		ProjectDto updatedProject = await ProjectsApi.UpdateProject(_projectId, model);
+		ProjectStateService.CurrentProject = updatedProject;
+
+		GoToProjectPage();
+	}
+
+
+	void GoToProjectPage()
+	{
+		Dictionary<string, string> parameters = new() { { nameof(ProjectPage.ProjectId), ProjectId } };
+		Nav.NavigateTo<ProjectPage>(parameters);
 	}
 }

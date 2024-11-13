@@ -7,6 +7,7 @@ namespace Front.ApiClient.Interfaces
     public interface IProjectsApi
     {
         public Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto);
+        public Task<ProjectDto> UpdateProject(Guid ProjectId, UpdateProjectDto updatedProject);
         public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request);
         public Task<ProjectDto> GetProject(Guid projectId);
         public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, PaginatedRequestDto<GetUsersQueryParameters> request);
