@@ -14,8 +14,8 @@ namespace TFG.Infrastructure
     {
         public static IServiceCollection RegisterAppInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(
-            options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<ApplicationDbContext>(
+            //options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<User, IdentityRole>(options => 
             options.Password = new PasswordOptions()
             {

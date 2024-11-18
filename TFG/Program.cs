@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection");
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.Services.RegisterAppServices();
 builder.Services.AddRazorPages();
