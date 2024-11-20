@@ -23,7 +23,7 @@
 	</Section>
 </MudContainer>
 @code {
-	CreateProjectDto createProjectDto = new CreateProjectDto();
+	CreateProjectDto createProjectDto = new();
 	MudForm? form;
 	bool loading;
 	HashSet<FilteredUserDto> users = [];

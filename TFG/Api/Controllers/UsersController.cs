@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using LinqKit;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
-using System.Linq.Expressions;
 using TFG.Api.FilterHandlers;
+using TFG.Api.Mappers;
 using TFG.Model.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,10 +12,9 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/users")]
 	[ApiController]
-	public class UsersController(UserManager<User> userManager, IMapper mapper) : ControllerBase
+	public class UsersController(UserManager<User> userManager) : ControllerBase
 	{
 		private readonly UserManager<User> _userManager = userManager;
-		private readonly IMapper _mapper = mapper;
 		// GET: api/<UsersController>
 		[HttpPost("search")]
 		public IActionResult Get(PaginatedRequestDto<GetUsersQueryParameters> request)
@@ -34,7 +31,7 @@ namespace TFG.Api.Controllers
 			}
 
 			List<User> users = [.. usersQuery];
-			List<FilteredUserDto> usersDto = _mapper.Map<List<FilteredUserDto>>(users);
+			List<FilteredUserDto> usersDto = users.Select(u => u.ToFilteredUserDto()).ToList();
 			PaginatedResponseDto<FilteredUserDto> response = new()
 			{
 				Items = usersDto,
@@ -53,7 +50,7 @@ namespace TFG.Api.Controllers
 			User? user = usersQuery.FirstOrDefault(u => u.Id == id);
 			if(user == null) return NotFound();
 			
-			UserDto userDto = _mapper.Map<UserDto>(user);
+			UserDto userDto = user.ToUserDto();
 			return Ok(userDto);
 		}
 

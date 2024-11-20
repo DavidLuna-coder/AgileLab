@@ -1,12 +1,13 @@
-﻿using AutoMapper;
-using LinqKit;
+﻿using LinqKit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
+using TFG.Api.Mappers;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
@@ -14,10 +15,9 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, IMapper mapper, UserManager<User> userManager) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
-		private readonly IMapper _mapper = mapper;
 		private readonly UserManager<User> _userManager = userManager;
 
 		// POST: api/Projects/search
@@ -38,7 +38,7 @@ namespace TFG.Api.Controllers
 				.Take(request.PageSize)
 				.ToListAsync();
 
-			List<FilteredProjectDto> items = _mapper.Map<List<FilteredProjectDto>>(projects);
+			List<FilteredProjectDto> items = projects.Select(p => p.ToFilteredProjectDto()).ToList();
 
 			return new PaginatedResponseDto<FilteredProjectDto>
 			{
@@ -59,7 +59,7 @@ namespace TFG.Api.Controllers
 			{
 				return NotFound();
 			}
-			var projectDto = _mapper.Map<ProjectDto>(project);
+			ProjectDto projectDto = project.ToProjectDto();
 			return projectDto;
 		}
 
@@ -69,25 +69,23 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> PutProject(Guid id, UpdateProjectDto project)
 		{
 			var existingProject = await _context.Projects
-				.Include(p => p.Users) 
+				.Include(p => p.Users)
 				.FirstOrDefaultAsync(p => p.Id == id);
 
-			if (existingProject == null)
+			if (existingProject is null)
 			{
 				return NotFound();
 			}
 
-			_mapper.Map(project, existingProject);
+			project.ToProject(existingProject);
 
+			project.UsersIds ??= [];
 			var updatedUsers = await _userManager.Users
 				.Where(u => project.UsersIds.Contains(u.Id))
 				.ToListAsync();
-
-			existingProject.Users.Clear(); // Clear existing relationships
-			foreach (var user in updatedUsers)
-			{
-				existingProject.Users.Add(user); // Add the updated users
-			}
+			existingProject.Users.Clear(); // Remove all users
+			existingProject.Users.AddRange(updatedUsers); // Add the updated users
+			_context.Projects.Update(existingProject);
 
 			try
 			{
@@ -105,7 +103,7 @@ namespace TFG.Api.Controllers
 				}
 			}
 
-			var response = _mapper.Map<ProjectDto>(existingProject);
+			var response = existingProject.ToProjectDto();
 			return Ok(response);
 		}
 
@@ -114,13 +112,14 @@ namespace TFG.Api.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Project>> CreateProject(CreateProjectDto projectDto)
 		{
-			var project = _mapper.Map<Project>(projectDto);
+			var project = projectDto.ToProject();
+			projectDto.UsersIds ??= [];
 			var projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id));
-			project.Users = projectUsers.ToList();
+			project.Users = [.. projectUsers];
 			project.CreatedAt = DateTime.UtcNow;
 			_context.Projects.Add(project);
 			await _context.SaveChangesAsync();
-			ProjectDto projectResponse = _mapper.Map<ProjectDto>(project);
+			ProjectDto projectResponse = project.ToProjectDto();
 			return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectResponse);
 		}
 
@@ -158,7 +157,7 @@ namespace TFG.Api.Controllers
 			}
 
 			List<User> users = await usersQuery.ToListAsync();
-			List<FilteredUserDto> usersDto = _mapper.Map<List<FilteredUserDto>>(users);
+			List<FilteredUserDto> usersDto = users.Select(u => u.ToFilteredUserDto()).ToList();
 			PaginatedResponseDto<FilteredUserDto> response = new()
 			{
 				Items = usersDto,
