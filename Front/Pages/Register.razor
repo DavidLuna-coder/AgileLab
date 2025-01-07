@@ -1,0 +1,47 @@
+﻿@page "/register"
+@layout EmptyLayout
+@using Front.Validators
+@using Front.ApiClient.Interfaces
+@using Front.Helpers
+@using Shared.DTOs
+@inject IAuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+<div style="min-height:80vh" class="d-flex justify-center align-center">
+	<MudForm ValidationDelay="0" @ref=form Model="registrationDto" Validation="validator.ValidateValues">
+		<div style="width:600px" class="d-flex justify-center align-center gap-3 flex-column">
+			<MudText Typo="Typo.h5" >Bienvenid@@, inicia sesión</MudText>
+			<MudTextField Required Immediate=true For="() => registrationDto.UserName" RequiredError="El nombre de usuario es obligatorio" FullWidth=true Label="Nombre de usuario" @bind-Value="registrationDto.UserName" T="string"></MudTextField>
+			<MudTextField Required Immediate=true For="() => registrationDto.Email" RequiredError="Es necesario introducir un email válido" FullWidth=true Label="Email" @bind-Value="registrationDto.Email" T="string"></MudTextField>
+			<MudTextField Required Immediate=true For="() => registrationDto.FirstName" RequiredError="El nombre es obligatorio" FullWidth=true Label="Nombre" @bind-Value="registrationDto.FirstName" T="string"></MudTextField>
+			<MudTextField Required Immediate=true For="() => registrationDto.LastName" RequiredError="Los apellidos son obligatorios" FullWidth=true Label="Apellidos" @bind-Value="registrationDto.LastName" T="string"></MudTextField>
+			<MudTextField Required Immediate=true For="() => registrationDto.Password" RequiredError="La contraseña no puede estar vacía" FullWidth=true Label="Password" T="string" @bind-Value="registrationDto.Password" InputType="InputType.Password"></MudTextField>
+			<MudButton OnClick="Submit">Submit</MudButton>
+		</div>
+	</MudForm>
+</div>
+
+
+@code {
+	RegistrationDto registrationDto = new() { Email=string.Empty, FirstName = string.Empty, LastName = string.Empty, Password = string.Empty, UserName = string.Empty };
+	MudForm form;
+	RegisterFormValidator validator = new RegisterFormValidator();
+
+	private async Task Submit()
+	{
+		await form.Validate();
+
+		if (form.IsValid)
+		{
+			try
+			{
+				await AuthenticationService.Register(registrationDto);
+				Nav.NavigateTo<Index>();
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add("Fallo en el registro de usuarios");
+			}
+		}
+	}
+}

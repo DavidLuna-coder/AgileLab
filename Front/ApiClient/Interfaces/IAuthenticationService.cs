@@ -7,7 +7,8 @@ namespace Front.ApiClient.Interfaces
     {
         public LocalUserInfo? User { get; }
         public Task Login(LoginRequestDto requestDto);
-        public Task Logout();
+        public Task Register(RegistrationDto requestDto);
+		public Task Logout();
         public Task Initialize();
         public bool IsAuthenticated();
     }

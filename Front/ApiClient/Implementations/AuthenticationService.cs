@@ -27,7 +27,17 @@ namespace Front.ApiClient.Implementations
 
         }
 
-        public async Task Logout()
+        public async Task Register(RegistrationDto request)
+		{
+			await _httpClient.PostAsync<RegistrationDto, LocalUserInfo>("/api/Authentication/register", request);
+			LoginRequestDto loginRequest = new()
+			{
+				Email = request.Email,
+				Password = request.Password
+			};
+			await Login(loginRequest);
+		}
+		public async Task Logout()
         {
             await _localstorageService.RemoveItemAsync("user");
         }
