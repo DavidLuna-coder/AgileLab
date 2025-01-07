@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TFG.Api.Middlewares;
 using TFG.Application.Services;
 using TFG.Infrastructure;
 using TFG.Infrastructure.Data;
@@ -41,6 +42,7 @@ app.UseCors(cors => cors
 	.AllowCredentials()
 );
 
+app.UseMiddleware<JwtMiddleware>();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");

@@ -32,7 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Domain\Enums\" />
+    <Folder Include="Application\Constants\" />
+    <Folder Include="Domain\Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>

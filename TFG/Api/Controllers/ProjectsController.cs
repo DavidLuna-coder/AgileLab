@@ -8,6 +8,8 @@ using Shared.DTOs.Projects;
 using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
+using TFG.Application.Interfaces.Projects;
+using TFG.Application.Services.Projects;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
@@ -15,10 +17,11 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly UserManager<User> _userManager = userManager;
+		private readonly IProjectService _projectService = projectService;
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
@@ -113,13 +116,14 @@ namespace TFG.Api.Controllers
 		public async Task<ActionResult<Project>> CreateProject(CreateProjectDto projectDto)
 		{
 			var project = projectDto.ToProject();
-			projectDto.UsersIds ??= [];
-			var projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id));
-			project.Users = [.. projectUsers];
-			project.CreatedAt = DateTime.UtcNow;
-			_context.Projects.Add(project);
-			await _context.SaveChangesAsync();
-			ProjectDto projectResponse = project.ToProjectDto();
+			var result = await _projectService.CreateProject(projectDto);
+
+			if (!result.Success)
+			{
+				return BadRequest(result.Errors);
+			}
+
+			ProjectDto projectResponse = result.Value.ToProjectDto();
 			return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectResponse);
 		}
 

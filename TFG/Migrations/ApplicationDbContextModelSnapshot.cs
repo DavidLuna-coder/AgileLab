@@ -17,7 +17,7 @@ namespace TFG.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -167,7 +167,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("RolesId");
 
-                    b.ToTable("PermissionRol");
+                    b.ToTable("PermissionRol", (string)null);
                 });
 
             modelBuilder.Entity("ProjectUser", b =>
@@ -182,7 +182,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ProjectUser");
+                    b.ToTable("ProjectUser", (string)null);
                 });
 
             modelBuilder.Entity("TFG.Model.Entities.Notification", b =>
@@ -198,7 +198,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("TFG.Model.Entities.Permission", b =>
@@ -209,7 +209,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permission");
+                    b.ToTable("Permission", (string)null);
                 });
 
             modelBuilder.Entity("TFG.Model.Entities.Project", b =>
@@ -231,7 +231,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("TFG.Model.Entities.Rol", b =>
@@ -242,7 +242,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("TFG.Model.Entities.User", b =>
