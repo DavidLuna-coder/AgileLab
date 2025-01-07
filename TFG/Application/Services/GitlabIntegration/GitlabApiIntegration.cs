@@ -14,7 +14,7 @@ namespace TFG.Application.Services.GitlabIntegration
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
         public record GitlabUserRegistrationResponse(int Id);
 
-		public async Task<Result<bool>> CreateProject(CreateProjectDto project, int gitlabUserId)
+		public async Task<Result<GitlabCreateProjectResponseDto>> CreateProject(CreateProjectDto project, int gitlabUserId)
         {
 			GitlabCreateProjectDto gitlabProject = new()
 			{
@@ -24,11 +24,13 @@ namespace TFG.Application.Services.GitlabIntegration
             try
             {
                 var response = await _api.PostAsync($"projects/user/{gitlabUserId}", gitlabProject);
-                return true;
+                string responseBody = await response.Content.ReadAsStringAsync();
+				GitlabCreateProjectResponseDto createdProject = JsonSerializer.Deserialize<GitlabCreateProjectResponseDto>(responseBody, _serializerOptions) ?? throw new Exception("Error creating project");
+                return createdProject;
 			}
             catch (Exception ex)
             {
-                return new Result<bool>([ex.Message]);
+                return new Result<GitlabCreateProjectResponseDto>([ex.Message]);
 			}
 		}
 
@@ -55,9 +57,17 @@ namespace TFG.Application.Services.GitlabIntegration
             }
         }
 
-        public Task DeleteProject(Project project)
+        public async Task<Result<bool>> DeleteProject(string gitlabProjectId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _api.DeleteAsync($"projects/{gitlabProjectId}");
+                return true;
+            }
+            catch 
+            {
+                return new Result<bool>(["An error ocurred deleting the project in gitlab"]);
+            }
         }
 
         public async Task<Result<bool>> DeleteUser(User user)

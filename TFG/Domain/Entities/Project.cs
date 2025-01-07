@@ -8,5 +8,6 @@
         public ICollection<Notification> Notifications { get; set; } = [];
         public ICollection<User> Users { get; set; } = [];
 		public DateTime CreatedAt { get; set; }
+        public string GitlabId { get; set; }
 	}
 }

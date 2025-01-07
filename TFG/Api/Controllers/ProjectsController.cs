@@ -131,15 +131,11 @@ namespace TFG.Api.Controllers
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteProject(Guid id)
 		{
-			var project = await _context.Projects.FindAsync(id);
-			if (project == null)
+			var result = await _projectService.DeleteProject(id);
+			if(!result.Success)
 			{
-				return NotFound();
+				return BadRequest();
 			}
-
-			_context.Projects.Remove(project);
-			await _context.SaveChangesAsync();
-
 			return NoContent();
 		}
 
