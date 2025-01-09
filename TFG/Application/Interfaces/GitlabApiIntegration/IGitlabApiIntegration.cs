@@ -15,7 +15,10 @@ namespace TFG.Application.Interfaces.GitlabApiIntegration
 		//<param name="gitlabUserId">The id of the user that will own the project</param>
 		//</summary>
 		Task<Result<GitlabCreateProjectResponseDto>> CreateProject(CreateProjectDto project, int gitlabUserId);
-        Task<Result<bool>> DeleteUser(User user);
+		Task<Result<bool>> AddUsersToProject(GitlabAddMembersToProjectDto dto);
+		Task<Result<GitlabProjectMembersResponseDto>> GetProjectMembers(int projectId);
+
+		Task<Result<bool>> DeleteUser(User user);
         Task<Result<bool>> DeleteProject(string gitlabProject);
     }
 }

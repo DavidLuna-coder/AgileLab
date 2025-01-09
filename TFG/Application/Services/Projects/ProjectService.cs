@@ -6,6 +6,7 @@ using TFG.Application.Dtos;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.GitlabIntegration.Dtos;
+using TFG.Application.Services.GitlabIntegration.Enums;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
@@ -23,7 +24,7 @@ namespace TFG.Application.Services.Projects
 			//Get the user id from the token
 			UserInfo userInfo = _httpContextAccessor.HttpContext!.Items["UserInfo"] as UserInfo ?? new();
 			projectDto.UsersIds ??= [];
-			
+
 			//Get the user from the database
 			var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userInfo.UserId);
 			if (user == null)
@@ -32,17 +33,27 @@ namespace TFG.Application.Services.Projects
 			}
 
 			//Create the project in Gitlab
-			Result<GitlabCreateProjectResponseDto> result = await _gitlabApiIntegration.CreateProject(projectDto, int.Parse(user.GitlabId));
-			if (!result.Success)
+			Result<GitlabCreateProjectResponseDto> createdProjectResult = await _gitlabApiIntegration.CreateProject(projectDto, int.Parse(user.GitlabId));
+			if (!createdProjectResult.Success)
 			{
-				return new Result<Project>(result.Errors);
+				return new Result<Project>(createdProjectResult.Errors);
 			}
+			IEnumerable<User> projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id)).ToList();
+			
+			//Add the users to the project in Gitlab
+			GitlabAddMembersToProjectDto gitlabAddMemberToProjectDto = new()
+			{
+				Id = createdProjectResult.Value.Id,
+				UserId = string.Join(",", projectUsers.Select(u => int.Parse(u.GitlabId))),
+				AccessLevel = GitlabAcessLevel.Developer
+			};
+			var addUsersToProjectResult = await _gitlabApiIntegration.AddUsersToProject(gitlabAddMemberToProjectDto);
+			if (!addUsersToProjectResult.Success) return new Result<Project>(addUsersToProjectResult.Errors);
 
 
 			//Create the project in the database
 			Project newProject = projectDto.ToProject();
-			newProject.GitlabId = result.Value.Id.ToString();
-			IEnumerable<User> projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id)).ToList();
+			newProject.GitlabId = createdProjectResult.Value.Id.ToString();
 			newProject.Users = projectUsers.ToList();
 			newProject.CreatedAt = DateTime.UtcNow;
 			_dbContext.Projects.Add(newProject);
@@ -60,9 +71,9 @@ namespace TFG.Application.Services.Projects
 			if (projectToDelete is null) return new Result<bool>(["The project does not exist"]);
 
 			//Delete the project in Gitlab
-		    var gitlabDeletionResult = await _gitlabApiIntegration.DeleteProject(projectToDelete.GitlabId);
-			
-			if(!gitlabDeletionResult.Success) return new Result<bool>(gitlabDeletionResult.Errors);
+			var gitlabDeletionResult = await _gitlabApiIntegration.DeleteProject(projectToDelete.GitlabId);
+
+			if (!gitlabDeletionResult.Success) return new Result<bool>(gitlabDeletionResult.Errors);
 
 			//Delete the project in the database
 			_dbContext.Projects.Remove(projectToDelete);

@@ -9,9 +9,9 @@ namespace TFG.Application.Services.GitlabIntegration
         private readonly HttpClient _httpClient;
         private readonly string GITLAB_BASE_ADDRESS;
         private readonly string GITLAB_API_KEY;
-        private JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
+        private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
 
-        public GitLabApi(IConfiguration configuration)
+		public GitLabApi(IConfiguration configuration)
         {
             GITLAB_BASE_ADDRESS = configuration["GitLab:GitLabBaseAddress"];
             GITLAB_API_KEY = configuration["GitLab:GitLabApiKey"];
