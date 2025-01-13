@@ -1,6 +1,7 @@
 ﻿using Shared.DTOs;
 using System.Text.Json;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
+using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Domain.Results;
 using TFG.Model.Entities;
 
@@ -10,12 +11,22 @@ namespace TFG.Application.Services.OpenProjectIntegration
     {
         private readonly OpenProjectApi _api = api;
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
-
-        public Task CreateProject(Project project)
-        {
-            throw new NotImplementedException();
-        }
         public record OpenProjectUserRegistrationResponse(int Id);
+        public record OpenProjectProjectCreatedResponse(int Id);
+        public async Task<Result<int>> CreateProject(OpenProjectCreateProjectDto project)
+        {
+            try
+            {
+                var response = await _api.PostAsync("projects", project);
+				string responseBody = await response.Content.ReadAsStringAsync();
+				OpenProjectProjectCreatedResponse createdProject = JsonSerializer.Deserialize<OpenProjectProjectCreatedResponse>(responseBody, _serializerOptions) ?? throw new Exception("Error creating project");
+				return createdProject.Id;
+            }
+            catch (Exception ex)
+            {
+                return new Result<int>([$"OpenProject Project Creation Error: {ex.Message}"]);
+            }
+        }
         public async Task<Result<int>> CreateUser(RegistrationDto user)
         {
             OpenProjectCreateUserRequest request = new()
@@ -42,9 +53,17 @@ namespace TFG.Application.Services.OpenProjectIntegration
             }
         }
 
-        public Task DeleteProject(Project project)
+        public async Task<Result<bool>> DeleteProject(int projectId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _api.DeleteAsync($"projects/{projectId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return new Result<bool>([ex.Message]);
+            }
         }
 
         public async Task<Result<bool>> DeleteUser(User user)

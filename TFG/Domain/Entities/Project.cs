@@ -9,5 +9,6 @@
         public ICollection<User> Users { get; set; } = [];
 		public DateTime CreatedAt { get; set; }
         public string GitlabId { get; set; }
+        public int OpenProjectId { get; set; }
 	}
 }

@@ -4,21 +4,24 @@ using Shared.DTOs.Projects;
 using TFG.Api.Mappers;
 using TFG.Application.Dtos;
 using TFG.Application.Interfaces.GitlabApiIntegration;
+using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.GitlabIntegration.Dtos;
 using TFG.Application.Services.GitlabIntegration.Enums;
+using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor) : IProjectService
+	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration) : IProjectService
 	{
 		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly ApplicationDbContext _dbContext = dbContext;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
 		public async Task<Result<Project>> CreateProject(CreateProjectDto projectDto)
 		{
 			//Get the user id from the token
@@ -39,7 +42,7 @@ namespace TFG.Application.Services.Projects
 				return new Result<Project>(createdProjectResult.Errors);
 			}
 			IEnumerable<User> projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id)).ToList();
-			
+
 			//Add the users to the project in Gitlab
 			GitlabAddMembersToProjectDto gitlabAddMemberToProjectDto = new()
 			{
@@ -50,10 +53,18 @@ namespace TFG.Application.Services.Projects
 			var addUsersToProjectResult = await _gitlabApiIntegration.AddUsersToProject(gitlabAddMemberToProjectDto);
 			if (!addUsersToProjectResult.Success) return new Result<Project>(addUsersToProjectResult.Errors);
 
+			//Create the project in OpenProject
+			OpenProjectCreateProjectDto openProjectCreateProjectDto = new()
+			{
+				Name = projectDto.Name
+			};
+			Result<int> openProjectCreateProjectResult = await _openProjectApiIntegration.CreateProject(openProjectCreateProjectDto);
+			//if (!openProjectCreateProjectResult.Success) return new Result<Project>(openProjectCreateProjectResult.Errors);
 
 			//Create the project in the database
 			Project newProject = projectDto.ToProject();
 			newProject.GitlabId = createdProjectResult.Value.Id.ToString();
+			newProject.OpenProjectId = openProjectCreateProjectResult.Value;
 			newProject.Users = projectUsers.ToList();
 			newProject.CreatedAt = DateTime.UtcNow;
 			_dbContext.Projects.Add(newProject);
@@ -72,8 +83,11 @@ namespace TFG.Application.Services.Projects
 
 			//Delete the project in Gitlab
 			var gitlabDeletionResult = await _gitlabApiIntegration.DeleteProject(projectToDelete.GitlabId);
+			//if (!gitlabDeletionResult.Success) return new Result<bool>(gitlabDeletionResult.Errors);
 
-			if (!gitlabDeletionResult.Success) return new Result<bool>(gitlabDeletionResult.Errors);
+			//Delete the project in OpenProject
+			var openProjectDeletionResult = await _openProjectApiIntegration.DeleteProject(projectToDelete.OpenProjectId);
+			//if (!openProjectDeletionResult.Success) return new Result<bool>(openProjectDeletionResult.Errors);
 
 			//Delete the project in the database
 			_dbContext.Projects.Remove(projectToDelete);
