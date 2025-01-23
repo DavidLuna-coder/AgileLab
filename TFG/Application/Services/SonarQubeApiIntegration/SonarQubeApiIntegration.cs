@@ -74,5 +74,18 @@ namespace TFG.Application.Services.SonarQubeIntegration
 				return new Result<SonarQubeGetDopSettingsDto>([$"SonarQubeGetDopSettingsError:{ex.Message}"]);
 			}
 		}
+
+		public async Task<Result<bool>> DeleteProject(SonarQubeDeleteProjectDto projectToDelete)
+		{
+			try
+			{
+				await _sonarQubeApi.PostAsync("projects/delete", projectToDelete);
+				return true;
+			}
+			catch(Exception ex)
+			{
+				return new Result<bool>([$"SonarQubeDeleteError:{ex.Message}"]);
+			}
+		}
 	}
 }

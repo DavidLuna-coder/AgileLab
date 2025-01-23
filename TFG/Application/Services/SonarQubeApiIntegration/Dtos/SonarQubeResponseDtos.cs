@@ -18,4 +18,9 @@
 		public string Url { get; set; }
 		public string AppId { get; set; }
 	}
+
+	public record SonarQubeDeleteProjectDto()
+	{
+		public string Project { get; set; } //project key
+	}
 }

@@ -10,5 +10,6 @@ namespace TFG.Application.Interfaces.SonarQubeIntegration
         public Task<Result<bool>> DeleteUser(string id);
         public Task<Result<SonarQubeCreateProjectResponseDto>> CreateProject(SonarQubeCreateProjectRequestDto request);
         public Task<Result<SonarQubeGetDopSettingsDto>> GetDopSettings();
+        public Task<Result<bool>> DeleteProject(SonarQubeDeleteProjectDto projectToDelete);
 	}
 }
