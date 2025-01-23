@@ -24,7 +24,8 @@ namespace TFG.Application.Services.SonarQubeIntegration
         public async Task<HttpResponseMessage> GetAsync(string endpoint, string version = null)
         {
             var response = await _httpClient.GetAsync(GetEndpointWithVersion(endpoint,version));
-            response.EnsureSuccessStatusCode();
+			var log = await response.Content.ReadAsStringAsync();//ELIMINAR
+			response.EnsureSuccessStatusCode();
             return response;
         }
 
@@ -35,6 +36,7 @@ namespace TFG.Application.Services.SonarQubeIntegration
             endpoint = GetEndpointWithVersion(endpoint, version);
 
 			var response = await _httpClient.PostAsync(endpoint, jsonContent);
+            var log = await response.Content.ReadAsStringAsync();//ELIMINAR
             response.EnsureSuccessStatusCode();
             return response;
         }

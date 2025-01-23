@@ -6,6 +6,8 @@ using TFG.Application.Dtos;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Interfaces.SonarQubeIntegration;
+using TFG.Application.Services.Dtos;
 using TFG.Application.Services.GitlabIntegration.Dtos;
 using TFG.Application.Services.GitlabIntegration.Enums;
 using TFG.Application.Services.OpenProjectIntegration.Dtos;
@@ -15,13 +17,14 @@ using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration) : IProjectService
+	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration) : IProjectService
 	{
 		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly ApplicationDbContext _dbContext = dbContext;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
+		public readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
 		public async Task<Result<Project>> CreateProject(CreateProjectDto projectDto)
 		{
 			//Get the user id from the token
@@ -53,12 +56,26 @@ namespace TFG.Application.Services.Projects
 			var addUsersToProjectResult = await _gitlabApiIntegration.AddUsersToProject(gitlabAddMemberToProjectDto);
 			if (!addUsersToProjectResult.Success) return new Result<Project>(addUsersToProjectResult.Errors);
 
+			//Create Project in SonarQube
+			string gilabId = (await _sonarQubeApiIntegration.GetDopSettings()).Value.DopSettings.Where(ds => ds.Type == "gitlab").First().Key;
+			SonarQubeCreateProjectRequestDto sonarQubeCreateProjectRequestDto = new()
+			{
+				DevOpsPlatformSettingId = gilabId,
+				ProjectKey = projectDto.Name,
+				ProjectName = projectDto.Name,
+				RepositoryIdentifier = createdProjectResult.Value.Id.ToString(),
+			};
+			var sonarQubeCreateProjectResult = await _sonarQubeApiIntegration.CreateProject(sonarQubeCreateProjectRequestDto);
+			//TODO ADD USERS TO SONARQUBE
+
+
 			//Create the project in OpenProject
 			OpenProjectCreateProjectDto openProjectCreateProjectDto = new()
 			{
 				Name = projectDto.Name
 			};
 			Result<int> openProjectCreateProjectResult = await _openProjectApiIntegration.CreateProject(openProjectCreateProjectDto);
+			//TODO ADD USERS TO OPENPROJECT
 			//if (!openProjectCreateProjectResult.Success) return new Result<Project>(openProjectCreateProjectResult.Errors);
 
 			//Create the project in the database
