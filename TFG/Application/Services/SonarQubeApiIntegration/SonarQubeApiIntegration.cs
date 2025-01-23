@@ -79,7 +79,7 @@ namespace TFG.Application.Services.SonarQubeIntegration
 		{
 			try
 			{
-				await _sonarQubeApi.PostAsync("projects/delete", projectToDelete);
+				await _sonarQubeApi.PostAsync($"projects/delete?project={projectToDelete.Project}", projectToDelete);
 				return true;
 			}
 			catch(Exception ex)

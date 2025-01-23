@@ -61,11 +61,12 @@ namespace TFG.Application.Services.Projects
 			SonarQubeCreateProjectRequestDto sonarQubeCreateProjectRequestDto = new()
 			{
 				DevOpsPlatformSettingId = gilabId,
-				ProjectKey = projectDto.Name,
+				ProjectKey = projectDto.Name.ToLowerInvariant().Replace(" ", "_"),
 				ProjectName = projectDto.Name,
 				RepositoryIdentifier = createdProjectResult.Value.Id.ToString(),
 			};
-			var sonarQubeCreateProjectResult = await _sonarQubeApiIntegration.CreateProject(sonarQubeCreateProjectRequestDto);
+			Result<SonarQubeCreateProjectResponseDto> sonarQubeCreateProjectResult = await _sonarQubeApiIntegration.CreateProject(sonarQubeCreateProjectRequestDto);
+			if (!sonarQubeCreateProjectResult.Success) return new Result<Project>(sonarQubeCreateProjectResult.Errors);
 			//TODO ADD USERS TO SONARQUBE
 
 
@@ -80,6 +81,7 @@ namespace TFG.Application.Services.Projects
 
 			//Create the project in the database
 			Project newProject = projectDto.ToProject();
+			newProject.SonarQubeProjectKey = sonarQubeCreateProjectRequestDto.ProjectKey;
 			newProject.GitlabId = createdProjectResult.Value.Id.ToString();
 			newProject.OpenProjectId = openProjectCreateProjectResult.Value;
 			newProject.Users = projectUsers.ToList();
@@ -105,7 +107,11 @@ namespace TFG.Application.Services.Projects
 			//Delete the project in OpenProject
 			var openProjectDeletionResult = await _openProjectApiIntegration.DeleteProject(projectToDelete.OpenProjectId);
 			//if (!openProjectDeletionResult.Success) return new Result<bool>(openProjectDeletionResult.Errors);
-
+			SonarQubeDeleteProjectDto sonarQubeDeleteProjectDto = new()
+			{
+				Project = projectToDelete.SonarQubeProjectKey
+			};
+			var sonarQubeDeletionResult = await _sonarQubeApiIntegration.DeleteProject(sonarQubeDeleteProjectDto);
 			//Delete the project in the database
 			_dbContext.Projects.Remove(projectToDelete);
 			await _dbContext.SaveChangesAsync();
