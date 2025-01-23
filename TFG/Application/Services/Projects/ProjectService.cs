@@ -57,7 +57,7 @@ namespace TFG.Application.Services.Projects
 			if (!addUsersToProjectResult.Success) return new Result<Project>(addUsersToProjectResult.Errors);
 
 			//Create Project in SonarQube
-			string gilabId = (await _sonarQubeApiIntegration.GetDopSettings()).Value.DopSettings.Where(ds => ds.Type == "gitlab").First().Key;
+			string gilabId = (await _sonarQubeApiIntegration.GetDopSettings()).Value.DopSettings.Where(ds => ds.Type == "gitlab").First().Id;
 			SonarQubeCreateProjectRequestDto sonarQubeCreateProjectRequestDto = new()
 			{
 				DevOpsPlatformSettingId = gilabId,
