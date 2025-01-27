@@ -82,9 +82,22 @@ namespace TFG.Application.Services.SonarQubeIntegration
 				await _sonarQubeApi.PostAsync($"projects/delete?project={projectToDelete.Project}", projectToDelete);
 				return true;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				return new Result<bool>([$"SonarQubeDeleteError:{ex.Message}"]);
+			}
+		}
+
+		public async Task<Result<bool>> CreateUserPermission(SonarQubeCreateUserPermissionDto sonarQubeCreateUserPermissionDto)
+		{
+			try
+			{
+				await _sonarQubeApi.PostAsync($"permissions/add_user?login={sonarQubeCreateUserPermissionDto.Login}&permission={sonarQubeCreateUserPermissionDto.Permission}&projectKey={sonarQubeCreateUserPermissionDto.ProjectKey}", sonarQubeCreateUserPermissionDto);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				return new Result<bool>([$"SonarQubeCreateUserPermissionError:{ex.Message}"]);
 			}
 		}
 	}

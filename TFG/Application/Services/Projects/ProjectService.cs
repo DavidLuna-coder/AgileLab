@@ -42,7 +42,7 @@ namespace TFG.Application.Services.Projects
 			//Create Project in SonarQube
 			string sonarQubeProjectKey = projectDto.Name.ToLowerInvariant().Replace(" ", "_");
 			string sonarQubeRepositoryIdentifier = gitlabProjectResult.Value.Id.ToString();
-			var sonarQubeProjectResult = await CreateAndConfigureSonarQubeProject(projectDto, sonarQubeProjectKey, sonarQubeRepositoryIdentifier);
+			var sonarQubeProjectResult = await CreateAndConfigureSonarQubeProject(projectDto, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
 			if (!sonarQubeProjectResult.Success) return new Result<Project>(sonarQubeProjectResult.Errors);
 
 			var openProjectProjectResult = await CreateAndConfigureOpenProjectProject(projectDto);
@@ -105,7 +105,7 @@ namespace TFG.Application.Services.Projects
 			return openProjectCreateProjectResult;
 		}
 
-		private async Task<Result<SonarQubeCreateProjectResponseDto>> CreateAndConfigureSonarQubeProject(CreateProjectDto projectDto, string projectKey, string repositoryIdentifier)
+		private async Task<Result<SonarQubeCreateProjectResponseDto>> CreateAndConfigureSonarQubeProject(CreateProjectDto projectDto, string projectKey, string repositoryIdentifier, IEnumerable<User> usersToInclude)
 		{
 			string gilabId = (await _sonarQubeApiIntegration.GetDopSettings()).Value.DopSettings.Where(ds => ds.Type == "gitlab").First().Id;
 			SonarQubeCreateProjectRequestDto sonarQubeCreateProjectRequestDto = new()
@@ -118,6 +118,17 @@ namespace TFG.Application.Services.Projects
 			Result<SonarQubeCreateProjectResponseDto> sonarQubeCreateProjectResult = await _sonarQubeApiIntegration.CreateProject(sonarQubeCreateProjectRequestDto);
 			if (!sonarQubeCreateProjectResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeCreateProjectResult.Errors);
 
+			foreach (var user in usersToInclude)
+			{
+				SonarQubeCreateUserPermissionDto sonarQubeCreateUserPermissionDto = new()
+				{
+					ProjectKey = projectKey,
+					Login = user.UserName!,
+					Permission = SonarQubeProjectPermissionConstants.Admin
+				};
+				var sonarQubeUserCreationResult = await _sonarQubeApiIntegration.CreateUserPermission(sonarQubeCreateUserPermissionDto);
+				//if (!sonarQubeUserCreationResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeUserCreationResult.Errors);
+			}
 			return sonarQubeCreateProjectResult;
 		}
 
@@ -134,11 +145,9 @@ namespace TFG.Application.Services.Projects
 			GitlabAddMembersToProjectDto gitlabAddMemberToProjectDto = new()
 			{
 				Id = createdProjectResult.Value.Id,
-				UserId = string.Join(",", projectUsers.Select(u => int.Parse(u.GitlabId))),
+				UserId = string.Join(",", projectUsers.Where(u => u.GitlabId != user.GitlabId).Select(u => int.Parse(u.GitlabId))),
 				AccessLevel = GitlabAcessLevel.Developer
 			};
-			var addUsersToProjectResult = await _gitlabApiIntegration.AddUsersToProject(gitlabAddMemberToProjectDto);
-			if (!addUsersToProjectResult.Success) return new Result<GitlabCreateProjectResponseDto>(addUsersToProjectResult.Errors);
 
 			return createdProjectResult;
 		}

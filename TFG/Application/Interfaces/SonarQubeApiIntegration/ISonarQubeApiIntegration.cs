@@ -11,5 +11,6 @@ namespace TFG.Application.Interfaces.SonarQubeIntegration
         public Task<Result<SonarQubeCreateProjectResponseDto>> CreateProject(SonarQubeCreateProjectRequestDto request);
         public Task<Result<SonarQubeGetDopSettingsDto>> GetDopSettings();
         public Task<Result<bool>> DeleteProject(SonarQubeDeleteProjectDto projectToDelete);
+        public Task<Result<bool>> CreateUserPermission(SonarQubeCreateUserPermissionDto sonarQubeCreateUserPermissionDto);
 	}
 }

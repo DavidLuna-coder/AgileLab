@@ -24,9 +24,16 @@ namespace TFG.Application.Services.SonarQubeIntegration
         public async Task<HttpResponseMessage> GetAsync(string endpoint, string version = null)
         {
             var response = await _httpClient.GetAsync(GetEndpointWithVersion(endpoint,version));
-			var log = await response.Content.ReadAsStringAsync();//ELIMINAR
-			response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch (Exception ex)
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
 
         public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T content, string version = null)
@@ -36,9 +43,16 @@ namespace TFG.Application.Services.SonarQubeIntegration
             endpoint = GetEndpointWithVersion(endpoint, version);
 
 			var response = await _httpClient.PostAsync(endpoint, jsonContent);
-            var log = await response.Content.ReadAsStringAsync();//ELIMINAR
-            response.EnsureSuccessStatusCode();
-            return response;
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }
+            catch
+            {
+				var log = await response.Content.ReadAsStringAsync();
+                throw new Exception(log);
+			}
+			return response;
         }
 
         public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T content, string version = null)
@@ -47,14 +61,30 @@ namespace TFG.Application.Services.SonarQubeIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync(GetEndpointWithVersion(endpoint, version), jsonContent);
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch (Exception ex)
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint, string version = null)
         {
             var response = await _httpClient.DeleteAsync(GetEndpointWithVersion(endpoint, version));
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch (Exception ex)
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
         private string GetEndpointWithVersion(string endpoint, string version = null)
         {

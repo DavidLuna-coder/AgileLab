@@ -25,8 +25,16 @@ namespace TFG.Application.Services.GitlabIntegration
         public async Task<HttpResponseMessage> GetAsync(string endpoint)
         {
             var response = await _httpClient.GetAsync(endpoint);
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
 
         public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T content)
@@ -35,8 +43,16 @@ namespace TFG.Application.Services.GitlabIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(endpoint, jsonContent);
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
 
         public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T content)
@@ -45,15 +61,31 @@ namespace TFG.Application.Services.GitlabIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync(endpoint, jsonContent);
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
 
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
         {
             var response = await _httpClient.DeleteAsync(endpoint);
-            response.EnsureSuccessStatusCode();
-            return response;
+			try
+			{
+				response.EnsureSuccessStatusCode();
+			}
+			catch
+			{
+				var log = await response.Content.ReadAsStringAsync();
+				throw new Exception(log);
+			}
+			return response;
         }
     }
 }
