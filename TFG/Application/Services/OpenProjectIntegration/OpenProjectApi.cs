@@ -10,9 +10,10 @@ namespace TFG.Application.Services.OpenProjectIntegration
         private readonly string OPENPROJECT_BASE_ADDRESS;
         private readonly string OPENPROJECT_API_KEY;
         private JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
-
-        public OpenProjectApi(IConfiguration configuration)
+        private readonly ILogger _logger;
+		public OpenProjectApi(IConfiguration configuration, ILogger logger)
         {
+			_logger = logger;
             OPENPROJECT_BASE_ADDRESS = configuration["OpenProject:OpenProjectBaseAddress"];
             OPENPROJECT_API_KEY = configuration["OpenProject:OpenProjectApiKey"];
             var byteArray = new ASCIIEncoding().GetBytes($"apikey:{OPENPROJECT_API_KEY}");
@@ -22,13 +23,13 @@ namespace TFG.Application.Services.OpenProjectIntegration
                 BaseAddress = new Uri(OPENPROJECT_BASE_ADDRESS)
             };
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-        }
+		}
 
         public async Task<HttpResponseMessage> GetAsync(string endpoint)
         {
             var response = await _httpClient.GetAsync(endpoint);
-            response.EnsureSuccessStatusCode();
-            return response;
+			EnsureSuccessStatusCode(response);
+			return response;
         }
 
         public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T content)
@@ -37,8 +38,8 @@ namespace TFG.Application.Services.OpenProjectIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(endpoint, jsonContent);
-            response.EnsureSuccessStatusCode();
-            return response;
+			EnsureSuccessStatusCode(response);
+			return response;
         }
 
         public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T content)
@@ -47,16 +48,25 @@ namespace TFG.Application.Services.OpenProjectIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync(endpoint, jsonContent);
-            response.EnsureSuccessStatusCode();
-            return response;
+			EnsureSuccessStatusCode(response);
+			return response;
         }
 
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
         {
 
             var response = await _httpClient.DeleteAsync(endpoint);
-            response.EnsureSuccessStatusCode();
-            return response;
+            EnsureSuccessStatusCode(response);
+			return response;
         }
-    }
+		private void EnsureSuccessStatusCode(HttpResponseMessage response)
+		{
+			if (!response.IsSuccessStatusCode)
+			{
+				var log = response.Content.ReadAsStringAsync().Result;
+				_logger.LogError(message: log);
+				throw new Exception(log);
+			}
+		}
+	}
 }

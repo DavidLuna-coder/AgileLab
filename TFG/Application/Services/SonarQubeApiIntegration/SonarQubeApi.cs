@@ -9,8 +9,8 @@ namespace TFG.Application.Services.SonarQubeIntegration
         private readonly string SONARQUBE_BASE_ADDRESS;
         private readonly string SONARQUBE_API_KEY;
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
-
-        public SonarQubeApi(IConfiguration configuration)
+        private readonly ILogger _logger;
+        public SonarQubeApi(IConfiguration configuration, ILogger logger)
         {
             SONARQUBE_BASE_ADDRESS = configuration["SonarQube:SonarQubeBaseAddress"];
             SONARQUBE_API_KEY = configuration["SonarQube:SonarQubeApiKey"];
@@ -19,20 +19,13 @@ namespace TFG.Application.Services.SonarQubeIntegration
                 BaseAddress = new Uri(SONARQUBE_BASE_ADDRESS)
             };
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", SONARQUBE_API_KEY);
+            _logger = logger;
         }
 
         public async Task<HttpResponseMessage> GetAsync(string endpoint, string version = null)
         {
             var response = await _httpClient.GetAsync(GetEndpointWithVersion(endpoint,version));
-			try
-			{
-				response.EnsureSuccessStatusCode();
-			}
-			catch (Exception ex)
-			{
-				var log = await response.Content.ReadAsStringAsync();
-				throw new Exception(log);
-			}
+			EnsureSuccessStatusCode(response);
 			return response;
         }
 
@@ -43,15 +36,7 @@ namespace TFG.Application.Services.SonarQubeIntegration
             endpoint = GetEndpointWithVersion(endpoint, version);
 
 			var response = await _httpClient.PostAsync(endpoint, jsonContent);
-            try
-            {
-                response.EnsureSuccessStatusCode();
-            }
-            catch
-            {
-				var log = await response.Content.ReadAsStringAsync();
-                throw new Exception(log);
-			}
+			EnsureSuccessStatusCode(response);
 			return response;
         }
 
@@ -61,29 +46,13 @@ namespace TFG.Application.Services.SonarQubeIntegration
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PutAsync(GetEndpointWithVersion(endpoint, version), jsonContent);
-			try
-			{
-				response.EnsureSuccessStatusCode();
-			}
-			catch (Exception ex)
-			{
-				var log = await response.Content.ReadAsStringAsync();
-				throw new Exception(log);
-			}
+			EnsureSuccessStatusCode(response);
 			return response;
         }
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint, string version = null)
         {
             var response = await _httpClient.DeleteAsync(GetEndpointWithVersion(endpoint, version));
-			try
-			{
-				response.EnsureSuccessStatusCode();
-			}
-			catch (Exception ex)
-			{
-				var log = await response.Content.ReadAsStringAsync();
-				throw new Exception(log);
-			}
+			EnsureSuccessStatusCode(response);
 			return response;
         }
         private string GetEndpointWithVersion(string endpoint, string version = null)
@@ -93,5 +62,15 @@ namespace TFG.Application.Services.SonarQubeIntegration
 
             return $"{version}/{endpoint}";
         }
-    }
+
+		private void EnsureSuccessStatusCode(HttpResponseMessage response)
+		{
+			if (!response.IsSuccessStatusCode)
+			{
+				var log = response.Content.ReadAsStringAsync().Result;
+				_logger.LogError(message: log);
+				throw new Exception(log);
+			}
+		}
+	}
 }
