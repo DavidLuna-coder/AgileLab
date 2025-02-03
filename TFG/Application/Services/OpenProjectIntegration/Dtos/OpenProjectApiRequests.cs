@@ -13,12 +13,20 @@
 	{
 		public record OpenProjectCreateMembershipLinks
 		{
-			public int ProjectId { get; set; }
-			public OpenProjectRoleDto[] Roles{ get; set; }
-
+			public OpenProjectCreateMembershipsLinksProperties Properties { get; set; }
 		}
-		public bool SendNotification { get; set; } = false;
-
+		public record OpenProjectCreateMembershipsLinksProperties
+		{
+			public int ProjectId { get; set; }
+			public OpenProjectRoleDto[] Roles { get; set; }
+			public OpenProjectPrincipalDto Principal { get; set; }
+		}
+		public record OpenProjectCreateMembershipMeta 
+		{ 
+			public bool SendNotification { get; set; } = false;
+		}
+		public OpenProjectCreateMembershipLinks _Links { get; set; }
+		public OpenProjectCreateMembershipMeta _Meta { get; set; }
 	};
 
 }

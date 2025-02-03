@@ -127,7 +127,7 @@ namespace TFG.Application.Services.Projects
 					Permission = SonarQubeProjectPermissionConstants.Admin
 				};
 				var sonarQubeUserCreationResult = await _sonarQubeApiIntegration.CreateUserPermission(sonarQubeCreateUserPermissionDto);
-				//if (!sonarQubeUserCreationResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeUserCreationResult.Errors);
+				if (!sonarQubeUserCreationResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeUserCreationResult.Errors);
 			}
 			return sonarQubeCreateProjectResult;
 		}

@@ -11,6 +11,6 @@ namespace TFG.Application.Interfaces.OpenProjectApiIntegration
         Task<Result<int>> CreateProject(OpenProjectCreateProjectDto project);
         Task<Result<bool>> DeleteUser(User user);
         Task<Result<bool>> DeleteProject(int projectId);
-
+        Task<Result<bool>> CreateMembership(OpenProjectCreateMembershipsDtos membership);
 	}
 }

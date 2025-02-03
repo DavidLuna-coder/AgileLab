@@ -21,4 +21,9 @@
 		public bool Active { get; set; }
 		public bool Public { get; set; }
 	}
+	public record OpenProjectFormattableDto
+	{
+		public string Format { get; set; } = "plain";
+		public string Raw { get; set; }
+	}
 }
