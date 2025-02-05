@@ -45,7 +45,7 @@ namespace TFG.Application.Services.Projects
 			var sonarQubeProjectResult = await CreateAndConfigureSonarQubeProject(projectDto, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
 			if (!sonarQubeProjectResult.Success) return new Result<Project>(sonarQubeProjectResult.Errors);
 
-			var openProjectProjectResult = await CreateAndConfigureOpenProjectProject(projectDto);
+			var openProjectProjectResult = await CreateAndConfigureOpenProjectProject(projectDto, projectUsers);
 			if (!openProjectProjectResult.Success) return new Result<Project>(openProjectProjectResult.Errors);
 
 			return await CreateProjectInDatabase(projectDto, projectUsers, gitlabProjectResult, sonarQubeProjectKey, openProjectProjectResult);
@@ -91,7 +91,7 @@ namespace TFG.Application.Services.Projects
 			return true;
 		}
 
-		private async Task<Result<int>> CreateAndConfigureOpenProjectProject(CreateProjectDto projectDto)
+		private async Task<Result<int>> CreateAndConfigureOpenProjectProject(CreateProjectDto projectDto, IEnumerable<User> users)
 		{
 			//Create the project in OpenProject
 			OpenProjectCreateProjectDto openProjectCreateProjectDto = new()
@@ -99,6 +99,12 @@ namespace TFG.Application.Services.Projects
 				Name = projectDto.Name
 			};
 			Result<int> openProjectCreateProjectResult = await _openProjectApiIntegration.CreateProject(openProjectCreateProjectDto);
+
+			foreach (var user in users)
+			{
+				await _openProjectApiIntegration.CreateMembership(int.Parse(user.OpenProjectId), openProjectCreateProjectResult.Value, [6]);
+			}
+
 			//TODO ADD USERS TO OPENPROJECT
 			if (!openProjectCreateProjectResult.Success) return new Result<int>(openProjectCreateProjectResult.Errors);
 

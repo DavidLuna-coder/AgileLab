@@ -79,11 +79,20 @@ namespace TFG.Application.Services.OpenProjectIntegration
 			}
 		}
 
-		public async Task<Result<bool>> CreateMembership(OpenProjectCreateMembershipsDtos membership)
+		public async Task<Result<bool>> CreateMembership(int userId, int projectId, int[] rolesId)
 		{
+			OpenProjectCreateMembershipsDtos creationRequest = new()
+			{
+				_links = new()
+				{
+					Principal = new() { Href = $"/api/v3/users/{userId}" },
+					Project = new() { Href = $"/api/v3/projects/{projectId}" },
+					Roles = rolesId.Select(roleId => new OpenProjectLink() { Href = $"/api/v3/roles/{roleId}" }).ToArray()
+				}
+			};
 			try
 			{
-				var response = await _api.PostAsync("memberships", membership);
+				var response = await _api.PostAsync("memberships", creationRequest);
 				return true;
 			}
 			catch (Exception ex)

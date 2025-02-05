@@ -2,10 +2,15 @@
 {
 	public record OpenProjectRoleDto
 	{
-		public int Id { get; set; }
-		public string Name { get; set; }
+		public int Id { get; set; } = 4;
+		public string Name { get; set; } = "Member";
+	};
+
+	public record OpenProjectLink
+	{
+		public string Href { get; set; }
 	}
-	public record OpenProjectProjectDto
+	public record OpenProjectProjectDto 
 	{
 		public int Id { get; set; }
 		public string Identifier { get; set; }
