@@ -9,8 +9,8 @@ namespace TFG.Application.Services.SonarQubeIntegration
         private readonly string SONARQUBE_BASE_ADDRESS;
         private readonly string SONARQUBE_API_KEY;
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
-        private readonly ILogger _logger;
-        public SonarQubeApi(IConfiguration configuration, ILogger logger)
+        private readonly ILogger<SonarQubeApi> _logger;
+        public SonarQubeApi(IConfiguration configuration, ILogger<SonarQubeApi> logger)
         {
             SONARQUBE_BASE_ADDRESS = configuration["SonarQube:SonarQubeBaseAddress"];
             SONARQUBE_API_KEY = configuration["SonarQube:SonarQubeApiKey"];
