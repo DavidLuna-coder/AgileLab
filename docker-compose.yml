@@ -1,0 +1,90 @@
+networks:
+  services_network:
+    name: services_network
+  sonar_network:
+    name: sonar_network
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonar_postgresql:
+  sonar_postgresql_data:
+  openproject_pgdata:
+  openproject_assets:
+  gitlab_runner_config:
+
+services:
+  openproject:
+    image: openproject/community:13
+    container_name: openproject
+    ports:
+      - '8080:80'
+    environment:
+      OPENPROJECT_SECRET_KEY_BASE: secret
+      OPENPROJECT_HOST__NAME: "localhost:8080"
+      OPENPROJECT_HTTPS: false
+      OPENPROJECT_DEFAULT__LANGUAGE: es
+    networks:
+      - services_network
+      - sonar_network
+    volumes:
+      - openproject_pgdata:/var/openproject/pgdata
+      - openproject_assets:/var/openproject/assets
+  
+  gitlab:
+    image: gitlab/gitlab-ce
+    container_name: gitlab
+    ports:
+      - '8081:80'
+      - "444:444"
+      - "22:22"
+    shm_size: '256m'
+    volumes:
+      - 'gitlab_config:/etc/gitlab'
+      - 'gitlab_logs:/var/log/gitlab'
+      - 'gitlab_data:/var/opt/gitlab'
+    networks:
+      - services_network
+  
+  gitlab_runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab_runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab_runner_config:/etc/gitlab-runner
+    networks:
+      - services_network
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on:
+      - sonar_db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar_db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+    networks:
+      - services_network
+      - sonar_network
+    
+  sonar_db:
+    image: postgres:12
+    container_name: sonar_db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - sonar_postgresql:/var/lib/postgresql
+      - sonar_postgresql_data:/var/lib/postgresql/data
+    networks:
+      - sonar_network
