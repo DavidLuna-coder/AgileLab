@@ -25,8 +25,27 @@ else
 			<MudButton OnClick="DeleteProject">Eliminar</MudButton>
 		</Actions>
 		<ChildContent>
+			<MudGrid Class="mb-4" Spacing="4">
+				<MudItem xs="12" sm="6" md="4">
+					<MudPaper>
+						<MudChart  ChartType="ChartType.Pie" InputData="[30,40]" Width="200px" InputLabels=@(["Smells", "Issues"]) Height="200px"  />
+					</MudPaper>
+				</MudItem>
+				<MudItem xs="12" sm="6" md="4">
+					<MudPaper>
+						<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" Width="200px"Height="200px" />
+					</MudPaper>
+				</MudItem>
+				<MudItem xs="12" sm="6" md="4">
+					<MudPaper>
+						<MudChart ChartType="ChartType.Pie" InputData="[30,30,10]" Width="200px" Height="200px" />
+					</MudPaper>
+				</MudItem>
+			</MudGrid>
+
 			<MudText Typo="Typo.h6">Descripción</MudText>
-			<MudText Typo="Typo.body1">@project.Description</MudText>
+			<MudText Class="mb-4" Typo="Typo.body1">@project.Description</MudText>
+			<MudText Typo="Typo.h6">Usuarios</MudText>
 			<MudTable T="FilteredUserDto" Class="mt-4" ServerData="ReloadUsers">
 				<HeaderContent>
 					<MudTh>Nombre</MudTh>
