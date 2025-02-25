@@ -20,6 +20,8 @@ namespace TFG.Application.Services.GitlabIntegration
 			{
 				Name = project.Name,
 				UserId = gitlabUserId,
+				Visibility = "public",
+				TemplateName = "dotnetcore"
 			};
 			try
 			{

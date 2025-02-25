@@ -15,10 +15,17 @@
 <MudContainer Class="mt-5" MaxWidth="MaxWidth.Medium">
 	<Section Title="Creación de Proyecto">
 		<MudForm @ref=form Model="createProjectDto">
-			<MudTextField Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
-			<MudTextField Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
+			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
+			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
 			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=users></UsersSelectionTable>
-			<MudButton OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
+			@if (!loading)
+			{
+				<MudButton Disabled="loading" OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
+			}
+			else
+			{
+				<MudButton Color="Color.Primary" Variant="Variant.Filled"><MudProgressCircular Size="Size.Small" Indeterminate=true /></MudButton>
+			}
 		</MudForm>
 	</Section>
 </MudContainer>
