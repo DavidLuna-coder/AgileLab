@@ -101,5 +101,21 @@ namespace TFG.Application.Services.OpenProjectIntegration
 			}
 
 		}
+
+		public async Task<Result<string>> GetWorkPackages(int projectId, OpenProjectFilterBuilder filterBuilder)
+		{
+			try
+			{
+				string url = filterBuilder.Build(projectId);
+				var response = await _api.GetAsync(url);
+				string responseBody = await response.Content.ReadAsStringAsync();
+
+				return responseBody;
+			}
+			catch (Exception ex)
+			{
+				return new Result<string>([$"OpenProject Query Error: {ex.Message}"]);
+			}
+		}
 	}
 }
