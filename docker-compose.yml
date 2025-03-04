@@ -35,7 +35,7 @@ services:
       - openproject_assets:/var/openproject/assets
   
   gitlab:
-    image: gitlab/gitlab-ce
+    image: gitlab/gitlab-ce:17.9.1-ce.0
     container_name: gitlab
     ports:
       - '8081:80'
