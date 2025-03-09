@@ -34,7 +34,7 @@
 				await AuthenticationService.Login(loginModel);
 				Nav.NavigateTo<Index>();
 			}
-			catch (Exception ex)
+			catch
 			{
 				Snackbar.Add("Nombre de usuario o contraseña incorrecta");
 			}

@@ -8,6 +8,7 @@ namespace TFG.Application.Interfaces.Projects
 	{
 		Task<Result<Project>> CreateProject(CreateProjectDto project);
 		Task<Result<bool>> DeleteProject(Guid id);
+		Task<List<ProjectTaskDto>> GetProjectTasks(Guid projectId, ProjectTaskQueryParameters requestDto);
 
 	}
 }

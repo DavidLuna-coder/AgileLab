@@ -10,14 +10,16 @@ using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Application.Services.Dtos;
 using TFG.Application.Services.GitlabIntegration.Dtos;
 using TFG.Application.Services.GitlabIntegration.Enums;
+using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.OpenProjectIntegration.Dtos;
+using TFG.Application.Services.OpenProjectIntegration.Mappers;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration) : IProjectService
+	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, ILogger<ProjectService> logger) : IProjectService
 	{
 		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly ApplicationDbContext _dbContext = dbContext;
@@ -91,6 +93,24 @@ namespace TFG.Application.Services.Projects
 			return true;
 		}
 
+		public async Task<List<ProjectTaskDto>> GetProjectTasks(Guid projectId, ProjectTaskQueryParameters requestDto)
+		{
+			OpenProjectFilterBuilder openProjectFilterBuilder = requestDto.ToOpenProjectFilterBuilder(_dbContext);
+			int openProjectProjectId = await _dbContext.Projects.Where(p => p.Id == projectId).Select(p => p.OpenProjectId).FirstOrDefaultAsync();
+			if (openProjectProjectId == default)
+			{
+				throw new ArgumentException("The project does not exist");
+			}
+
+			Result<OpenProjectWorkPackage[]> result = await _openProjectApiIntegration.GetWorkPackages(openProjectProjectId, openProjectFilterBuilder);
+			if (!result.Success)
+			{
+				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', result.Errors));
+				return [];
+			}
+
+			return result.Value.Select(wp => wp.ToProjectTaskDto()).ToList();
+		}
 		private async Task<Result<int>> CreateAndConfigureOpenProjectProject(CreateProjectDto projectDto, IEnumerable<User> users)
 		{
 			//Create the project in OpenProject

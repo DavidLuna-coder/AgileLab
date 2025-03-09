@@ -9,7 +9,6 @@ using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
-using TFG.Application.Services.Projects;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
@@ -56,7 +55,7 @@ namespace TFG.Api.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<ProjectDto>> GetProject(Guid id)
 		{
-			var project = await _context.Projects.FindAsync(id);
+			Project? project = await _context.Projects.FindAsync(id);
 
 			if (project == null)
 			{
@@ -64,6 +63,14 @@ namespace TFG.Api.Controllers
 			}
 			ProjectDto projectDto = project.ToProjectDto();
 			return projectDto;
+		}
+
+		[HttpPost("{id}/task-summary/search")]
+		public async Task<ActionResult<List<ProjectTaskDto>>> GetTaskSummary(Guid id, ProjectTaskQueryParameters parameters)
+		{
+			List<ProjectTaskDto> projectTasks = await _projectService.GetProjectTasks(id, parameters);
+
+			return Ok(projectTasks);
 		}
 
 		// PUT: api/Projects/5

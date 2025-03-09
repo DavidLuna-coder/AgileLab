@@ -69,3 +69,4 @@ namespace TFG.Application.Services.OpenProjectIntegration
 			return $"/api/v3/projects/{projectId}/work_packages?{query}";
 		}
 	}
+}

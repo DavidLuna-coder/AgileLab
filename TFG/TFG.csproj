@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Application\Constants\" />
+    <Folder Include="Application\Services\OpenProjectIntegration\Helpers\" />
     <Folder Include="Domain\Interfaces\" />
   </ItemGroup>
 

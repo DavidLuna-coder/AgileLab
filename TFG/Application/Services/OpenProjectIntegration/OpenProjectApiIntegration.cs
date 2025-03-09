@@ -102,7 +102,7 @@ namespace TFG.Application.Services.OpenProjectIntegration
 
 		}
 
-		public async Task<Result<string>> GetWorkPackages(int projectId, OpenProjectFilterBuilder filterBuilder)
+		public async Task<Result<OpenProjectWorkPackage[]>> GetWorkPackages(int projectId, OpenProjectFilterBuilder filterBuilder)
 		{
 			try
 			{
@@ -110,11 +110,12 @@ namespace TFG.Application.Services.OpenProjectIntegration
 				var response = await _api.GetAsync(url);
 				string responseBody = await response.Content.ReadAsStringAsync();
 
-				return responseBody;
+				GetWorkPackageResponse packages = JsonSerializer.Deserialize<GetWorkPackageResponse>(responseBody, _serializerOptions) ?? new();
+				return packages.Embedded.Elements;
 			}
 			catch (Exception ex)
 			{
-				return new Result<string>([$"OpenProject Query Error: {ex.Message}"]);
+				return new Result<OpenProjectWorkPackage[]>([$"OpenProject Query Error: {ex.Message}"]);
 			}
 		}
 	}
