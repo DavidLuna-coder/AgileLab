@@ -51,4 +51,37 @@ namespace TFG.Application.Services.OpenProjectIntegration.Dtos
 		[JsonPropertyName("_embedded")]
 		public EmbeddedItems<OpenProjectWorkPackage> Embedded { get; set; } = new();
 	}
+
+	public record OpenProjectStatus
+	{
+		[JsonPropertyName("id")]
+		public int Id { get; set; } // x > 0	
+		[JsonPropertyName("name")]
+		public string Name { get; set; }
+		[JsonPropertyName("isClosed")]
+		public bool IsClosed { get; set; }
+		[JsonPropertyName("isDefault")]
+		public bool IsDefault { get; set; }
+		[JsonPropertyName("color")]
+		public string Color { get; set; }
+		[JsonPropertyName("isReadonly")]
+		public bool IsReadonly { get; set; }
+		[JsonPropertyName("excludedFromTotals")]
+		public bool ExcludedFromTotals { get; set; }
+		[JsonPropertyName("defaultDoneRatio")]
+		public int? DefaultDoneRatio { get; set; } // 0 <= x <= 100	
+		[JsonPropertyName("position")]
+		public int Position { get; set; }
+
+	}
+
+	public record OpenProjectCollection<T>
+	{
+		[JsonPropertyName("total")]
+		public int Total { get; set; }
+		[JsonPropertyName("count")]
+		public int Count { get; set; }
+		[JsonPropertyName("_embedded")]
+		public EmbeddedItems<T> Embedded { get; set; } = new();
+	}
 }

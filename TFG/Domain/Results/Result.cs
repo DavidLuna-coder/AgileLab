@@ -6,8 +6,9 @@ namespace TFG.Domain.Results
     {
         public readonly T Value;
         public static implicit operator Result<T>(T value) => new Result<T>(value);
-        public readonly ImmutableArray<string> Errors;
+        public readonly ImmutableArray<string> Errors = new ImmutableArray<string>();
         public readonly bool Success => Errors.Length == 0;
+
         public Result(T value)
         {
             Value = value;

@@ -95,21 +95,44 @@ namespace TFG.Application.Services.Projects
 
 		public async Task<List<ProjectTaskDto>> GetProjectTasks(Guid projectId, ProjectTaskQueryParameters requestDto)
 		{
-			OpenProjectFilterBuilder openProjectFilterBuilder = requestDto.ToOpenProjectFilterBuilder(_dbContext);
 			int openProjectProjectId = await _dbContext.Projects.Where(p => p.Id == projectId).Select(p => p.OpenProjectId).FirstOrDefaultAsync();
 			if (openProjectProjectId == default)
 			{
 				throw new ArgumentException("The project does not exist");
 			}
 
-			Result<OpenProjectWorkPackage[]> result = await _openProjectApiIntegration.GetWorkPackages(openProjectProjectId, openProjectFilterBuilder);
-			if (!result.Success)
+			OpenProjectFilterBuilder openProjectFilterBuilder = requestDto.ToOpenProjectFilterBuilder(_dbContext);
+			Result<OpenProjectCollection<OpenProjectStatus>> statusesResult = await _openProjectApiIntegration.GetStatuses();
+			if (!statusesResult.Success)
 			{
-				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', result.Errors));
+				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', statusesResult.Errors));
 				return [];
 			}
 
-			return result.Value.Select(wp => wp.ToProjectTaskDto()).ToList();
+
+			IEnumerable<OpenProjectStatus> allStatuses = statusesResult.Value.Embedded.Elements;
+			IEnumerable<OpenProjectStatus> closedStatuses = statusesResult.Value.Embedded.Elements.Where(s => s.IsClosed);
+			IEnumerable<OpenProjectStatus> openStatuses = statusesResult.Value.Embedded.Elements.Where(s => !s.IsClosed);
+			Result<OpenProjectWorkPackage[]> closedTasks = new Result<OpenProjectWorkPackage[]>(new List<OpenProjectWorkPackage>().ToArray());
+			if (closedStatuses.Any())
+			{
+				openProjectFilterBuilder.AddFilter("status", "=", [.. closedStatuses.Select(s => s.Id.ToString())]);
+				closedTasks = await _openProjectApiIntegration.GetWorkPackages(openProjectProjectId, openProjectFilterBuilder);
+			}
+			openProjectFilterBuilder.AddFilter("status", "=", [.. openStatuses.Select(s => s.Id.ToString())]);
+			Result<OpenProjectWorkPackage[]> openTasks = await _openProjectApiIntegration.GetWorkPackages(openProjectProjectId, openProjectFilterBuilder);
+
+			if (!closedTasks.Success || !openTasks.Success)
+			{
+				var errors = closedTasks.Errors.AddRange(openTasks.Errors);
+				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', closedTasks.Errors));
+				return [];
+			}
+
+			var result = new List<ProjectTaskDto>();
+			result.AddRange(closedTasks.Value.Select(t => t.ToProjectTaskDto(true)));
+			result.AddRange(openTasks.Value.Select(t => t.ToProjectTaskDto(false)));
+			return result.ToList();
 		}
 		private async Task<Result<int>> CreateAndConfigureOpenProjectProject(CreateProjectDto projectDto, IEnumerable<User> users)
 		{

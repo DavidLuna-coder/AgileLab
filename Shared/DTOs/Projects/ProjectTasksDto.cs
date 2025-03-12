@@ -9,5 +9,6 @@
 	{
 		public required string Name { get; set; }
 		public int PercentageDone { get; set; } 
+		public bool IsClosed { get; set; }
 	}
 }

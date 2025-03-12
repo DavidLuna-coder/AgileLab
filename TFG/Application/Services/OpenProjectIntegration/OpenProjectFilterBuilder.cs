@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Web;
 
 namespace TFG.Application.Services.OpenProjectIntegration
 {
 	public class OpenProjectFilterBuilder
 	{
-		private readonly Dictionary<string, object> _filters = new();
+		private readonly Dictionary<string, OpenProjectFilter> _filters = new();
 		private int? _offset;
 		private int? _pageSize;
 		private string? _sortBy;
@@ -27,7 +28,8 @@ namespace TFG.Application.Services.OpenProjectIntegration
 
 		public OpenProjectFilterBuilder AddFilter(string key, string @operator, params string[] values)
 		{
-			_filters[key] = new Dictionary<string, object> { { "operator", @operator }, { "values", values.Length > 0 ? values : null } };
+			if (values.Length == 0) return this;
+			_filters[key] = new OpenProjectFilter() { Operator = @operator, Values = values };
 			return this;
 		}
 
@@ -64,9 +66,28 @@ namespace TFG.Application.Services.OpenProjectIntegration
 			if (_groupBy != null) query["groupBy"] = _groupBy;
 			if (_showSums.HasValue) query["showSums"] = _showSums.ToString().ToLower();
 			if (_select != null) query["select"] = _select;
-			if (_filters.Count > 0) query["filters"] = JsonSerializer.Serialize(_filters);
-
+			if (_filters.Count > 0)
+			{
+				string filtersJson = ConvertFiltersToJson();
+				query["filters"] = filtersJson;
+			}
 			return $"/api/v3/projects/{projectId}/work_packages?{query}";
+		}
+
+		private string ConvertFiltersToJson()
+		{
+			var filtersList = _filters.Select(kvp => new Dictionary<string, OpenProjectFilter> { { kvp.Key, kvp.Value } }).ToList();
+
+			var filtersJson = JsonSerializer.Serialize(filtersList);
+			return filtersJson;
+		}
+
+		private record OpenProjectFilter()
+		{
+			[JsonPropertyName("operator")]
+			public string Operator { get; set; } = string.Empty;
+			[JsonPropertyName("values")]
+			public string[] Values { get; set; } = [];
 		}
 	}
 }

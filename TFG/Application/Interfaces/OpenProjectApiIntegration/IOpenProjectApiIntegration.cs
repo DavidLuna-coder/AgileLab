@@ -14,5 +14,7 @@ namespace TFG.Application.Interfaces.OpenProjectApiIntegration
         Task<Result<bool>> DeleteProject(int projectId);
         Task<Result<bool>> CreateMembership(int userId, int projectId, int[] rolesId);
         Task<Result<OpenProjectWorkPackage[]>> GetWorkPackages(int projectId, OpenProjectFilterBuilder filterBuilder);
+        Task<Result<OpenProjectCollection<OpenProjectStatus>>> GetStatuses();
+
 	}
 }

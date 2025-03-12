@@ -118,5 +118,23 @@ namespace TFG.Application.Services.OpenProjectIntegration
 				return new Result<OpenProjectWorkPackage[]>([$"OpenProject Query Error: {ex.Message}"]);
 			}
 		}
+
+		public async Task<Result<OpenProjectCollection<OpenProjectStatus>>> GetStatuses()
+		{
+			try
+			{
+				string url = "/api/v3/statuses";
+				HttpResponseMessage response = await _api.GetAsync(url);
+				string responseBody = await response.Content.ReadAsStringAsync();
+
+				OpenProjectCollection<OpenProjectStatus> statuses = JsonSerializer.Deserialize<OpenProjectCollection<OpenProjectStatus>>(responseBody) ?? throw new Exception("Failed statuses deserialization");
+
+				return statuses;
+			}
+			catch (Exception ex)
+			{
+				return new Result<OpenProjectCollection<OpenProjectStatus>>([$"OpenProject Query Error: {ex.Message}"]);
+			}
+		}
 	}
 }
