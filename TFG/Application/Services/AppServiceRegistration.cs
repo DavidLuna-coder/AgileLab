@@ -1,4 +1,5 @@
-﻿using Shared.Utils.DateTimeProvider;
+﻿using NGitLab;
+using Shared.Utils.DateTimeProvider;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
@@ -30,6 +31,16 @@ namespace TFG.Application.Services
             services.AddScoped<ISonarQubeApiIntegration, SonarQubeApiIntegration>();
 
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+            services.AddScoped<IGitLabClient>(serviceProvider =>
+            {
+                var configuration = serviceProvider.GetService<IConfiguration>();
+                string url = configuration!.GetValue<string>("Gitlab:GitLabBaseAddress") ?? throw new ArgumentNullException();
+                string token = configuration.GetValue<string>("Gitlab:GitLabApiKey") ?? throw new ArgumentNullException();
+                var client = new GitLabClient(url, token);
+
+                return client;
+            });
             return services;
         }
     }

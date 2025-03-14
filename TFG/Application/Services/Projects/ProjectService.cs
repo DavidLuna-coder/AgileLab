@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NGitLab;
+using NGitLab.Models;
 using Shared.DTOs.Projects;
 using TFG.Api.Mappers;
 using TFG.Application.Dtos;
@@ -16,10 +18,13 @@ using TFG.Application.Services.OpenProjectIntegration.Mappers;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
+using Project = TFG.Model.Entities.Project;
+using GitlabProject = NGitLab.Models.Project;
+using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, ILogger<ProjectService> logger) : IProjectService
+	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IGitLabClient gitLabClient, ILogger<ProjectService> logger) : IProjectService
 	{
 		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly ApplicationDbContext _dbContext = dbContext;
@@ -27,6 +32,8 @@ namespace TFG.Application.Services.Projects
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
 		public readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
+		private readonly IGitLabClient gitLabClient = gitLabClient;
+
 		public async Task<Result<Project>> CreateProject(CreateProjectDto projectDto)
 		{
 			//Get the user id from the token
@@ -76,8 +83,7 @@ namespace TFG.Application.Services.Projects
 			if (projectToDelete is null) return new Result<bool>(["The project does not exist"]);
 
 			//Delete the project in Gitlab
-			var gitlabDeletionResult = await _gitlabApiIntegration.DeleteProject(projectToDelete.GitlabId);
-			//if (!gitlabDeletionResult.Success) return new Result<bool>(gitlabDeletionResult.Errors);
+			await gitLabClient.Projects.DeleteAsync(projectToDelete.GitlabId);
 
 			//Delete the project in OpenProject
 			var openProjectDeletionResult = await _openProjectApiIntegration.DeleteProject(projectToDelete.OpenProjectId);
@@ -184,21 +190,20 @@ namespace TFG.Application.Services.Projects
 		private async Task<Result<GitlabCreateProjectResponseDto>> CreateAndConfigureGitlabProject(CreateProjectDto projectDto, User user, IEnumerable<User> projectUsers)
 		{
 			//Create the project in Gitlab
-			var createdProjectResult = await _gitlabApiIntegration.CreateProject(projectDto, int.Parse(user.GitlabId));
-			if (!createdProjectResult.Success)
-			{
-				return new Result<GitlabCreateProjectResponseDto>(createdProjectResult.Errors);
-			}
+			ProjectCreate gitLabProject = projectDto.ToGitlabProjectCreate();
+			GitlabProject createdProject = await gitLabClient.Projects.CreateAsync(gitLabProject);
+
 
 			//Add the users to the project in Gitlab
 			GitlabAddMembersToProjectDto gitlabAddMemberToProjectDto = new()
 			{
-				Id = createdProjectResult.Value.Id,
+				Id = createdProject.Id,
 				UserId = string.Join(",", projectUsers.Where(u => u.GitlabId != user.GitlabId).Select(u => int.Parse(u.GitlabId))),
 				AccessLevel = GitlabAcessLevel.Developer
 			};
 
-			return createdProjectResult;
+			var response = new GitlabCreateProjectResponseDto(createdProject.Id, createdProject.Name, createdProject.Description);
+			return response;
 		}
 	}
 
