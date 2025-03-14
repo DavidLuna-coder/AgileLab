@@ -17,7 +17,6 @@ using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Application.Services.OpenProjectIntegration.Mappers;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
-using TFG.Model.Entities;
 using Project = TFG.Model.Entities.Project;
 using GitlabProject = NGitLab.Models.Project;
 using User = TFG.Model.Entities.User;
@@ -193,14 +192,14 @@ namespace TFG.Application.Services.Projects
 			ProjectCreate gitLabProject = projectDto.ToGitlabProjectCreate();
 			GitlabProject createdProject = await gitLabClient.Projects.CreateAsync(gitLabProject);
 
-
-			//Add the users to the project in Gitlab
-			GitlabAddMembersToProjectDto gitlabAddMemberToProjectDto = new()
+			foreach(User projectUser in projectUsers)
 			{
-				Id = createdProject.Id,
-				UserId = string.Join(",", projectUsers.Where(u => u.GitlabId != user.GitlabId).Select(u => int.Parse(u.GitlabId))),
-				AccessLevel = GitlabAcessLevel.Developer
-			};
+				ProjectMemberCreate member = new() {
+					UserId = projectUser.GitlabId,
+					AccessLevel = projectUser.Id != user.Id ? AccessLevel.Developer : AccessLevel.Owner
+				};
+				await gitLabClient.Members.AddMemberToProjectAsync(createdProject.Id, member);
+			}
 
 			var response = new GitlabCreateProjectResponseDto(createdProject.Id, createdProject.Name, createdProject.Description);
 			return response;
