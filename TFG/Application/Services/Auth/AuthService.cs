@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using NGitLab;
+using NGitLab.Models;
 using Shared.DTOs;
 using Shared.Utils.DateTimeProvider;
 using System.Collections.Immutable;
@@ -7,24 +9,23 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TFG.Application.Interfaces;
-using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
-using TFG.Model.Entities;
+using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Auth
 {
-	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IGitlabApiIntegration gitlabApiIntegration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IDateTimeProvider dateTimeProvider) : IAuthService
+	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient) : IAuthService
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly SignInManager<User> _signInManager = signInManager;
 		private readonly IConfiguration _configuration = configuration;
-		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
 		private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+		private readonly IGitLabClient gitLabClient = gitLabClient;
 		#region REGISTER
 		public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
 		{
@@ -46,7 +47,7 @@ namespace TFG.Application.Services.Auth
 			try
 			{
 				//Gitlab registration
-				Result<int> gitlabResult = await RegisterGitlab(model);
+				Result<long> gitlabResult = await RegisterGitlab(model);
 				if (!gitlabResult.Success) return CreateIdentityError(gitlabResult.Errors);
 				user.GitlabId = gitlabResult.Value.ToString();
 
@@ -54,7 +55,7 @@ namespace TFG.Application.Services.Auth
 				var openProjectResult = await RegisterOpenProject(model);
 				if (!openProjectResult.Success)
 				{
-					await _gitlabApiIntegration.DeleteUser(user);
+					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 					return CreateIdentityError(openProjectResult.Errors);
 				}
 				user.OpenProjectId = openProjectResult.Value.ToString();
@@ -63,17 +64,18 @@ namespace TFG.Application.Services.Auth
 				var sonarQubeResult = await _sonarQubeApiIntegration.CreateUser(model);
 				if (!sonarQubeResult.Success)
 				{
-					await _gitlabApiIntegration.DeleteUser(user);
+					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 					await _openProjectApiIntegration.DeleteUser(user);
 					return CreateIdentityError(sonarQubeResult.Errors);
 				}
 				user.SonarQubeId = sonarQubeResult.Value;
 
 				//App registration
-				                                                                                                                                                                var result = await _userManager.CreateAsync(user, model.Password);
+				                                                                                                                                                                
+				var result = await _userManager.CreateAsync(user, model.Password);
 				if (!result.Succeeded)
 				{
-					await _gitlabApiIntegration.DeleteUser(user);
+					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 					await _openProjectApiIntegration.DeleteUser(user);
 					await _sonarQubeApiIntegration.DeleteUser(user.SonarQubeId);
 				}
@@ -86,7 +88,7 @@ namespace TFG.Application.Services.Auth
 				if (userCreated)
 				{
 					await _userManager.DeleteAsync(user);
-					await _gitlabApiIntegration.DeleteUser(user);
+					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 				}
 				var errors = new[]
 				{
@@ -102,10 +104,24 @@ namespace TFG.Application.Services.Auth
 			return openProjectResult;
 		}
 
-		private async Task<Result<int>> RegisterGitlab(RegistrationDto model)
+		private async Task<Result<long>> RegisterGitlab(RegistrationDto model)
 		{
-			var gitLabResult = await _gitlabApiIntegration.CreateUser(model);
-			return gitLabResult;
+			UserUpsert user = new()
+			{
+				Email = model.Email,
+				Password = model.Password,
+				Name = model.Email,
+				Username = model.UserName
+			};
+			try
+			{
+				NGitLab.Models.User gitlabUser = await gitLabClient.Users.CreateAsync(user);
+				return gitlabUser.Id;
+			}
+			catch(Exception ex)
+			{
+				return new([ex.Message]);
+			}
 		}
 		#endregion
 

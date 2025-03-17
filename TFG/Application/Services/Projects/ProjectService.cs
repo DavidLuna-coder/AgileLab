@@ -5,13 +5,10 @@ using NGitLab.Models;
 using Shared.DTOs.Projects;
 using TFG.Api.Mappers;
 using TFG.Application.Dtos;
-using TFG.Application.Interfaces.GitlabApiIntegration;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Application.Services.Dtos;
-using TFG.Application.Services.GitlabIntegration.Dtos;
-using TFG.Application.Services.GitlabIntegration.Enums;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Application.Services.OpenProjectIntegration.Mappers;
@@ -23,9 +20,8 @@ using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(IGitlabApiIntegration gitlabApiIntegration, ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IGitLabClient gitLabClient, ILogger<ProjectService> logger) : IProjectService
+	public class ProjectService(ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IGitLabClient gitLabClient, ILogger<ProjectService> logger) : IProjectService
 	{
-		private readonly IGitlabApiIntegration _gitlabApiIntegration = gitlabApiIntegration;
 		private readonly ApplicationDbContext _dbContext = dbContext;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -59,7 +55,7 @@ namespace TFG.Application.Services.Projects
 			return await CreateProjectInDatabase(projectDto, projectUsers, gitlabProjectResult, sonarQubeProjectKey, openProjectProjectResult);
 		}
 
-		private async Task<Result<Project>> CreateProjectInDatabase(CreateProjectDto projectDto, IEnumerable<User> projectUsers, Result<GitlabCreateProjectResponseDto> gitlabProjectResult, string sonarQubeProjectKey, Result<int> openProjectProjectResult)
+		private async Task<Result<Project>> CreateProjectInDatabase(CreateProjectDto projectDto, IEnumerable<User> projectUsers, Result<GitlabProject> gitlabProjectResult, string sonarQubeProjectKey, Result<int> openProjectProjectResult)
 		{
 			//Create the project in the database
 			Project newProject = projectDto.ToProject();
@@ -186,7 +182,7 @@ namespace TFG.Application.Services.Projects
 			return sonarQubeCreateProjectResult;
 		}
 
-		private async Task<Result<GitlabCreateProjectResponseDto>> CreateAndConfigureGitlabProject(CreateProjectDto projectDto, User user, IEnumerable<User> projectUsers)
+		private async Task<Result<GitlabProject>> CreateAndConfigureGitlabProject(CreateProjectDto projectDto, User user, IEnumerable<User> projectUsers)
 		{
 			//Create the project in Gitlab
 			ProjectCreate gitLabProject = projectDto.ToGitlabProjectCreate();
@@ -201,8 +197,7 @@ namespace TFG.Application.Services.Projects
 				await gitLabClient.Members.AddMemberToProjectAsync(createdProject.Id, member);
 			}
 
-			var response = new GitlabCreateProjectResponseDto(createdProject.Id, createdProject.Name, createdProject.Description);
-			return response;
+			return createdProject;
 		}
 	}
 
