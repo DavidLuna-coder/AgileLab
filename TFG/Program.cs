@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection");
 builder.AddServiceDefaults();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
-builder.Services.RegisterAppServices();
+builder.RegisterAppServices();
 builder.Services.AddRazorPages();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())

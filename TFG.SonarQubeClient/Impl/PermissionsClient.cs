@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using TFG.SonarQubeClient.Models;
 
@@ -14,7 +13,7 @@ namespace TFG.SonarQubeClient.Impl
 		public async Task AddUserAsync(UserPermission userPermission)
 		{
 			string permissionString = JsonSerializer.Serialize(userPermission.Permission,jsonSerializerOptions).Trim('"');
-			await client.PostAsync($"permissions/add_user?login={userPermission.Login}&permission={permissionString}&projectKey={userPermission.ProjectKey}", userPermission);
+			await client.PostAsync($"permissions/add_user?login={userPermission.Login}&permission={permissionString.ToLowerInvariant()}&projectKey={userPermission.ProjectKey}", userPermission);
 		}
 	}
 }

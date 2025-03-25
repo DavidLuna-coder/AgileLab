@@ -9,9 +9,9 @@ namespace TFG.SonarQubeClient.Impl
 			throw new NotImplementedException();
 		}
 
-		public Task DeleteAsync(ProjectDeletion projectKey)
+		public Task DeleteAsync(string projectKey)
 		{
-			return client.PostAsync($"projects/delete?project={projectKey}", projectKey);
+			return client.PostAsync($"projects/delete?project={projectKey}");
 		}
 	}
 }

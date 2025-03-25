@@ -5,6 +5,6 @@ namespace TFG.SonarQubeClient
     public interface IProjectsClient
     {
         Task<ProjectCreated> CreateAsync(ProjectCreation project);
-        Task DeleteAsync(ProjectDeletion projectKey);
-    }
+        Task DeleteAsync(string projectKey);
+	}
 }

@@ -7,7 +7,6 @@ using TFG.Api.Mappers;
 using TFG.Application.Dtos;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
-using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Application.Services.Dtos;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.OpenProjectIntegration.Dtos;
@@ -17,17 +16,19 @@ using TFG.Infrastructure.Data;
 using Project = TFG.Model.Entities.Project;
 using GitlabProject = NGitLab.Models.Project;
 using User = TFG.Model.Entities.User;
+using TFG.SonarQubeClient;
+using TFG.SonarQubeClient.Models;
 
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IGitLabClient gitLabClient, ILogger<ProjectService> logger) : IProjectService
+	public class ProjectService(ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, IGitLabClient gitLabClient, ISonarQubeClient sonarClient, ILogger<ProjectService> logger) : IProjectService
 	{
 		private readonly ApplicationDbContext _dbContext = dbContext;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
-		public readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
-		private readonly IGitLabClient gitLabClient = gitLabClient;
+		private readonly IGitLabClient _gitLabClient = gitLabClient;
+		private readonly ISonarQubeClient _sonarQubeClient = sonarClient;
 
 		public async Task<Result<Project>> CreateProject(CreateProjectDto projectDto)
 		{
@@ -39,15 +40,14 @@ namespace TFG.Application.Services.Projects
 			if (user == null) return new Result<Project>(["User not found"]);
 
 
-			IEnumerable<User> projectUsers = _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id)).ToList();
+			IEnumerable<User> projectUsers = await _userManager.Users.Where(u => projectDto.UsersIds.Any(id => id == u.Id)).ToListAsync();
 			var gitlabProjectResult = await CreateAndConfigureGitlabProject(projectDto, user, projectUsers);
 			if (!gitlabProjectResult.Success) return new Result<Project>(gitlabProjectResult.Errors);
 
 			//Create Project in SonarQube
 			string sonarQubeProjectKey = projectDto.Name.ToLowerInvariant().Replace(" ", "_");
 			string sonarQubeRepositoryIdentifier = gitlabProjectResult.Value.Id.ToString();
-			var sonarQubeProjectResult = await CreateAndConfigureSonarQubeProject(projectDto, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
-			if (!sonarQubeProjectResult.Success) return new Result<Project>(sonarQubeProjectResult.Errors);
+			await CreateAndConfigureSonarQubeProject(projectDto, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
 
 			var openProjectProjectResult = await CreateAndConfigureOpenProjectProject(projectDto, projectUsers);
 			if (!openProjectProjectResult.Success) return new Result<Project>(openProjectProjectResult.Errors);
@@ -78,7 +78,7 @@ namespace TFG.Application.Services.Projects
 			if (projectToDelete is null) return new Result<bool>(["The project does not exist"]);
 
 			//Delete the project in Gitlab
-			await gitLabClient.Projects.DeleteAsync(projectToDelete.GitlabId);
+			await _gitLabClient.Projects.DeleteAsync(projectToDelete.GitlabId);
 
 			//Delete the project in OpenProject
 			var openProjectDeletionResult = await _openProjectApiIntegration.DeleteProject(projectToDelete.OpenProjectId);
@@ -87,7 +87,7 @@ namespace TFG.Application.Services.Projects
 			{
 				Project = projectToDelete.SonarQubeProjectKey
 			};
-			var sonarQubeDeletionResult = await _sonarQubeApiIntegration.DeleteProject(sonarQubeDeleteProjectDto);
+			await _sonarQubeClient.Projects.DeleteAsync(projectToDelete.SonarQubeProjectKey);
 			//Delete the project in the database
 			_dbContext.Projects.Remove(projectToDelete);
 			await _dbContext.SaveChangesAsync();
@@ -106,12 +106,11 @@ namespace TFG.Application.Services.Projects
 			Result<OpenProjectCollection<OpenProjectStatus>> statusesResult = await _openProjectApiIntegration.GetStatuses();
 			if (!statusesResult.Success)
 			{
-				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', statusesResult.Errors));
+				logger.LogError("Get Project Task Errors: {Errors}", string.Join(',', statusesResult.Errors));
 				return [];
 			}
 
 
-			IEnumerable<OpenProjectStatus> allStatuses = statusesResult.Value.Embedded.Elements;
 			IEnumerable<OpenProjectStatus> closedStatuses = statusesResult.Value.Embedded.Elements.Where(s => s.IsClosed);
 			IEnumerable<OpenProjectStatus> openStatuses = statusesResult.Value.Embedded.Elements.Where(s => !s.IsClosed);
 			Result<OpenProjectWorkPackage[]> closedTasks = new Result<OpenProjectWorkPackage[]>(new List<OpenProjectWorkPackage>().ToArray());
@@ -149,52 +148,41 @@ namespace TFG.Application.Services.Projects
 				await _openProjectApiIntegration.CreateMembership(int.Parse(user.OpenProjectId), openProjectCreateProjectResult.Value, [6]);
 			}
 
-			//TODO ADD USERS TO OPENPROJECT
 			if (!openProjectCreateProjectResult.Success) return new Result<int>(openProjectCreateProjectResult.Errors);
 
 			return openProjectCreateProjectResult;
 		}
 
-		private async Task<Result<SonarQubeCreateProjectResponseDto>> CreateAndConfigureSonarQubeProject(CreateProjectDto projectDto, string projectKey, string repositoryIdentifier, IEnumerable<User> usersToInclude)
+		private async Task<BoundedProject> CreateAndConfigureSonarQubeProject(CreateProjectDto projectDto, string projectKey, string repositoryIdentifier, IEnumerable<User> usersToInclude)
 		{
-			string gilabId = (await _sonarQubeApiIntegration.GetDopSettings()).Value.DopSettings.Where(ds => ds.Type == "gitlab").First().Id;
-			SonarQubeCreateProjectRequestDto sonarQubeCreateProjectRequestDto = new()
-			{
-				DevOpsPlatformSettingId = gilabId,
-				ProjectKey = projectKey,
-				ProjectName = projectDto.Name,
-				RepositoryIdentifier = repositoryIdentifier,
-			};
-			Result<SonarQubeCreateProjectResponseDto> sonarQubeCreateProjectResult = await _sonarQubeApiIntegration.CreateProject(sonarQubeCreateProjectRequestDto);
-			if (!sonarQubeCreateProjectResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeCreateProjectResult.Errors);
+			var test = await _sonarQubeClient.DopTranslations.GetDopSettingsAsync();
+
+			string gilabId = test.DopSettings.First(ds => ds.Type == "gitlab").Id;
+			ProjectBinding projectBinding = new() { DevOpsPlatformSettingId = gilabId, ProjectKey = projectKey, ProjectName = projectDto.Name, RepositoryIdentifier = repositoryIdentifier, Monorepo = true };
+			BoundedProject project = await _sonarQubeClient.DopTranslations.BoundProjectAsync(projectBinding);
 
 			foreach (var user in usersToInclude)
 			{
-				SonarQubeCreateUserPermissionDto sonarQubeCreateUserPermissionDto = new()
-				{
-					ProjectKey = projectKey,
-					Login = user.UserName!,
-					Permission = SonarQubeProjectPermissionConstants.Admin
-				};
-				var sonarQubeUserCreationResult = await _sonarQubeApiIntegration.CreateUserPermission(sonarQubeCreateUserPermissionDto);
-				if (!sonarQubeUserCreationResult.Success) return new Result<SonarQubeCreateProjectResponseDto>(sonarQubeUserCreationResult.Errors);
+				UserPermission userPermission = new() { Login = user.UserName!, ProjectKey = projectKey, Permission = PermissionType.Admin };
+				await _sonarQubeClient.Permissions.AddUserAsync(userPermission);
 			}
-			return sonarQubeCreateProjectResult;
+			return project;
 		}
 
 		private async Task<Result<GitlabProject>> CreateAndConfigureGitlabProject(CreateProjectDto projectDto, User user, IEnumerable<User> projectUsers)
 		{
 			//Create the project in Gitlab
 			ProjectCreate gitLabProject = projectDto.ToGitlabProjectCreate();
-			GitlabProject createdProject = await gitLabClient.Projects.CreateAsync(gitLabProject);
+			GitlabProject createdProject = await _gitLabClient.Projects.CreateAsync(gitLabProject);
 
-			foreach(User projectUser in projectUsers)
+			foreach (User projectUser in projectUsers)
 			{
-				ProjectMemberCreate member = new() {
+				ProjectMemberCreate member = new()
+				{
 					UserId = projectUser.GitlabId,
 					AccessLevel = projectUser.Id != user.Id ? AccessLevel.Developer : AccessLevel.Owner
 				};
-				await gitLabClient.Members.AddMemberToProjectAsync(createdProject.Id, member);
+				await _gitLabClient.Members.AddMemberToProjectAsync(createdProject.Id, member);
 			}
 
 			return createdProject;

@@ -8,13 +8,16 @@ using TFG.Application.Services.Auth;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.Projects;
 using TFG.Application.Services.SonarQubeIntegration;
+using TFG.SonarQubeClient;
 
 namespace TFG.Application.Services
 {
     public static class AppServiceRegistration
     {
-        public static IServiceCollection RegisterAppServices(this IServiceCollection services)
+        public static IServiceCollection RegisterAppServices(this WebApplicationBuilder builder)
         {
+            IServiceCollection services = builder.Services;
+			ConfigurationManager configuration = builder.Configuration;
 			services.AddHttpContextAccessor();
 			services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProjectService, ProjectService>();
@@ -26,7 +29,9 @@ namespace TFG.Application.Services
             services.AddScoped<ISonarQubeApiIntegration, SonarQubeApiIntegration>();
 
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
+			string sonarBaseUrl = configuration["SonarQube:SonarQubeBaseAddress"] ?? string.Empty;
+			string sonarApiToken = configuration["SonarQube:SonarQubeApiKey"] ?? string.Empty;
+			services.AddSonarApiClient(sonarBaseUrl, sonarApiToken);
             services.AddScoped<IGitLabClient>(serviceProvider =>
             {
                 var configuration = serviceProvider.GetService<IConfiguration>();

@@ -9,6 +9,8 @@ namespace TFG.SonarQubeClient.Impl
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
         public SonarHttpClient(string baseUrl, string token)
 		{
+			if (string.IsNullOrEmpty(baseUrl)) throw new ArgumentException($"'{nameof(baseUrl)}' cannot be null or empty.", nameof(baseUrl));
+			if (string.IsNullOrEmpty(token)) throw new ArgumentException($"'{nameof(token)}' cannot be null or empty.", nameof(token));
 
 			_httpClient = new HttpClient()
 			{
@@ -34,8 +36,15 @@ namespace TFG.SonarQubeClient.Impl
 			EnsureSuccessStatusCode(response);
 			return response;
         }
+		public async Task<HttpResponseMessage> PostAsync(string endpoint, string? version = null)
+		{
+			endpoint = GetEndpointWithVersion(endpoint, version);
 
-        public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T content, string? version = null)
+			var response = await _httpClient.PostAsync(endpoint, null);
+			EnsureSuccessStatusCode(response);
+			return response;
+		}
+		public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T content, string? version = null)
         {
             string json = JsonSerializer.Serialize(content, _serializerOptions);
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
