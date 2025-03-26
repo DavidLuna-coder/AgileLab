@@ -82,11 +82,7 @@ namespace TFG.Application.Services.Projects
 
 			//Delete the project in OpenProject
 			var openProjectDeletionResult = await _openProjectApiIntegration.DeleteProject(projectToDelete.OpenProjectId);
-			//if (!openProjectDeletionResult.Success) return new Result<bool>(openProjectDeletionResult.Errors);
-			SonarQubeDeleteProjectDto sonarQubeDeleteProjectDto = new()
-			{
-				Project = projectToDelete.SonarQubeProjectKey
-			};
+
 			await _sonarQubeClient.Projects.DeleteAsync(projectToDelete.SonarQubeProjectKey);
 			//Delete the project in the database
 			_dbContext.Projects.Remove(projectToDelete);
@@ -113,7 +109,7 @@ namespace TFG.Application.Services.Projects
 
 			IEnumerable<OpenProjectStatus> closedStatuses = statusesResult.Value.Embedded.Elements.Where(s => s.IsClosed);
 			IEnumerable<OpenProjectStatus> openStatuses = statusesResult.Value.Embedded.Elements.Where(s => !s.IsClosed);
-			Result<OpenProjectWorkPackage[]> closedTasks = new Result<OpenProjectWorkPackage[]>(new List<OpenProjectWorkPackage>().ToArray());
+			Result<OpenProjectWorkPackage[]> closedTasks = new(new List<OpenProjectWorkPackage>().ToArray());
 			if (closedStatuses.Any())
 			{
 				openProjectFilterBuilder.AddFilter("status", "=", [.. closedStatuses.Select(s => s.Id.ToString())]);
