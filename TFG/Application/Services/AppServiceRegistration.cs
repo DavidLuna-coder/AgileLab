@@ -3,11 +3,9 @@ using Shared.Utils.DateTimeProvider;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
-using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Application.Services.Auth;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.Projects;
-using TFG.Application.Services.SonarQubeIntegration;
 using TFG.SonarQubeClient;
 
 namespace TFG.Application.Services
@@ -25,8 +23,6 @@ namespace TFG.Application.Services
             services.AddScoped<OpenProjectApi, OpenProjectApi>();
             services.AddScoped<IOpenProjectApiIntegration, OpenProjectApiIntegration>();
 
-            services.AddScoped<SonarQubeApi, SonarQubeApi>();
-            services.AddScoped<ISonarQubeApiIntegration, SonarQubeApiIntegration>();
 
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 			string sonarBaseUrl = configuration["SonarQube:SonarQubeBaseAddress"] ?? string.Empty;

@@ -10,20 +10,21 @@ using System.Security.Claims;
 using System.Text;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
-using TFG.Application.Interfaces.SonarQubeIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
+using TFG.SonarQubeClient;
+using TFG.SonarQubeClient.Models;
 using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Auth
 {
-	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IOpenProjectApiIntegration openProjectApiIntegration, ISonarQubeApiIntegration sonarQubeApiIntegration, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient) : IAuthService
+	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IOpenProjectApiIntegration openProjectApiIntegration,  ISonarQubeClient sonarQubeClient, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient) : IAuthService
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly SignInManager<User> _signInManager = signInManager;
 		private readonly IConfiguration _configuration = configuration;
 		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
-		private readonly ISonarQubeApiIntegration _sonarQubeApiIntegration = sonarQubeApiIntegration;
+		private readonly ISonarQubeClient _sonarQubeClient = sonarQubeClient;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IGitLabClient gitLabClient = gitLabClient;
 		#region REGISTER
@@ -61,14 +62,16 @@ namespace TFG.Application.Services.Auth
 				user.OpenProjectId = openProjectResult.Value.ToString();
 
 				//SonarQube registration Falta por implementar.
-				var sonarQubeResult = await _sonarQubeApiIntegration.CreateUser(model);
-				if (!sonarQubeResult.Success)
+				UserCreation userCreation = new UserCreation()
 				{
-					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
-					await _openProjectApiIntegration.DeleteUser(user);
-					return CreateIdentityError(sonarQubeResult.Errors);
-				}
-				user.SonarQubeId = sonarQubeResult.Value;
+					Login = model.UserName,
+					Name = model.FirstName + " " + model.LastName,
+					Email = model.Email,
+					Password = model.Password,
+				};
+				var sonarUser = await _sonarQubeClient.Users.CreateAsync(userCreation);
+
+				user.SonarQubeId = sonarUser.Id;
 
 				//App registration
 				                                                                                                                                                                
@@ -77,7 +80,7 @@ namespace TFG.Application.Services.Auth
 				{
 					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 					await _openProjectApiIntegration.DeleteUser(user);
-					await _sonarQubeApiIntegration.DeleteUser(user.SonarQubeId);
+					await _sonarQubeClient.Users.DeleteAsync(user.SonarQubeId);
 				}
 
 				return result;
