@@ -7,7 +7,6 @@ using TFG.Api.Mappers;
 using TFG.Application.Dtos;
 using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
-using TFG.Application.Services.Dtos;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Application.Services.OpenProjectIntegration.Mappers;
@@ -120,8 +119,7 @@ namespace TFG.Application.Services.Projects
 
 			if (!closedTasks.Success || !openTasks.Success)
 			{
-				var errors = closedTasks.Errors.AddRange(openTasks.Errors);
-				logger.LogError("Get Project Task Errors: {errors}", string.Join(',', closedTasks.Errors));
+				logger.LogError("Get Project Task Errors: {Errors}", string.Join(',', closedTasks.Errors));
 				return [];
 			}
 
