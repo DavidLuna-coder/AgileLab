@@ -64,7 +64,7 @@ namespace TFG.SonarQubeClient.Impl
             if (string.IsNullOrEmpty(version))
                 return endpoint;
 
-            return $"{version}/{endpoint}";
+            return $"/api/{version}/{endpoint}";
         }
 
 		private static void EnsureSuccessStatusCode(HttpResponseMessage response)

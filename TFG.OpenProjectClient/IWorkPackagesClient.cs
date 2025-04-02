@@ -5,6 +5,6 @@ namespace TFG.OpenProjectClient
 {
 	public interface IWorkPackagesClient
 	{
-		Task<OpenProjectCollection<WorkPackage>> GetAsync(GetWorkPackagesQuery query);
+		Task<OpenProjectCollection<WorkPackage>> GetAsync(int projectId, GetWorkPackagesQuery query);
 	}
 }

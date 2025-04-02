@@ -20,7 +20,7 @@ namespace TFG.Application.Services.OpenProjectIntegration
 
 			_httpClient = new HttpClient
 			{
-				BaseAddress = new Uri(OPENPROJECT_BASE_ADDRESS)
+				BaseAddress = new Uri($"{OPENPROJECT_BASE_ADDRESS}/api/v3/")
 			};
 			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 		}
