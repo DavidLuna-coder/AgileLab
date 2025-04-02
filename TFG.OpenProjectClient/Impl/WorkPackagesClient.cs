@@ -8,7 +8,7 @@ namespace TFG.OpenProjectClient.Impl
 	{
 		public async Task<OpenProjectCollection<WorkPackage>> GetAsync(int projectId, GetWorkPackagesQuery query)
 		{
-			var response = await httpClient.GetAsync($"/projects/{projectId}/work_packages?{query}");
+			var response = await httpClient.GetAsync($"projects/{projectId}/work_packages?{query}");
 			string responseBody = await response.Content.ReadAsStringAsync();
 			OpenProjectCollection<WorkPackage> workPackages = JsonSerializer.Deserialize<OpenProjectCollection<WorkPackage>>(responseBody)!;
 			return workPackages;
