@@ -6,6 +6,7 @@ using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Auth;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.Projects;
+using TFG.OpenProjectClient;
 using TFG.SonarQubeClient;
 
 namespace TFG.Application.Services
@@ -37,7 +38,9 @@ namespace TFG.Application.Services
 
                 return client;
             });
-            return services;
+
+            services.AddOpenProjectApiClient(configuration["OpenProject:OpenProjectBaseAddress"] ?? string.Empty, configuration["OpenProject:OpenProjectApiKey"] ?? string.Empty);
+			return services;
         }
     }
 }
