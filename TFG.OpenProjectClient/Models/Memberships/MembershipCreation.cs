@@ -5,6 +5,6 @@ namespace TFG.OpenProjectClient.Models.Memberships
 	public class MembershipCreation
 	{
 		[JsonPropertyName("_links")]
-		MembershipCreationLinks Links { get; set; }
+		public MembershipCreationLinks Links { get; set; }
 	}
 }

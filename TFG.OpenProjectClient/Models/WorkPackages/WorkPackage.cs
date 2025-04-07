@@ -43,8 +43,6 @@ namespace TFG.OpenProjectClient.Models.WorkPackages
 
 		[JsonPropertyName("schema")]
 		public required Link Schema { get; set; }
-		[JsonPropertyName("ancestors")]
-		public Link? Ancestors { get; set; }
 		[JsonPropertyName("attachments")]
 		public Link? Attachments { get; set; }
 
@@ -75,12 +73,6 @@ namespace TFG.OpenProjectClient.Models.WorkPackages
 
 		[JsonPropertyName("delete")]
 		public Link? Delete { get; set; }
-
-		[JsonPropertyName("watch")]
-		public Link? Watch { get; set; }
-
-		[JsonPropertyName("unwatch")]
-		public Link? Unwatch { get; set; }
 
 		[JsonPropertyName("addComment")]
 		public Link? AddComment { get; set; }

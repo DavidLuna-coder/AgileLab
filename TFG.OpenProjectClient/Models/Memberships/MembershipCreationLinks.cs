@@ -5,10 +5,10 @@ namespace TFG.OpenProjectClient.Models.Memberships
 	public class MembershipCreationLinks
 	{
 		[JsonPropertyName("principal")]
-		Link Principal { get; set; }
+		public Link Principal { get; set; }
 		[JsonPropertyName("roles")]
-		Link[] Roles { get; set; }
+		public Link[] Roles { get; set; }
 		[JsonPropertyName("project")]
-		Link Project { get; set; }
+		public Link Project { get; set; }
 	}
 }

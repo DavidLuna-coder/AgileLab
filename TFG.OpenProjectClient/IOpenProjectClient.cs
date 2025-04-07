@@ -3,7 +3,7 @@
 	public interface IOpenProjectClient
 	{
 		IUsersClient Users { get; }
-		IProjectsClient Project { get; }
+		IProjectsClient Projects { get; }
 		IMembershipsClient Memberships { get; }
 		IStatusesClient Statuses { get; }
 		IWorkPackagesClient WorkPackages { get; }

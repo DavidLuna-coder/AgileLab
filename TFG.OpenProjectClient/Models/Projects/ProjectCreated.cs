@@ -4,7 +4,7 @@ using TFG.OpenProjectClient.Models.BasicObjects;
 
 namespace TFG.OpenProjectClient.Models.Projects
 {
-	public class ProjectCreated : HalResource<Link>
+	public class ProjectCreated : HalResource<CreatedProjectLinks>
 	{
 		/// <summary>
 		/// Unique identifier for the project.
@@ -61,5 +61,11 @@ namespace TFG.OpenProjectClient.Models.Projects
 		/// </summary>
 		[JsonPropertyName("updatedAt")]
 		public DateTime UpdatedAt { get; set; }
+	}
+
+	public class CreatedProjectLinks
+	{
+		[JsonPropertyName("self")] 
+		public Link Self { get; set; }
 	}
 }

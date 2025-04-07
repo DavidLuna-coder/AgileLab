@@ -22,7 +22,7 @@ namespace TFG.OpenProjectClient.Models
 		public LinkItem Links { get; set; }
 	}
 
-	public class OpenProjectCollection<T> : HalResource<Link, EmbeddedItems<T[]>>
+	public class OpenProjectCollection<T> : HalResource<OpenProjectSelfLink, EmbeddedItems<T>>
 	{
 		// Meta información de la colección
 		[JsonPropertyName("total")]
@@ -43,7 +43,11 @@ namespace TFG.OpenProjectClient.Models
 		[JsonPropertyName("totalSums")]
 		public object? TotalSums { get; set; }
 	}
-
+	public class OpenProjectSelfLink
+	{
+		[JsonPropertyName("self")]
+		public Link Self { get; set; }
+	}
 	public class EmbeddedItems<T>
 	{
 		[JsonPropertyName("elements")]
@@ -55,7 +59,7 @@ namespace TFG.OpenProjectClient.Models
 		[JsonPropertyName("href")]
 		public required string? Href { get; set; }
 		[JsonPropertyName("title")]
-		public required string Title { get; set; }
+		public string Title { get; set; }
 		[JsonPropertyName("templated")]
 		public bool Templated { get; set; } = false;
 		[JsonPropertyName("method")]

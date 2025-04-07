@@ -36,7 +36,7 @@ namespace TFG.OpenProjectClient.Models.Projects
 		/// Explicación del estado del proyecto.
 		/// </summary>
 		[JsonPropertyName("statusExplanation")]
-		public FormattableText? StatusExplanation { get; set; }
+		public FormattableText StatusExplanation { get; set; } = new();
 
 		/// <summary>
 		/// Descripción del proyecto.

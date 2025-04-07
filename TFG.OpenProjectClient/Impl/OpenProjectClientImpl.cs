@@ -4,7 +4,7 @@
 	{
 		public IUsersClient Users { get; } = usersClient;
 
-		public IProjectsClient Project { get; } = projectsClient;
+		public IProjectsClient Projects { get; } = projectsClient;
 
 		public IMembershipsClient Memberships { get; } = membershipsClient;
 

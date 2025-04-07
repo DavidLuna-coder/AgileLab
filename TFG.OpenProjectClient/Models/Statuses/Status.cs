@@ -19,7 +19,7 @@ namespace TFG.OpenProjectClient.Models.Statuses
 		[JsonPropertyName("excludedFromTotals")]
 		public bool ExcludedFromTotals { get; set; }
 		[JsonPropertyName("defaultDoneRatio")]
-		public int DefaultDoneRatio { get; set; }
+		public int? DefaultDoneRatio { get; set; }
 		[JsonPropertyName("position")]
 		public int Position { get; set; }
 	}
