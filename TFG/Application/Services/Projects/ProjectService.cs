@@ -5,11 +5,7 @@ using NGitLab.Models;
 using Shared.DTOs.Projects;
 using TFG.Api.Mappers;
 using TFG.Application.Dtos;
-using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
-using TFG.Application.Services.OpenProjectIntegration;
-using TFG.Application.Services.OpenProjectIntegration.Dtos;
-using TFG.Application.Services.OpenProjectIntegration.Mappers;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
 using Project = TFG.Model.Entities.Project;
@@ -21,21 +17,17 @@ using TFG.SonarQubeClient;
 using TFG.SonarQubeClient.Models;
 using TFG.OpenProjectClient;
 using TFG.OpenProjectClient.Models.Memberships;
-using TFG.OpenProjectClient.Models.Users;
 using TFG.OpenProjectClient.Models.Statuses;
 using TFG.OpenProjectClient.Models.WorkPackages;
 using TFG.OpenProjectClient.Models.BasicObjects;
 
-using TFG.OpenProjectClient.Models;
-
 namespace TFG.Application.Services.Projects
 {
-	public class ProjectService(ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IOpenProjectApiIntegration openProjectApiIntegration, IGitLabClient gitLabClient, ISonarQubeClient sonarClient, IOpenProjectClient openProjectClient, ILogger<ProjectService> logger) : IProjectService
+	public class ProjectService(ApplicationDbContext dbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor, IGitLabClient gitLabClient, ISonarQubeClient sonarClient, IOpenProjectClient openProjectClient, ILogger<ProjectService> logger) : IProjectService
 	{
 		private readonly ApplicationDbContext _dbContext = dbContext;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
 		private readonly IGitLabClient _gitLabClient = gitLabClient;
 		private readonly ISonarQubeClient _sonarQubeClient = sonarClient;
 		private readonly IOpenProjectClient _openProjectClient = openProjectClient;
@@ -107,9 +99,7 @@ namespace TFG.Application.Services.Projects
 				throw new ArgumentException("The project does not exist");
 			}
 
-			OpenProjectFilterBuilder openProjectFilterBuilder = requestDto.ToOpenProjectFilterBuilder(_dbContext);
 			var statuses = await _openProjectClient.Statuses.GetStatusesAsync();
-
 
 			IEnumerable<Status> closedStatuses = statuses.Embedded.Elements.Where(s => s.IsClosed);
 			IEnumerable<Status> openStatuses = statuses.Embedded.Elements.Where(s => !s.IsClosed);
@@ -164,9 +154,9 @@ namespace TFG.Application.Services.Projects
 
 		private async Task<BoundedProject> CreateAndConfigureSonarQubeProject(CreateProjectDto projectDto, string projectKey, string repositoryIdentifier, IEnumerable<User> usersToInclude)
 		{
-			var test = await _sonarQubeClient.DopTranslations.GetDopSettingsAsync();
+			var dopSettings = await _sonarQubeClient.DopTranslations.GetDopSettingsAsync();
 
-			string gilabId = test.DopSettings.First(ds => ds.Type == "gitlab").Id;
+			string gilabId = dopSettings.DopSettings.First(ds => ds.Type == "gitlab").Id;
 			ProjectBinding projectBinding = new() { DevOpsPlatformSettingId = gilabId, ProjectKey = projectKey, ProjectName = projectDto.Name, RepositoryIdentifier = repositoryIdentifier, Monorepo = true };
 			BoundedProject project = await _sonarQubeClient.DopTranslations.BoundProjectAsync(projectBinding);
 
