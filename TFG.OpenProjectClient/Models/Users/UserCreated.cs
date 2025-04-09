@@ -3,14 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace TFG.OpenProjectClient.Models.Users
 {
-	public class UserCreated : HalResource<Link>
-	{ /// <summary>
-	  /// Type of resource (expected to be "User").
-	  /// </summary>
-		[JsonPropertyName("_type")]
-		[Required]
-		public string Type { get; set; } = "User";
-
+	public class UserCreated : HalResource<CreatedUserLink>
+	{
+		[JsonPropertyName("id")]
+		public int Id { get; set; }
 		/// <summary>
 		/// URL to user's avatar.
 		/// </summary>
@@ -86,5 +82,11 @@ namespace TFG.OpenProjectClient.Models.Users
 		/// </summary>
 		[JsonPropertyName("updatedAt")]
 		public DateTime UpdatedAt { get; set; }
+	}
+
+	public class CreatedUserLink
+	{
+		[JsonPropertyName("showUser")]
+		public Link ShowUser { get; set; }
 	}
 }

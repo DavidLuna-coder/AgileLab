@@ -61,7 +61,7 @@ namespace TFG.OpenProjectClient.Models.Users
 		/// **Conditions:** Only writable on creation, not on update.
 		/// </summary>
 		[JsonPropertyName("status")]
-		public string Status { get; set; } = string.Empty;
+		public string Status { get; set; } = "active";
 
 		/// <summary>
 		/// The preferred language of the user.

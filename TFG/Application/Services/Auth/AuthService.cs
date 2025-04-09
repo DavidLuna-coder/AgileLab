@@ -9,24 +9,24 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TFG.Application.Interfaces;
-using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Data;
+using TFG.OpenProjectClient;
+using TFG.OpenProjectClient.Models.Users;
 using TFG.SonarQubeClient;
-using TFG.SonarQubeClient.Models;
 using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Auth
 {
-	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IOpenProjectApiIntegration openProjectApiIntegration,  ISonarQubeClient sonarQubeClient, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient) : IAuthService
+	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration,  ISonarQubeClient sonarQubeClient, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient, IOpenProjectClient openProjectClient) : IAuthService
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly SignInManager<User> _signInManager = signInManager;
 		private readonly IConfiguration _configuration = configuration;
-		private readonly IOpenProjectApiIntegration _openProjectApiIntegration = openProjectApiIntegration;
 		private readonly ISonarQubeClient _sonarQubeClient = sonarQubeClient;
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
-		private readonly IGitLabClient gitLabClient = gitLabClient;
+		private readonly IGitLabClient _gitLabClient = gitLabClient;
+		private readonly IOpenProjectClient _openProjectClient = openProjectClient;
 		#region REGISTER
 		public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
 		{
@@ -53,16 +53,11 @@ namespace TFG.Application.Services.Auth
 				user.GitlabId = gitlabResult.Value.ToString();
 
 				//OpenProject registration
-				var openProjectResult = await RegisterOpenProject(model);
-				if (!openProjectResult.Success)
-				{
-					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
-					return CreateIdentityError(openProjectResult.Errors);
-				}
-				user.OpenProjectId = openProjectResult.Value.ToString();
+				UserCreated openProjectUser = await RegisterOpenProject(model);
+				user.OpenProjectId = openProjectUser.Id.ToString();
 
 				//SonarQube registration Falta por implementar.
-				UserCreation userCreation = new UserCreation()
+				SonarQubeClient.Models.UserCreation userCreation = new()
 				{
 					Login = model.UserName,
 					Name = model.FirstName + " " + model.LastName,
@@ -78,33 +73,39 @@ namespace TFG.Application.Services.Auth
 				var result = await _userManager.CreateAsync(user, model.Password);
 				if (!result.Succeeded)
 				{
-					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
-					await _openProjectApiIntegration.DeleteUser(user);
+					_gitLabClient.Users.Delete(long.Parse(user.GitlabId));
+					await _openProjectClient.Users.DeleteAsync(int.Parse(user.OpenProjectId));
 					await _sonarQubeClient.Users.DeleteAsync(user.SonarQubeId);
 				}
 
 				return result;
 
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				if (userCreated)
 				{
 					await _userManager.DeleteAsync(user);
-					gitLabClient.Users.Delete(long.Parse(user.GitlabId));
+					_gitLabClient.Users.Delete(long.Parse(user.GitlabId));
 				}
-				var errors = new[]
-				{
-					new IdentityError { Description = ex.Message },
-				};
-				return IdentityResult.Failed(errors);
+				throw;
 			}
 		}
 
-		private async Task<Result<int>> RegisterOpenProject(RegistrationDto model)
+		private async Task<UserCreated> RegisterOpenProject(RegistrationDto model)
 		{
-			var openProjectResult = await _openProjectApiIntegration.CreateUser(model);
-			return openProjectResult;
+			OpenProjectClient.Models.Users.UserCreation userToCreate = new()
+			{
+				Admin = model.IsAdmin,
+				Email = model.Email,
+				Login = model.UserName,
+				FirstName = model.FirstName,
+				LastName = model.LastName,
+				Language = "es",
+				Password = model.Password
+			};
+			UserCreated userCreated	= await	_openProjectClient.Users.CreateAsync(userToCreate);
+			return userCreated;
 		}
 
 		private async Task<Result<long>> RegisterGitlab(RegistrationDto model)
@@ -118,7 +119,7 @@ namespace TFG.Application.Services.Auth
 			};
 			try
 			{
-				NGitLab.Models.User gitlabUser = await gitLabClient.Users.CreateAsync(user);
+				NGitLab.Models.User gitlabUser = await _gitLabClient.Users.CreateAsync(user);
 				return gitlabUser.Id;
 			}
 			catch(Exception ex)
