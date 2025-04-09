@@ -25,15 +25,15 @@ namespace Front.ApiClient.Implementations
 			return response;
 		}
 
-		public async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request)
+		public async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
 		{
-			var response = await client.PostAsync<PaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
+			var response = await client.PostAsync<FilteredPaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
 			return response;
 		}
 
-		public async Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, PaginatedRequestDto<GetUsersQueryParameters> request)
+		public async Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
 		{
-			var response = await client.PostAsync<PaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
+			var response = await client.PostAsync<FilteredPaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
 			return response;
 		}
 

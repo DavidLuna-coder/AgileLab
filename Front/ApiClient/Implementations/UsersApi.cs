@@ -9,9 +9,9 @@ namespace Front.ApiClient.Implementations
         private const string BASE_URL = "api/users";
         IApiHttpClient _apiHttpClient = apiHttpClient;
 
-        public async Task<PaginatedResponseDto<FilteredUserDto>> GetFilteredUsers(PaginatedRequestDto<GetUsersQueryParameters> queryParameters, CancellationToken cancellationToken = default)
+        public async Task<PaginatedResponseDto<FilteredUserDto>> GetFilteredUsers(FilteredPaginatedRequestDto<GetUsersQueryParameters> queryParameters, CancellationToken cancellationToken = default)
         {
-            var response = await _apiHttpClient.PostAsync<PaginatedRequestDto<GetUsersQueryParameters> ,PaginatedResponseDto<FilteredUserDto>>($"{BASE_URL}/search", queryParameters);
+            var response = await _apiHttpClient.PostAsync<FilteredPaginatedRequestDto<GetUsersQueryParameters> ,PaginatedResponseDto<FilteredUserDto>>($"{BASE_URL}/search", queryParameters);
             return response;
         }
     }

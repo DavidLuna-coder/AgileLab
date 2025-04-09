@@ -24,7 +24,7 @@ namespace TFG.Api.Controllers
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
-		public async Task<ActionResult<PaginatedResponseDto<FilteredProjectDto>>> SearchProjects([FromBody] PaginatedRequestDto<ProjectQueryParameters> request)
+		public async Task<ActionResult<PaginatedResponseDto<FilteredProjectDto>>> SearchProjects([FromBody] FilteredPaginatedRequestDto<ProjectQueryParameters> request)
 		{
 			var projectsQuery = _context.Projects.AsQueryable();
 
@@ -147,7 +147,7 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpPost("{id}/users/search")]
-		public async Task<IActionResult> GetProjectUsers(Guid id, PaginatedRequestDto<GetUsersQueryParameters> request)
+		public async Task<IActionResult> GetProjectUsers(Guid id, FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
 		{
 			var usersQuery = _userManager.Users.AsQueryable();
 			IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();

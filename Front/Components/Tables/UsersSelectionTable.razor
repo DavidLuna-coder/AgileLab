@@ -32,7 +32,7 @@
 	async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
 	{
 		GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
-		var request = new PaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
+		var request = new FilteredPaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
 		var response = await UsersApi.GetFilteredUsers(request);
 
 		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };

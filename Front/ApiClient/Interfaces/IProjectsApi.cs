@@ -8,9 +8,9 @@ namespace Front.ApiClient.Interfaces
     {
         public Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto);
         public Task<ProjectDto> UpdateProject(Guid ProjectId, UpdateProjectDto updatedProject);
-        public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(PaginatedRequestDto<ProjectQueryParameters> request);
+        public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request);
         public Task<ProjectDto> GetProject(Guid projectId);
-        public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, PaginatedRequestDto<GetUsersQueryParameters> request);
+        public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request);
         public Task DeleteProject(Guid projectId);
 	}
 }

@@ -17,7 +17,7 @@ namespace TFG.Api.Controllers
 		private readonly UserManager<User> _userManager = userManager;
 		// GET: api/<UsersController>
 		[HttpPost("search")]
-		public IActionResult Get(PaginatedRequestDto<GetUsersQueryParameters> request)
+		public IActionResult Get(FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
 		{
 			var usersQuery = _userManager.Users.AsQueryable();
 			IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();

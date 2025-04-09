@@ -80,7 +80,7 @@
 	{
 		_lastSearch = _search;
 		ProjectQueryParameters projectQueryParameters = new ProjectQueryParameters() { Name = _search };
-		var request = new PaginatedRequestDto<ProjectQueryParameters> { Page = tableState.Page, PageSize = tableState.PageSize, Filters = projectQueryParameters };
+		var request = new FilteredPaginatedRequestDto<ProjectQueryParameters> { Page = tableState.Page, PageSize = tableState.PageSize, Filters = projectQueryParameters };
 		var response = (await ProjectsApi.GetProjects(request));
 
 		_projects = response.Items;
