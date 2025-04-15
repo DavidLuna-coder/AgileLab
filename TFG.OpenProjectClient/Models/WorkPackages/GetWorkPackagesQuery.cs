@@ -7,7 +7,7 @@ namespace TFG.OpenProjectClient.Models.WorkPackages
 	{
 		public int? Offset { get; set; }
 		public int? PageSize { get; set; }
-		public OpenProjectFilters[]  Filters { get; set; }
+		public OpenProjectFilters[]?  Filters { get; set; }
 		public string? SortBy { get; set; }
 		public string? GroupBy { get; set; }
 		public bool? ShowSums { get; set; }

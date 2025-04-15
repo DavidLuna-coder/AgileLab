@@ -123,6 +123,7 @@ namespace TFG.Application.Services.Projects
 			result.AddRange(openTasks.Embedded.Elements.Select(t => t.ToProjectTaskDto(false)));
 			return result.ToList();
 		}
+
 		private async Task<OPProjectCreated> CreateAndConfigureOpenProjectProject(CreateProjectDto projectDto, IEnumerable<User> users)
 		{
 			OPProjectCreation openProjectProjectCreation = new()

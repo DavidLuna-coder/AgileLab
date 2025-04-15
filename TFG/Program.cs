@@ -16,6 +16,8 @@ builder.AddServiceDefaults();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.RegisterAppServices();
 builder.Services.AddRazorPages();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

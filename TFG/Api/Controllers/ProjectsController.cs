@@ -1,4 +1,5 @@
 ﻿using LinqKit;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,9 +7,11 @@ using NuGet.Packaging;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 using Shared.DTOs.Users;
+using TFG.Api.Exeptions;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
 
@@ -16,11 +19,12 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService, IMediator mediator) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IProjectService _projectService = projectService;
+		private readonly IMediator _mediator = mediator;
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
@@ -63,14 +67,6 @@ namespace TFG.Api.Controllers
 			}
 			ProjectDto projectDto = project.ToProjectDto();
 			return projectDto;
-		}
-
-		[HttpPost("{id}/task-summary/search")]
-		public async Task<ActionResult<List<ProjectTaskDto>>> GetTaskSummary(Guid id, ProjectTaskQueryParameters parameters)
-		{
-			List<ProjectTaskDto> projectTasks = await _projectService.GetProjectTasks(id, parameters);
-
-			return Ok(projectTasks);
 		}
 
 		// PUT: api/Projects/5
@@ -173,6 +169,29 @@ namespace TFG.Api.Controllers
 				PageSize = request.PageSize
 			};
 			return Ok(response);
+		}
+
+		[HttpPost("{id}/task-summary/search")]
+		public async Task<IActionResult> GetTaskSummary(Guid id, [FromBody] PaginatedRequestDtoBase request)
+		{
+			GetTasksSummaryQuery query = new()
+			{
+				ProjectId = id,
+				Request = new FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>
+				{
+					Page = request.Page,
+					PageSize = request.PageSize
+				}
+			};
+			try
+			{
+				var response = await _mediator.Send(query);
+				return Ok(response);
+			}
+			catch (NotFoundException)
+			{
+				return NotFound();
+			}
 		}
 
 		private bool ProjectExists(Guid id)
