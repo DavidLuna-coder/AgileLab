@@ -4,6 +4,7 @@
 @using Front.Components.Tables
 @using Front.Helpers
 @using Front.Services.StateService
+@using Shared.DTOs.Filters
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Users
@@ -27,17 +28,17 @@ else
 		</Actions>
 		<ChildContent>
 			<MudGrid Class="mb-4" Spacing="4">
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem sm="12" md="4">
 					<MudPaper Class="pa-4">
 						<MudChart  ChartType="ChartType.Pie" InputData="[10,5]" Width="200px"  InputLabels=@(["Tareas Completadas", "Tareas Pendientes"]) Height="200px"  />
 					</MudPaper>
 				</MudItem>
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem sm="12" md="4">
 					<MudPaper Class="pa-4">
 						<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" InputLabels=@(["Smells", "Issues"]) Width="200px" Height="200px" />
 					</MudPaper>
 				</MudItem>
-				<MudItem xs="12" sm="6" md="4">
+				<MudItem sm="12" md="4">
 					<MudPaper Class="pa-4">
 						<MudChart ChartType="ChartType.Pie" InputData="[30,30,10]" Width="200px" Height="200px" />
 					</MudPaper>
@@ -57,7 +58,9 @@ else
 					<MudTd DataLabel="Email">@context.Email</MudTd>
 				</RowTemplate>
 			</MudTable>
-		<TaskSummaryTable></TaskSummaryTable>
+
+			<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
+			<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
 		</ChildContent>
 
 	</Section>
@@ -113,5 +116,10 @@ else
 	{
 		await ProjectsApi.DeleteProject(projectId);
 		Nav.NavigateTo<ProjectsPage>();
+	}
+
+	Task<PaginatedResponseDto<TaskSummaryDto>> GetTasks(FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
+	{
+		return ProjectsApi.GetTaskSummary(projectId, request);
 	}
 }

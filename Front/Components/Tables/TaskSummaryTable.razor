@@ -3,16 +3,34 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 
-<MudDataGrid ServerData="GetTaskData"  T="TaskSummaryDto">
+<MudDataGrid Class="@Class" ServerData="GetTaskData"  T="TaskSummaryDto">
 	<Columns>
+		<HierarchyColumn T="TaskSummaryDto" />
 		<PropertyColumn Property="t => t.Name" Title="Nombre" />
-
+		<TemplateColumn Title="Enlace a OpenProject">
+			<CellTemplate>
+				<MudLink>@context.Item.OpenProjectTaskId</MudLink>
+			</CellTemplate>
+		</TemplateColumn>
 	</Columns>
+	<ChildRowContent>
+		<MudCard>
+			<MudCardHeader>
+				<CardHeaderContent>
+					<MudText Typo="Typo.h6">@context.Item.Name</MudText>
+				</CardHeaderContent>
+			</MudCardHeader>
+			<MudCardContent>
+				<MudText>Esto es una prueba de plantilla</MudText>
+			</MudCardContent>
+		</MudCard>
+	</ChildRowContent>
 </MudDataGrid>
 @code {
 	[Parameter]
 	public Func<FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>, Task<PaginatedResponseDto<TaskSummaryDto>>> GetServerData { get; set; }
-
+	[Parameter]
+	public string Class { get; set; }
 	async Task<GridData<TaskSummaryDto>> GetTaskData(GridState<TaskSummaryDto> gridState)
 	{
 		if (GetServerData == null) return new();

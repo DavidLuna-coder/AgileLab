@@ -1,4 +1,5 @@
-﻿using Shared.DTOs.Pagination;
+﻿using Shared.DTOs.Filters;
+using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 using Shared.DTOs.Users;
 
@@ -12,5 +13,6 @@ namespace Front.ApiClient.Interfaces
         public Task<ProjectDto> GetProject(Guid projectId);
         public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request);
         public Task DeleteProject(Guid projectId);
+        public Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request);
 	}
 }

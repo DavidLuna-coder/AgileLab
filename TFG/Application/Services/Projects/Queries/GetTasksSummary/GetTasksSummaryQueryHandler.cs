@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using NGitLab;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
-using System.Data.Entity;
 using TFG.Api.Exeptions;
 using TFG.Infrastructure.Data;
 using TFG.OpenProjectClient;
 using TFG.OpenProjectClient.Models;
 using TFG.OpenProjectClient.Models.BasicObjects;
 using TFG.OpenProjectClient.Models.WorkPackages;
+using Microsoft.EntityFrameworkCore;
 using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
