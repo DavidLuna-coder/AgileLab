@@ -71,10 +71,7 @@
 	string _search = string.Empty;
 	string _lastSearch = string.Empty;
 	IEnumerable<FilteredProjectDto> _projects = [];
-	protected override void OnInitialized()
-	{
-		base.OnInitialized();
-	}
+
 
 	private async Task<TableData<FilteredProjectDto>> ReloadProjects(TableState tableState, CancellationToken cancellationToken)
 	{

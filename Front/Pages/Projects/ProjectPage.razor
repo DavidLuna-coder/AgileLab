@@ -1,6 +1,7 @@
 ﻿@page "/projects/{ProjectId}"
 @using Front.ApiClient.Interfaces
 @using Front.Components
+@using Front.Components.Tables
 @using Front.Helpers
 @using Front.Services.StateService
 @using Shared.DTOs.Pagination
@@ -56,7 +57,9 @@ else
 					<MudTd DataLabel="Email">@context.Email</MudTd>
 				</RowTemplate>
 			</MudTable>
+		<TaskSummaryTable></TaskSummaryTable>
 		</ChildContent>
+
 	</Section>
 }
 

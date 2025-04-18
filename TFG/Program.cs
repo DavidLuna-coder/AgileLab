@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using TFG.Api.Middlewares;
 using TFG.Application.Services;
 using TFG.Infrastructure;
@@ -8,10 +9,42 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddLogging(builder => builder.AddConsole());
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+	options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
+});
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection");
+builder.Services.AddSwaggerGen(c =>
+{
+	c.SwaggerDoc("v1", new() { Title = "TFG.Api", Version = "v1" });
+
+	// Definir esquema de seguridad
+	c.AddSecurityDefinition("Bearer", new()
+	{
+		Name = "Authorization",
+		Type = SecuritySchemeType.Http,
+		Scheme = "Bearer",
+		BearerFormat = "JWT",
+		In = ParameterLocation.Header,
+		Description = "Introduce el token JWT con el esquema 'Bearer'. Ejemplo: Bearer {tu token}"
+	});
+
+	// Requerir seguridad en todos los endpoints
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = "Bearer"
+				}
+			},
+			Array.Empty<string>()
+		}
+	});
+}); builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection");
 builder.AddServiceDefaults();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.RegisterAppServices();
@@ -32,6 +65,7 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseMiddleware<JwtMiddleware>();
 
 app.UseAuthorization();
 
@@ -45,7 +79,6 @@ app.UseCors(cors => cors
 	.AllowCredentials()
 );
 
-app.UseMiddleware<JwtMiddleware>();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");

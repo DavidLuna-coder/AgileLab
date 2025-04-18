@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using TFG.Application.Dtos;
+﻿using TFG.Application.Dtos;
 using TFG.Application.Interfaces;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Security;

@@ -1,114 +1,92 @@
-﻿using Azure.Core;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using NGitLab;
 using Shared.DTOs.Pagination;
+using Shared.DTOs.Projects;
 using System.Data.Entity;
 using TFG.Api.Exeptions;
-using TFG.Application.Services.OpenProjectIntegration.Dtos;
 using TFG.Infrastructure.Data;
-using TFG.Model.Entities;
 using TFG.OpenProjectClient;
+using TFG.OpenProjectClient.Models;
 using TFG.OpenProjectClient.Models.BasicObjects;
 using TFG.OpenProjectClient.Models.WorkPackages;
+using User = TFG.Model.Entities.User;
 
 namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 {
-	public class GetTasksSummaryQueryHandler(ApplicationDbContext dbContext, IOpenProjectClient openProjectClient, UserManager<User> userManager) : IRequestHandler<GetTasksSummaryQuery, PaginatedResponseDto<TaskSummaryDto>>
+	public class GetTasksSummaryQueryHandler(
+	ApplicationDbContext dbContext,
+	IOpenProjectClient openProjectClient,
+	UserManager<User> userManager,
+	IGitLabClient gitlabClient)
+	: IRequestHandler<GetTasksSummaryQuery, PaginatedResponseDto<TaskSummaryDto>>
 	{
 		public async Task<PaginatedResponseDto<TaskSummaryDto>> Handle(GetTasksSummaryQuery request, CancellationToken cancellationToken)
 		{
-			Project project = await dbContext.Projects
-							  .FirstOrDefaultAsync(p => p.Id == request.ProjectId) ?? throw new NotFoundException("Project not found");
+			var project = await dbContext.Projects
+				.AsNoTracking()
+				.FirstOrDefaultAsync(p => p.Id == request.ProjectId, cancellationToken)
+				?? throw new NotFoundException("Project not found");
 
-			var opFilters = await GetOpenProjectFilters(request);
-			GetWorkPackagesQuery query = new()
+			var openProjectFilters = await BuildOpenProjectFiltersAsync(request, cancellationToken);
+
+			var query = new GetWorkPackagesQuery
 			{
 				PageSize = request.Request.PageSize,
 				Offset = request.Request.Page * request.Request.PageSize,
-				Filters = opFilters
+				Filters = openProjectFilters
 			};
+
 			var workPackagesCollection = await openProjectClient.WorkPackages.GetAsync(project.OpenProjectId, query);
-			List<Task<OpenProjectClient.Models.OpenProjectCollection<GitlabMergeRequest>>> tasks = new();
-			foreach (var workPackage in workPackagesCollection.Embedded.Elements)
-			{
-				var getMergeRequest = openProjectClient.WorkPackages.GetGitlabMergeRequestsAsync(workPackage.Id);
-				tasks.Add(getMergeRequest);
-			}
-			OpenProjectClient.Models.OpenProjectCollection<GitlabMergeRequest>[] mergeRequests;
-			mergeRequests = await GetMergeRequests(tasks);
 
-			var results = workPackagesCollection.Embedded.Elements.Zip(mergeRequests, (workPackage, mergeRequestCollection) =>
-			{
-				var (ids, titles) = ExtractIdsAndTitles(mergeRequestCollection.Embedded.Elements);
+			var tasks = await MapToTaskSummariesAsync(workPackagesCollection, cancellationToken);
 
-				return new TaskSummaryDto
-				{
-					MergeRequestsIds = ids,
-					MergeRequestsTitles = titles,
-					Name = workPackage.Subject,
-					OpenProjectTaskId = workPackage.Id,
-				};
-			}
-			).ToArray();
-
-			PaginatedResponseDto<TaskSummaryDto> paginatedResponse = new()
+			return new PaginatedResponseDto<TaskSummaryDto>
 			{
-				Items = results,
+				Items = tasks,
 				PageNumber = request.Request.Page,
 				PageSize = request.Request.PageSize,
 				TotalCount = workPackagesCollection.Total
 			};
-
-			return paginatedResponse;
 		}
 
-		private static async Task<OpenProjectClient.Models.OpenProjectCollection<GitlabMergeRequest>[]> GetMergeRequests(List<Task<OpenProjectClient.Models.OpenProjectCollection<GitlabMergeRequest>>> tasks)
+		private async Task<OpenProjectFilters[]?> BuildOpenProjectFiltersAsync(GetTasksSummaryQuery query, CancellationToken cancellationToken)
 		{
-			try
-			{
-				return await Task.WhenAll(tasks);
-			}
-			catch
-			{
-				return [];
-			}
+			if (query.Request.Filters?.UserIds is not { Length: > 0 })
+				return null;
+
+			var openProjectUserIds = await userManager.Users
+				.Where(u => query.Request.Filters.UserIds.Contains(u.Id))
+				.Select(u => u.OpenProjectId)
+				.ToArrayAsync(cancellationToken);
+
+			return openProjectUserIds.Length > 0
+				? [new OpenProjectFilters { Name = "user", Operator = "=", Values = openProjectUserIds }]
+				: null;
 		}
 
-		private static (int[] ids, string[] titles) ExtractIdsAndTitles(IEnumerable<GitlabMergeRequest> mergeRequests)
+		private async Task<List<TaskSummaryDto>> MapToTaskSummariesAsync(OpenProjectCollection<WorkPackage> collection, CancellationToken cancellationToken)
 		{
-			var ids = new List<int>();
-			var titles = new List<string>();
-
-			foreach (var mr in mergeRequests)
+			var taskSummaries = await Task.WhenAll(collection.Embedded.Elements.Select(async wp =>
 			{
-				ids.Add(mr.Id);
-				titles.Add(mr.Title);
-			}
+				var gitlabMergeRequests = await openProjectClient.WorkPackages.GetGitlabMergeRequestsAsync(wp.Id);
 
-			return (ids.ToArray(), titles.ToArray());
-		}
+				var mergeRequests = gitlabMergeRequests.Embedded.Elements.Select(mr => new TaskSummaryMergeRequestInfo
+				{
+					Title = mr.Title,
+					Id = mr.Id,
+					CommitIds = gitlabClient.MergeRequests.Commits(mr.Id).All.Select(c => c.ShortId).ToList()
+				}).ToList();
 
-		private async Task<string[]?> GetOpenProjectUserIds(GetTasksSummaryQuery query)
-		{
-			if (query.Request.Filters?.UserIds == null) return null;
+				return new TaskSummaryDto
+				{
+					Name = wp.Subject,
+					OpenProjectTaskId = wp.Id,
+					MergeRequests = mergeRequests
+				};
+			}));
 
-			return await userManager.Users.Where(u => query.Request.Filters.UserIds.Contains(u.Id)).Select(u => u.OpenProjectId).ToArrayAsync();
-		}
-
-		private async Task<OpenProjectFilters[]?> GetOpenProjectFilters(GetTasksSummaryQuery query)
-		{
-			string[]? openProjectUserIds = await GetOpenProjectUserIds(query);
-
-			List<OpenProjectFilters> filters = new();
-
-			if (openProjectUserIds != null && openProjectUserIds.Length != 0)
-			{
-				var filter = new OpenProjectFilters() { Name = "user", Operator = "=", Values = openProjectUserIds };
-				filters.Add(filter);
-			}
-
-			return filters.Count != 0 ? filters.ToArray() : null;
-
+			return taskSummaries.ToList();
 		}
 	}
 }

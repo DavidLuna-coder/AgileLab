@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging;
+using Shared.DTOs.Filters;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
 using Shared.DTOs.Users;

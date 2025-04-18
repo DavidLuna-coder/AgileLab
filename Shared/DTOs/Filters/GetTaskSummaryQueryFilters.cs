@@ -1,4 +1,4 @@
-﻿namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
+﻿namespace Shared.DTOs.Filters
 {
 	public class GetTaskSummaryQueryFilters
 	{

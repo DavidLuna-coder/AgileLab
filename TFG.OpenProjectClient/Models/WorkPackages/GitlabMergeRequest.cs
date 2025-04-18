@@ -6,7 +6,7 @@ namespace TFG.OpenProjectClient.Models.WorkPackages
 	public class GitlabMergeRequest : HalResource<GitlabMergeRequestLinks>
 	{
 		[JsonPropertyName("id")]
-		public int Id { get; set; }
+		public long Id { get; set; }
 		[JsonPropertyName("number")]
 		public int Number { get; set; }
 		[JsonPropertyName("htmlUrl")]

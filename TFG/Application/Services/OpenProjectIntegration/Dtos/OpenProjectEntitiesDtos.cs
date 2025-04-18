@@ -75,13 +75,4 @@ namespace TFG.Application.Services.OpenProjectIntegration.Dtos
 
 	}
 
-	public record OpenProjectCollection<T>
-	{
-		[JsonPropertyName("total")]
-		public int Total { get; set; }
-		[JsonPropertyName("count")]
-		public int Count { get; set; }
-		[JsonPropertyName("_embedded")]
-		public EmbeddedItems<T> Embedded { get; set; } = new();
-	}
 }

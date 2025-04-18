@@ -1,7 +1,6 @@
 ﻿using NGitLab;
 using Shared.Utils.DateTimeProvider;
 using TFG.Application.Interfaces;
-using TFG.Application.Interfaces.OpenProjectApiIntegration;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Auth;
 using TFG.Application.Services.OpenProjectIntegration;
@@ -22,7 +21,6 @@ namespace TFG.Application.Services
             services.AddScoped<IProjectService, ProjectService>();
                        
             services.AddScoped<OpenProjectApi, OpenProjectApi>();
-            services.AddScoped<IOpenProjectApiIntegration, OpenProjectApiIntegration>();
 
 
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
