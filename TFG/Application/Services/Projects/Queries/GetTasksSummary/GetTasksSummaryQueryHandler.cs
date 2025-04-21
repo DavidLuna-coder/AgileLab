@@ -39,7 +39,7 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 
 			var workPackagesCollection = await openProjectClient.WorkPackages.GetAsync(project.OpenProjectId, query);
 
-			var tasks = await MapToTaskSummariesAsync(workPackagesCollection, cancellationToken);
+			var tasks = await MapToTaskSummariesAsync(workPackagesCollection, long.Parse(project.GitlabId));
 
 			return new PaginatedResponseDto<TaskSummaryDto>
 			{
@@ -65,7 +65,7 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 				: null;
 		}
 
-		private async Task<List<TaskSummaryDto>> MapToTaskSummariesAsync(OpenProjectCollection<WorkPackage> collection, CancellationToken cancellationToken)
+		private async Task<List<TaskSummaryDto>> MapToTaskSummariesAsync(OpenProjectCollection<WorkPackage> collection, long gitlabProjectId)
 		{
 			var taskSummaries = await Task.WhenAll(collection.Embedded.Elements.Select(async wp =>
 			{
@@ -75,7 +75,9 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 				{
 					Title = mr.Title,
 					Id = mr.Id,
-					CommitIds = gitlabClient.MergeRequests.Commits(mr.Id).All.Select(c => c.ShortId).ToList()
+					CommitIds = gitlabClient.GetMergeRequest(gitlabProjectId).Commits(mr.Id).All
+						.Select(c => c.ShortId)
+						.ToList(),
 				}).ToList();
 
 				return new TaskSummaryDto

@@ -21,7 +21,15 @@
 				</CardHeaderContent>
 			</MudCardHeader>
 			<MudCardContent>
-				<MudText>Esto es una prueba de plantilla</MudText>
+				<MudText>Merge requests: </MudText>
+				@foreach(var mr in context.Item.MergeRequests)
+				{
+					<div class="d-flex" style="width:100%">
+						<MudText>@mr.Title</MudText>
+						<MudChip Color="Color.Primary">@mr.CommitIds.FirstOrDefault()</MudChip>
+						<MudDivider />
+					</div>
+				}
 			</MudCardContent>
 		</MudCard>
 	</ChildRowContent>
