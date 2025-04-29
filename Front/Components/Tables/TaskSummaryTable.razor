@@ -3,7 +3,7 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 
-<MudDataGrid Class="@Class" ServerData="GetTaskData"  T="TaskSummaryDto">
+<MudDataGrid Hover Class="@Class" ServerData="GetTaskData"  T="TaskSummaryDto">
 	<Columns>
 		<HierarchyColumn T="TaskSummaryDto" />
 		<PropertyColumn Property="t => t.Name" Title="Nombre" />
@@ -14,22 +14,26 @@
 		</TemplateColumn>
 	</Columns>
 	<ChildRowContent>
-		<MudCard>
+		<MudCard Elevation="0">
 			<MudCardHeader>
 				<CardHeaderContent>
 					<MudText Typo="Typo.h6">@context.Item.Name</MudText>
 				</CardHeaderContent>
 			</MudCardHeader>
 			<MudCardContent>
-				<MudText>Merge requests: </MudText>
-				@foreach(var mr in context.Item.MergeRequests)
-				{
-					<div class="d-flex" style="width:100%">
-						<MudText>@mr.Title</MudText>
-						<MudChip Color="Color.Primary">@mr.CommitIds.FirstOrDefault()</MudChip>
-						<MudDivider />
-					</div>
-				}
+				<MudText Typo="Typo.h6">Merge requests</MudText>
+				<MudTable Elevation=0 T="TaskSummaryMergeRequestInfo" Items="@context.Item.MergeRequests">
+					<HeaderContent>
+						<MudTh>Id</MudTh>
+						<MudTh>Título</MudTh>
+						<MudTh>Último commit</MudTh>
+					</HeaderContent>
+					<RowTemplate Context=mr>
+						<MudTd DataLabel="Id">@mr.Id</MudTd>
+						<MudTd DataLabel="Title">@mr.Title</MudTd>
+						<MudTd DataLabel="LastCommit"><MudChip Size="Size.Small" Color="Color.Primary">@mr.CommitIds.FirstOrDefault()</MudChip></MudTd>
+					</RowTemplate>
+				</MudTable>
 			</MudCardContent>
 		</MudCard>
 	</ChildRowContent>

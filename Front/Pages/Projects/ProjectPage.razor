@@ -27,42 +27,29 @@ else
 			<MudButton OnClick="DeleteProject">Eliminar</MudButton>
 		</Actions>
 		<ChildContent>
-			<MudGrid Class="mb-4" Spacing="4">
-				<MudItem sm="12" md="4">
-					<MudPaper Class="pa-4">
-						<MudChart  ChartType="ChartType.Pie" InputData="[10,5]" Width="200px"  InputLabels=@(["Tareas Completadas", "Tareas Pendientes"]) Height="200px"  />
-					</MudPaper>
-				</MudItem>
-				<MudItem sm="12" md="4">
-					<MudPaper Class="pa-4">
-						<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" InputLabels=@(["Smells", "Issues"]) Width="200px" Height="200px" />
-					</MudPaper>
-				</MudItem>
-				<MudItem sm="12" md="4">
-					<MudPaper Class="pa-4">
-						<MudChart ChartType="ChartType.Pie" InputData="[30,30,10]" Width="200px" Height="200px" />
-					</MudPaper>
-				</MudItem>
-			</MudGrid>
-
-			<MudText Typo="Typo.h6">Descripción</MudText>
-			<MudText Class="mb-4" Typo="Typo.body1">@project.Description</MudText>
-			<MudText Typo="Typo.h6">Usuarios</MudText>
-			<MudTable T="FilteredUserDto" Class="mt-4" ServerData="ReloadUsers">
-				<HeaderContent>
-					<MudTh>Nombre</MudTh>
-					<MudTh>Email</MudTh>
-				</HeaderContent>
-				<RowTemplate>
-					<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
-					<MudTd DataLabel="Email">@context.Email</MudTd>
-				</RowTemplate>
-			</MudTable>
-
-			<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
-			<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+			<MudTabs Elevation="0">
+				<MudTabPanel Text="Resumen">
+					<ProjectSummary Project="project" />
+				</MudTabPanel>
+				<MudTabPanel Text="Usuarios">
+					<MudText Typo="Typo.h6">Usuarios</MudText>
+					<MudTable Hover T="FilteredUserDto" Class="mt-4" ServerData="ReloadUsers">
+						<HeaderContent>
+							<MudTh>Nombre</MudTh>
+							<MudTh>Email</MudTh>
+						</HeaderContent>
+						<RowTemplate>
+							<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+							<MudTd DataLabel="Email">@context.Email</MudTd>
+						</RowTemplate>
+					</MudTable>
+				</MudTabPanel>
+				<MudTabPanel Text="Tareas">
+					<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
+					<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+				</MudTabPanel>
+			</MudTabs>
 		</ChildContent>
-
 	</Section>
 }
 
