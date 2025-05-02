@@ -38,13 +38,13 @@ services:
     image: gitlab/gitlab-ce:17.9.2-ce.0
     container_name: gitlab
     ports:
-      - '8081:8081'
+      - '80:80'
       - "444:444"
       - "22:22"
     shm_size: '1gb'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.local:8081'
+        external_url 'http://gitlab'
     volumes:
       - 'gitlab_config:/etc/gitlab'
       - 'gitlab_logs:/var/log/gitlab'

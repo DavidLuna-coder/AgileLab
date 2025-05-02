@@ -1,6 +1,8 @@
 ﻿using Shared.DTOs.Projects;
+using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Users;
 using TFG.Model.Entities;
+using TFG.SonarQubeClient.Models.Metrics;
 
 namespace TFG.Api.Mappers
 {
@@ -48,6 +50,20 @@ namespace TFG.Api.Mappers
 				LastName = user.LastName,
 				Email = user.Email!,
 			};
+		}
+
+		public static ProjectMetricsDto ToProjectMetricsDto(this SonarMetricsResponse sonarMetricsResponse)
+		{
+			ProjectMetricsDto dto = new()
+			{
+				Measures = sonarMetricsResponse.Component.Measures.Select(m => new ProjectMeasureDto
+				{
+					Value = m.Value,
+					Metric = m.Metric,
+				}).ToList()
+			};
+
+			return dto;
 		}
 	}
 }

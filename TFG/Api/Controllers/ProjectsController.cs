@@ -12,6 +12,7 @@ using TFG.Api.Exeptions;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Infrastructure.Data;
 using TFG.Model.Entities;
@@ -195,6 +196,16 @@ namespace TFG.Api.Controllers
 			}
 		}
 
+		[HttpGet("{projectId}/metrics")]
+		public async Task<IActionResult> GetMetrics(Guid projectId)
+		{
+			GetProjectKpisQuery query = new()
+			{
+				ProjectId = projectId,
+			};
+			var metrics = await _mediator.Send(query);
+			return Ok(metrics);
+		}
 		private bool ProjectExists(Guid id)
 		{
 			return _context.Projects.Any(e => e.Id == id);
