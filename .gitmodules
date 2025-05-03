@@ -1,0 +1,3 @@
+[submodule "NGitlab"]
+	path = NGitlab
+	url = https://github.com/DavidLuna-coder/NGitLab.git
