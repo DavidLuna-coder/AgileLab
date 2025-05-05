@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Projects.Metrics;
-using System.Data.Entity;
 using TFG.Api.Exeptions;
 using TFG.Api.Mappers;
 using TFG.Infrastructure.Data;

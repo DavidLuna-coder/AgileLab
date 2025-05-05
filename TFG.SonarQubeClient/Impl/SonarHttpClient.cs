@@ -62,7 +62,7 @@ namespace TFG.SonarQubeClient.Impl
         private static string GetEndpointWithVersion(string endpoint, string? version = null)
         {
             if (string.IsNullOrEmpty(version))
-                return endpoint;
+                return $"/api/{endpoint}";
 
             return $"/api/{version}/{endpoint}";
         }
