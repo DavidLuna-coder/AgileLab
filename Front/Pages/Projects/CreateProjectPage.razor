@@ -3,6 +3,7 @@
 @using Front.Components
 @using Front.Components.Tables
 @using Front.Helpers
+@using Shared.Constants
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Users
 @inject IProjectsApi ProjectsApi
@@ -17,6 +18,14 @@
 		<MudForm @ref=form Model="createProjectDto">
 			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
 			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
+			<MudSelect Placeholder="Selecciona una plantilla de proyecto" Margin=Margin.Dense Clearable T="string" @bind-Value="@createProjectDto.Template">
+				<MudSelectItem Value="@GitlabProjectTemplates.DotNetCore">.Net Core</MudSelectItem>
+				<MudSelectItem Value="@GitlabProjectTemplates.Spring">Spring</MudSelectItem>
+				<MudSelectItem Value="@GitlabProjectTemplates.Express">Express</MudSelectItem>
+				<MudSelectItem Value="@GitlabProjectTemplates.Android">Android</MudSelectItem>
+				<MudSelectItem Value="@GitlabProjectTemplates.RubyOnRails">Ruby on Rails</MudSelectItem>
+			</MudSelect>
+
 			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=users></UsersSelectionTable>
 			@if (!loading)
 			{
@@ -43,6 +52,7 @@
 
 		try
 		{
+			createProjectDto.Template = string.IsNullOrEmpty(createProjectDto.Template) ? null : createProjectDto.Template;
 			createProjectDto.UsersIds = users.Select(u => u.Id).ToList();
 			loading = true;
 			ProjectDto createdProject = await ProjectsApi.CreateProject(createProjectDto);

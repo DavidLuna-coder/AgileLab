@@ -12,7 +12,7 @@ namespace TFG.Api.Mappers
 				Description = createProjectDto.Description,
 				Name = createProjectDto.Name,
 				VisibilityLevel = VisibilityLevel.Public,
-				TemplateName = "dotnetcore",
+				TemplateName = createProjectDto.Template,
 				MergeRequestsAccessLevel = "enabled",
 			};
 		}
