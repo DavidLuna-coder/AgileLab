@@ -2,6 +2,7 @@
 using Shared.DTOs.Filters;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
+using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Users;
 
 namespace Front.ApiClient.Implementations
@@ -9,10 +10,9 @@ namespace Front.ApiClient.Implementations
 	public class ProjectsApi(IApiHttpClient client) : IProjectsApi
 	{
 		private const string PROJECTS_ENDPOINT = "api/projects";
-		public async Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto)
+		public Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto)
 		{
-			ProjectDto createdProject = await client.PostAsync<CreateProjectDto, ProjectDto>(PROJECTS_ENDPOINT, createProjectDto);
-			return createdProject;
+			return client.PostAsync<CreateProjectDto, ProjectDto>(PROJECTS_ENDPOINT, createProjectDto);
 		}
 
 		public async Task DeleteProject(Guid projectId)
@@ -20,34 +20,34 @@ namespace Front.ApiClient.Implementations
 			await client.DeleteAsync($"{PROJECTS_ENDPOINT}/{projectId}");
 		}
 
-		public async Task<ProjectDto> GetProject(Guid projectId)
+		public Task<ProjectDto> GetProject(Guid projectId)
 		{
-			var response = await client.GetAsync<ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}");
-			return response;
+			return client.GetAsync<ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}");
 		}
 
-		public async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
+		public Task<ProjectMetricsDto> GetProjectMetrics(Guid projectId)
 		{
-			var response = await client.PostAsync<FilteredPaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
-			return response;
+			return client.GetAsync<ProjectMetricsDto>($"{PROJECTS_ENDPOINT}/{projectId}/metrics");
 		}
 
-		public async Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
+		public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
 		{
-			var response = await client.PostAsync<FilteredPaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
-			return response;
+			return client.PostAsync<FilteredPaginatedRequestDto<ProjectQueryParameters>, PaginatedResponseDto<FilteredProjectDto>>($"{PROJECTS_ENDPOINT}/search", request);			
 		}
 
-		public async Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
+		public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
 		{
-			var response = await client.PostAsync<FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>, PaginatedResponseDto<TaskSummaryDto>>($"{PROJECTS_ENDPOINT}/{projectid}/task-summary/search", request);
-			return response;
+			return client.PostAsync<FilteredPaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{PROJECTS_ENDPOINT}/{projectId}/users/search", request);
 		}
 
-		public async Task<ProjectDto> UpdateProject(Guid projectId,UpdateProjectDto updatedProject)
+		public Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
 		{
-			ProjectDto result = await client.PutAsync<UpdateProjectDto, ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}", updatedProject);
-			return result;
+			return client.PostAsync<FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>, PaginatedResponseDto<TaskSummaryDto>>($"{PROJECTS_ENDPOINT}/{projectid}/task-summary/search", request);
+		}
+
+		public Task<ProjectDto> UpdateProject(Guid projectId,UpdateProjectDto updatedProject)
+		{
+			return client.PutAsync<UpdateProjectDto, ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}", updatedProject);
 		}
 	}
 }

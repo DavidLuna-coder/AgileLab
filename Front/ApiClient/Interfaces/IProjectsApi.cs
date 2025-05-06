@@ -1,18 +1,20 @@
 ﻿using Shared.DTOs.Filters;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
+using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Users;
 
 namespace Front.ApiClient.Interfaces
 {
     public interface IProjectsApi
     {
-        public Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto);
-        public Task<ProjectDto> UpdateProject(Guid ProjectId, UpdateProjectDto updatedProject);
-        public Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request);
-        public Task<ProjectDto> GetProject(Guid projectId);
-        public Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request);
-        public Task DeleteProject(Guid projectId);
-        public Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request);
+        Task<ProjectDto> CreateProject(CreateProjectDto createProjectDto);
+        Task<ProjectDto> UpdateProject(Guid ProjectId, UpdateProjectDto updatedProject);
+        Task<PaginatedResponseDto<FilteredProjectDto>> GetProjects(FilteredPaginatedRequestDto<ProjectQueryParameters> request);
+        Task<ProjectDto> GetProject(Guid projectId);
+        Task<PaginatedResponseDto<FilteredUserDto>> GetProjectUsers(Guid projectId, FilteredPaginatedRequestDto<GetUsersQueryParameters> request);
+        Task DeleteProject(Guid projectId);
+        Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request);
+        Task<ProjectMetricsDto> GetProjectMetrics(Guid projectId);
 	}
 }

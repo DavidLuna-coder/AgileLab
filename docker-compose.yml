@@ -41,7 +41,7 @@ services:
       - '80:80'
       - "444:444"
       - "22:22"
-    shm_size: '1gb'
+    shm_size: '256m'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'http://gitlab'

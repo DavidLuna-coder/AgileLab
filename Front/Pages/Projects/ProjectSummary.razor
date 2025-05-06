@@ -1,4 +1,7 @@
-﻿@using Shared.DTOs.Projects
+﻿@using Front.ApiClient.Interfaces
+@using Shared.DTOs.Projects
+@using Shared.DTOs.Projects.Metrics
+@inject IProjectsApi ProjectsApi
 <MudGrid>
 	<MudItem sm="12" md="4">
 		<MudPaper Class="pa-4">
@@ -11,4 +14,11 @@
 @code {
 	[Parameter]
 	public ProjectDto Project { get; set; }
+	private ProjectMetricsDto metrics = new() { Measures = [] };
+
+	protected override async Task OnInitializedAsync()
+	{
+		metrics = await ProjectsApi.GetProjectMetrics(Project.Id);
+		await base.OnInitializedAsync();
+	}
 }
