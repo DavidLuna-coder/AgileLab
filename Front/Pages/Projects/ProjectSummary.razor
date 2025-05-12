@@ -5,7 +5,9 @@
 <MudGrid>
 	<MudItem sm="12" md="4">
 		<MudPaper Class="pa-4">
-			<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" InputLabels=@(["Smells", "Issues"]) Width="200px" Height="200px" />
+			<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+				<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" InputLabels=@(["Smells", "Issues"]) Width="200px" Height="200px" />
+			</MudStack>
 		</MudPaper>
 	</MudItem>
 </MudGrid>
