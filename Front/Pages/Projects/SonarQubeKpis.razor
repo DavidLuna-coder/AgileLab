@@ -1,53 +1,24 @@
-﻿
-<MudGrid Gutter="GutterSize.Small">
+﻿@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Shared.Constants
+@using Shared.DTOs.Projects.Metrics
+@inject IProjectsApi ProjectsApi
+
+<MudGrid>
 	<!-- 1. Bugs, Code Smells y vulnerabilidades -->
-	<MudItem xs="12" md="3">
-		<MudCard>
-			<MudCardHeader><MudText Typo="Typo.h6">Líneas de código</MudText></MudCardHeader>
-			<MudCardContent>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
-					<MudIcon Icon="@Icons.Material.Filled.Code" Style="font-size:4rem;" />
-					<MudText Typo="Typo.h2">12</MudText>  <!-- Total de Bugs -->
-				</MudStack>
 
-			</MudCardContent>
-		</MudCard>
+	<MudItem xs="12" md="3">
+		<KpiCard Title="Líneas de código" Value=@kpis.NCLoc IsLoading=isLoading Icon="@Icons.Material.Filled.Code"></KpiCard>
 	</MudItem>
 	<MudItem xs="12" md="3">
-		<MudCard>
-			<MudCardHeader><MudText Typo="Typo.h6">Vulnerabilidades</MudText></MudCardHeader>
-			<MudCardContent>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
-					<MudIcon Icon="@Icons.Material.Filled.Security" Style="font-size:4rem;" />
-					<MudText Typo="Typo.h2">125</MudText>  <!-- Total de Bugs -->
-				</MudStack>
-			</MudCardContent>
-		</MudCard>
+		<KpiCard Title="Vulnerabilidades" Value=@kpis.Vulnerabilities IsLoading=isLoading Icon="@Icons.Material.Filled.Security"></KpiCard>
 	</MudItem>
 	<MudItem xs="12" md="3">
-		<MudCard>
-			<MudCardHeader><MudText Typo="Typo.h6">Bugs</MudText></MudCardHeader>
-			<MudCardContent>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
-					<MudIcon Icon="@Icons.Material.Filled.BugReport" Style="font-size:4rem;" />
-					<MudText Typo="Typo.h2">31</MudText>  <!-- Total de Bugs -->
-				</MudStack>
-			</MudCardContent>
-		</MudCard>
+		<KpiCard Title="Bugs" Value=@kpis.Bugs IsLoading=isLoading Icon="@Icons.Material.Filled.BugReport"></KpiCard>
 	</MudItem>
 	<MudItem xs="12" md="3">
-		<MudCard>
-			<MudCardHeader><MudText Typo="Typo.h6">Code Smells</MudText></MudCardHeader>
-			<MudCardContent>
-				<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
-					<MudIcon Icon="@Icons.Material.Filled.Build" Style="font-size:4rem;" />
-					<MudText Typo="Typo.h2">12</MudText>  <!-- Total de Bugs -->
-				</MudStack>
-
-			</MudCardContent>
-		</MudCard>
+		<KpiCard Title="Code Smells" Value=@kpis.Smells IsLoading=isLoading Icon="@Icons.Material.Filled.Build"></KpiCard>
 	</MudItem>
-
 
 	<!-- 3. Cobertura Meter un gauge -->
 	<MudItem xs="12" md="4">
@@ -56,9 +27,9 @@
 			<MudCardContent class="d-flex justify-center">
 				<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
 					<MudChart ChartType="ChartType.Donut"
-					InputData="[73, 27]"
-					InputLabels="@(["Cubierto", "No cubierto"])"
-					Width="100%" />
+							  InputData="[73, 27]"
+							  InputLabels="@(["Cubierto", "No cubierto"])"
+							  Width="100%" />
 				</MudStack>
 			</MudCardContent>
 		</MudCard>
@@ -69,7 +40,7 @@
 		<MudCard>
 			<MudCardHeader><MudText Typo="Typo.subtitle1">Ficheros con más problemas</MudText></MudCardHeader>
 			<MudCardContent>
-				<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(["Program.cs","Bloater.cs","Strategy.cs", "Foo.cs", "Bar.cs"])" ChartSeries="chartSeries" />
+				<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(["Program.cs", "Bloater.cs", "Strategy.cs", "Foo.cs", "Bar.cs"])" ChartSeries="chartSeries" />
 			</MudCardContent>
 		</MudCard>
 	</MudItem>
@@ -110,7 +81,12 @@
 @code {
 	[Parameter]
 	public string ProjectId { get; set; }
+
+	public Guid projectId { get => new Guid(ProjectId); }
 	private List<ChartSeries> chartSeries;
+	private ProjectMetricsDto projectMetrics;
+	private SummaryKpi kpis = new();
+	private bool isLoading = true;
 	protected override void OnInitialized()
 	{
 		chartSeries = new()
@@ -121,5 +97,28 @@
 			new(){ Name = "Mantenibilidad", Data = [20,32,5,9,10] }
 		};
 		base.OnInitialized();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		projectMetrics = await ProjectsApi.GetProjectMetrics(projectId);
+
+		kpis = new()
+		{
+			NCLoc = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Ncloc).Value),
+			Vulnerabilities = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Vulnerabilities).Value),
+			Bugs = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Bugs).Value),
+			Smells = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.CodeSmells).Value),
+		};
+		isLoading = false;
+
+	}
+
+	class SummaryKpi()
+	{
+		public int NCLoc { get; set; }
+		public int Vulnerabilities { get; set; }
+		public int Bugs { get; set; }
+		public int Smells { get; set; }
 	}
 }

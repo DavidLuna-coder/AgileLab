@@ -1,0 +1,26 @@
+﻿<MudCard>
+	<MudCardHeader><MudText Typo="Typo.h6">@Title</MudText></MudCardHeader>
+	<MudCardContent>
+		<MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
+			<MudIcon Icon="@Icon" Style="font-size:4rem;" />
+			@if(IsLoading)
+			{
+				<MudText Typo="Typo.h2"><MudSkeleton /></MudText>
+			}
+			else
+			{
+				<MudText Typo="Typo.h2">@Value</MudText>
+			}
+		</MudStack>
+	</MudCardContent>
+</MudCard>
+@code {
+	[Parameter]
+	public int Value { get; set; }
+	[Parameter]
+	public string Title { get; set; } = string.Empty;
+	[Parameter]
+	public string? Icon { get; set; }
+	[Parameter]
+	public bool IsLoading { get; set; }
+}
