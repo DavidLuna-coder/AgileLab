@@ -8,5 +8,6 @@ namespace TFG.SonarQubeClient
         Task<ProjectCreated> CreateAsync(ProjectCreation project);
         Task DeleteAsync(string projectKey);
         Task<SonarMetricsResponse> GetMetrics(SonarMetricsRequest request);
+        Task<SonarComponentsTree> GetComponentsTree(GetComponentsRequest request);
 	}
 }
