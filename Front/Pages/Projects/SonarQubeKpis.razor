@@ -26,10 +26,17 @@
 			<MudCardHeader><MudText Typo="Typo.subtitle1">Cobertura</MudText></MudCardHeader>
 			<MudCardContent class="d-flex justify-center">
 				<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-					<MudChart ChartType="ChartType.Donut"
-							  InputData="[73, 27]"
+					@if (isLoading)
+					{
+						<MudSkeleton SkeletonType="SkeletonType.Circle" Width="150px" Height="150px" />
+					}
+					else
+					{
+						<MudChart ChartType="ChartType.Donut"
+							  InputData="[kpis.Coverage, 100-kpis.Coverage]"
 							  InputLabels="@(["Cubierto", "No cubierto"])"
 							  Width="100%" />
+					}
 				</MudStack>
 			</MudCardContent>
 		</MudCard>
@@ -109,6 +116,7 @@
 			Vulnerabilities = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Vulnerabilities).Value),
 			Bugs = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Bugs).Value),
 			Smells = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.CodeSmells).Value),
+			Coverage = double.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Coverage).Value),
 		};
 		isLoading = false;
 
@@ -120,5 +128,6 @@
 		public int Vulnerabilities { get; set; }
 		public int Bugs { get; set; }
 		public int Smells { get; set; }
+		public double Coverage { get; set; }
 	}
 }
