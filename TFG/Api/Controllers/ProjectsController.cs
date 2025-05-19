@@ -12,6 +12,7 @@ using TFG.Api.Exeptions;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Infrastructure.Data;
@@ -200,6 +201,17 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> GetMetrics(Guid projectId)
 		{
 			GetProjectKpisQuery query = new()
+			{
+				ProjectId = projectId,
+			};
+			var metrics = await _mediator.Send(query);
+			return Ok(metrics);
+		}
+
+		[HttpGet("{projectId}/metrics/most-affected-files")]
+		public async Task<IActionResult> GetMostAffectedFiles(Guid projectId)
+		{
+			GetMostAffectedFilesQuery query = new()
 			{
 				ProjectId = projectId,
 			};
