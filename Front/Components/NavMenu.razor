@@ -1,12 +1,21 @@
 ﻿@using Front.Helpers
 @using Front.Pages
+@using Front.Pages.Configuration
 @inject NavigationManager Nav
-<MudStack>
+<MudStack Spacing="0">
 	<MudItem>
 		<MudNavLink Href="@(Nav.GetUrl<ProjectsPage>())">
 			<div class="d-flex flex-row gap-3 align-center">
 				<MudIcon Icon="@Icons.Material.Filled.Folder" />
 				<MudText>Proyectos</MudText>
+			</div>
+		</MudNavLink>
+	</MudItem>
+	<MudItem>
+		<MudNavLink Href="@(Nav.GetUrl<ConfigurationPage>())">
+			<div class="d-flex flex-row gap-3 align-center">
+				<MudIcon Icon="@Icons.Material.Filled.Settings" />
+				<MudText>Configuración</MudText>
 			</div>
 		</MudNavLink>
 	</MudItem>

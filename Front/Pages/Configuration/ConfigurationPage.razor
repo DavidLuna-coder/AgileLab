@@ -1,0 +1,48 @@
+﻿@page "/configuration"
+@using Front.Components
+<PageTitle>
+    Configuración
+</PageTitle>
+<Section Title="Configuración">
+	<ChildContent>
+		<MudTabs Elevation="0" PanelClass="pa-6">
+			<MudTabPanel Text="Gitlab">
+				<MudTextField Class="mb-4" T="string" Label="Url Base" />
+				<MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+			</MudTabPanel>
+            <MudTabPanel Text="SonarQube">
+                <MudTextField Class="mb-4" T="string" Label="Url Base" />
+                <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+            </MudTabPanel>
+            <MudTabPanel Text="OpenProject">
+                <MudTextField Class="mb-4" T="string" Label="Url Base" />
+                <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+            </MudTabPanel>
+		</MudTabs>
+	</ChildContent>
+
+</Section>
+
+@code {
+    public string Password { get; set; } = "superstrong123";
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ButtonTestclick()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+}
