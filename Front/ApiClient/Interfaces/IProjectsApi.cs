@@ -16,5 +16,6 @@ namespace Front.ApiClient.Interfaces
         Task DeleteProject(Guid projectId);
         Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request);
         Task<ProjectMetricsDto> GetProjectMetrics(Guid projectId);
+        Task<List<AffectedFileDto>> GetMostAffectedFiles(Guid projectId);
 	}
 }

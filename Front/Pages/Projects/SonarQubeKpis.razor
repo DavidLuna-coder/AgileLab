@@ -33,9 +33,9 @@
 					else
 					{
 						<MudChart ChartType="ChartType.Donut"
-							  InputData="[kpis.Coverage, 100-kpis.Coverage]"
-							  InputLabels="@(["Cubierto", "No cubierto"])"
-							  Width="100%" />
+								  InputData="[kpis.Coverage, 100-kpis.Coverage]"
+								  InputLabels="@(["Cubierto", "No cubierto"])"
+								  Width="100%" />
 					}
 				</MudStack>
 			</MudCardContent>
@@ -47,7 +47,14 @@
 		<MudCard>
 			<MudCardHeader><MudText Typo="Typo.subtitle1">Ficheros con más problemas</MudText></MudCardHeader>
 			<MudCardContent>
-				<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(["Program.cs", "Bloater.cs", "Strategy.cs", "Foo.cs", "Bar.cs"])" ChartSeries="chartSeries" />
+				@if (!isLoading)
+				{
+					<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(fileNames)" ChartSeries="chartSeries" />
+				}
+				else
+				{
+					<MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="100%" />
+				}
 			</MudCardContent>
 		</MudCard>
 	</MudItem>
@@ -94,22 +101,15 @@
 	private ProjectMetricsDto projectMetrics;
 	private SummaryKpi kpis = new();
 	private bool isLoading = true;
-	protected override void OnInitialized()
-	{
-		chartSeries = new()
-		{
-			new(){ Name = "LOC", Data = [31,45,21,11,34] },
-			new(){ Name = "Seguridad", Data = [2,1,5,9,51] },
-			new(){ Name = "Fiabilidad", Data = [12,61,52,9,1] },
-			new(){ Name = "Mantenibilidad", Data = [20,32,5,9,10] }
-		};
-		base.OnInitialized();
-	}
+	private string[] fileNames = [];
 
 	protected override async Task OnInitializedAsync()
 	{
-		projectMetrics = await ProjectsApi.GetProjectMetrics(projectId);
+		var projectMetricsTask = ProjectsApi.GetProjectMetrics(projectId);
+		var projectMostAffectedFilesTask = ProjectsApi.GetMostAffectedFiles(projectId);
 
+		projectMetrics = await projectMetricsTask;
+		var test = await projectMostAffectedFilesTask;
 		kpis = new()
 		{
 			NCLoc = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Ncloc).Value),
@@ -118,8 +118,16 @@
 			Smells = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.CodeSmells).Value),
 			Coverage = double.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Coverage).Value),
 		};
-		isLoading = false;
 
+		chartSeries = new()
+		{
+			new(){ Name = "Líneas de código", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Ncloc).Select(m => double.Parse(m.Value)).ToArray() },
+			new(){ Name = "Vulnerabilidades", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Vulnerabilities).Select(m => double.Parse(m.Value)).ToArray() },
+			new(){ Name = "Bugs", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Bugs).Select(m => double.Parse(m.Value)).ToArray() },
+			new(){ Name = "Code Smells", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.CodeSmells).Select(m => double.Parse(m.Value)).ToArray() },
+		};
+		fileNames = test.Select(f => f.Name).ToArray();
+		isLoading = false;
 	}
 
 	class SummaryKpi()

@@ -20,6 +20,11 @@ namespace Front.ApiClient.Implementations
 			await client.DeleteAsync($"{PROJECTS_ENDPOINT}/{projectId}");
 		}
 
+		public Task<List<AffectedFileDto>> GetMostAffectedFiles(Guid projectId)
+		{
+			return client.GetAsync<List<AffectedFileDto>>($"{PROJECTS_ENDPOINT}/{projectId}/metrics/most-affected-files");
+		}
+
 		public Task<ProjectDto> GetProject(Guid projectId)
 		{
 			return client.GetAsync<ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}");

@@ -1,13 +1,17 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Projects.Metrics;
+using TFG.Api.Exeptions;
 using TFG.Api.Mappers;
+using TFG.Infrastructure.Data;
+using TFG.Model.Entities;
 using TFG.SonarQubeClient;
 using TFG.SonarQubeClient.Models;
 using TFG.SonarQubeClient.Models.Metrics;
 
 namespace TFG.Application.Services.Projects.Queries.GetMosAffectedFiles
 {
-	public class GetMostAffectedFilesQueryHandler(ISonarQubeClient sonarQubeClient) : IRequestHandler<GetMostAffectedFilesQuery, List<AffectedFileDto>>
+	public class GetMostAffectedFilesQueryHandler(ISonarQubeClient sonarQubeClient, ApplicationDbContext dbContext) : IRequestHandler<GetMostAffectedFilesQuery, List<AffectedFileDto>>
 	{
 		const double wSmells = 0.2;
 		const double wBugs = 0.3;
@@ -16,8 +20,9 @@ namespace TFG.Application.Services.Projects.Queries.GetMosAffectedFiles
 		{
 			int page = 1;
 			int pageSize = 100;
-			List<string> componentsKeys = [];
-			GetComponentsRequest componentsRequest = new() { ComponentKey = request.ProjectId.ToString(), Page = page, PageSize = pageSize, Qualifiers = ["FIL"] };
+			List<SonarQubeClient.Models.SonarComponent> componentsKeys = [];
+			Project project = await dbContext.Projects.FirstOrDefaultAsync(p => p.Id == request.ProjectId) ?? throw new NotFoundException("Project not found");
+			GetComponentsRequest componentsRequest = new() { ComponentKey = project.SonarQubeProjectKey, Page = page, PageSize = pageSize, Qualifiers = ["FIL"] };
 			int totalPages = 0;
 			int totalItems = 0;
 			do
@@ -26,7 +31,7 @@ namespace TFG.Application.Services.Projects.Queries.GetMosAffectedFiles
 				SonarComponentsTree componentsTree = await sonarQubeClient.Projects.GetComponentsTree(componentsRequest);
 				totalItems = totalItems == 0 ? componentsTree.Paging.Total : totalItems;
 				totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-				componentsKeys.AddRange(componentsTree.Components.Select(c => c.Key));
+				componentsKeys.AddRange(componentsTree.Components.ToList());
 				page++;
 				componentsRequest.Page = page;
 			} while (componentsRequest.Page <= totalPages);
@@ -52,21 +57,21 @@ namespace TFG.Application.Services.Projects.Queries.GetMosAffectedFiles
 		static int ParseValue(string? val) => int.TryParse(val, out var n) ? n : 0;
 
 		public async Task<List<AffectedFileDto>> GetFileMetricsAsync(
-		IEnumerable<string> componentKeys,
+		IEnumerable<SonarQubeClient.Models.SonarComponent> componentKeys,
 		int maxDegree = 8,
 		CancellationToken ct = default)
 		{
 			using var throttler = new SemaphoreSlim(maxDegree);
 
 			var tasks = componentKeys
-				.Select(async (key, idx) =>
+				.Select(async (component, idx) =>
 				{
 					await throttler.WaitAsync(ct);
 					try
 					{
 						var response = await sonarQubeClient.Projects.GetMetrics(new SonarMetricsRequest
 						{
-							ProjectKey = key,
+							ProjectKey = component.Key,
 							MetricKeys = [
 								SonarMetricKeys.CodeSmells,
 							SonarMetricKeys.Bugs,
@@ -75,7 +80,9 @@ namespace TFG.Application.Services.Projects.Queries.GetMosAffectedFiles
 
 						return (idx, new AffectedFileDto
 						{
-							Name = key,
+							Name = component.Name,
+							Key = component.Key,
+							Path = component.Path,
 							Measures = response.ToProjectMetricsDto().Measures
 						});
 					}
