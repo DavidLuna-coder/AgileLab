@@ -1,48 +1,128 @@
 ﻿@page "/configuration"
+@using Front.ApiClient.Interfaces
 @using Front.Components
+@using Shared.DTOs.Integrations
+@inject IApiIntegrationsApi apiIntegrationsApi
 <PageTitle>
-    Configuración
+	Configuración
 </PageTitle>
 <Section Title="Configuración">
 	<ChildContent>
 		<MudTabs Elevation="0" PanelClass="pa-6">
 			<MudTabPanel Text="Gitlab">
-				<MudTextField Class="mb-4" T="string" Label="Url Base" />
-				<MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+				@if (isLoading)
+				{
+					<MudProgressLinear Indeterminate="true" Color="Color.Primary" Size="Size.Medium" Class="mt-4" />
+				}
+				else
+				{
+					<MudStack>
+						<MudTextField @bind-Value=GitlabaseUrl Class="mb-4" T="string" Label="Url Base" />
+						<MudTextField @bind-Value=GitlabToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.Gitlab, GitlabaseUrl, GitlabToken)">Guardar</MudButton>
+					</MudStack>
+				}
 			</MudTabPanel>
-            <MudTabPanel Text="SonarQube">
-                <MudTextField Class="mb-4" T="string" Label="Url Base" />
-                <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
-            </MudTabPanel>
-            <MudTabPanel Text="OpenProject">
-                <MudTextField Class="mb-4" T="string" Label="Url Base" />
-                <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
-            </MudTabPanel>
+			<MudTabPanel Text="SonarQube">
+				@if (isLoading)
+				{
+					<MudProgressLinear Indeterminate="true" Color="Color.Primary" Size="Size.Medium" Class="mt-4" />
+				}
+				else
+				{
+					<MudStack>
+						<MudTextField @bind-Value=SonarqubeBaseUrl Class="mb-4" T="string" Label="Url Base" />
+						<MudTextField @bind-Value=SonarqubeToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.SonarQube, SonarqubeBaseUrl, SonarqubeToken)">Guardar</MudButton>
+					</MudStack>
+				}
+			</MudTabPanel>
+			<MudTabPanel Text="OpenProject">
+				@if (isLoading)
+				{
+					<MudProgressLinear Indeterminate="true" Color="Color.Primary" Size="Size.Medium" Class="mt-4" />
+				}
+				else
+				{
+					<MudStack>
+						<MudTextField @bind-Value=OpenProjectBaseUrl Class="mb-4" T="string" Label="Url Base" />
+						<MudTextField @bind-Value=OpenProjectToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.OpenProject, OpenProjectBaseUrl, OpenProjectToken)">Guardar</MudButton>
+					</MudStack>
+				}
+			</MudTabPanel>
 		</MudTabs>
 	</ChildContent>
 
 </Section>
 
 @code {
-    public string Password { get; set; } = "superstrong123";
+	public string Password { get; set; }
 
-    bool isShow;
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+	private bool isLoading = true;
+	private string GitlabaseUrl { get; set; }
+	private string GitlabToken { get; set; }
 
-    void ButtonTestclick()
-    {
-        @if (isShow)
-        {
-            isShow = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShow = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
-    }
+	private string SonarqubeBaseUrl { get; set; }
+	private string SonarqubeToken { get; set; }
+
+	private string OpenProjectBaseUrl { get; set; }
+	private string OpenProjectToken { get; set; }
+
+	bool isShow;
+	InputType PasswordInput = InputType.Password;
+	string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Reload();
+
+		await base.OnInitializedAsync();
+
+		isLoading = false;
+	}
+
+	void ButtonTestclick()
+	{
+		@if (isShow)
+		{
+			isShow = false;
+			PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+			PasswordInput = InputType.Password;
+		}
+		else
+		{
+			isShow = true;
+			PasswordInputIcon = Icons.Material.Filled.Visibility;
+			PasswordInput = InputType.Text;
+		}
+	}
+
+	async Task UpdateApiIntegration(ApiConfigurationType type, string url, string token)
+	{
+		UpdateApiIntegrationDto updateApiIntegrationDto = new UpdateApiIntegrationDto
+		{
+			BaseUrl = url,
+			Token = token
+		};
+
+		await apiIntegrationsApi.UpdateApiIntegration(type, updateApiIntegrationDto);
+		await Reload();
+	}
+
+	async Task Reload()
+	{
+		isLoading = true;
+		List<IntegrationDto> integrations = await apiIntegrationsApi.GetIntegrations();
+		GitlabaseUrl = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.Gitlab)?.BaseUrl ?? string.Empty;
+		GitlabToken = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.Gitlab)?.Token ?? string.Empty;
+
+		SonarqubeBaseUrl = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.SonarQube)?.BaseUrl ?? string.Empty;
+		SonarqubeToken = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.SonarQube)?.Token ?? string.Empty;
+
+		OpenProjectBaseUrl = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.OpenProject)?.BaseUrl ?? string.Empty;
+		OpenProjectToken = integrations.FirstOrDefault(x => x.Type == ApiConfigurationType.OpenProject)?.Token ?? string.Empty;
+		isLoading = false;
+		StateHasChanged();
+	}
 }
