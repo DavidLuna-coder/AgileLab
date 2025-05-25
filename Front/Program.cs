@@ -21,6 +21,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IApiHttpClient, ApiHttpClient>();
 builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
 builder.Services.AddScoped<IUsersApi, UsersApi>();
+builder.Services.AddScoped<IApiIntegrationsApi, ApiIntegrationsApi>();
 builder.Services.AddScoped<ProjectStateService>();
 
 await builder.Build().RunAsync();
