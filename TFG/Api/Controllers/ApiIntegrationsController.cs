@@ -7,7 +7,7 @@ using TFG.Application.Services.Integrations.Queries.GetIntegrationsQuery;
 
 namespace TFG.Api.Controllers
 {
-	[Route("api/integrations/")]
+	[Route("api/integrations")]
 	[ApiController]
 	public class ApiIntegrationsController(IMediator mediator) : ControllerBase
 	{
@@ -24,8 +24,8 @@ namespace TFG.Api.Controllers
 			var command = new UpdateApiIntegrationCommand { ApiConfigurationType = apiIntegrationType, Dto = dto };
 			try
 			{
-				await mediator.Send(command);
-				return NoContent();
+				var response = await mediator.Send(command);
+				return Ok(response);
 			}
 			catch (NotFoundException ex)
 			{
