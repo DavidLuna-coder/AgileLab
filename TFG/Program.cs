@@ -44,7 +44,22 @@ builder.Services.AddSwaggerGen(c =>
 			Array.Empty<string>()
 		}
 	});
-}); builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection");
+});
+
+builder.AddSqlServerDbContext<ApplicationDbContext>("DefaultConnection",
+	configureDbContextOptions: (options) =>
+	{
+		options
+		.UseSeeding((context, _) =>
+		{
+			ApplicationDbContext.SeedConfig(context);
+		})
+		.UseAsyncSeeding(async (context, _, cancellationToken) =>
+		{
+			await ApplicationDbContext.SeedConfigAsync(context);
+		});
+	}
+);
 builder.AddServiceDefaults();
 builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.RegisterAppServices();

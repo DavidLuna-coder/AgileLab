@@ -1,4 +1,7 @@
-﻿namespace TFG.Domain.Entities
+﻿
+using Shared.DTOs.Integrations;
+
+namespace TFG.Domain.Entities
 {
 	public class ApiConfiguration
 	{
@@ -7,12 +10,5 @@
 		public string Name { get; set; }
 		public string BaseUrl { get; set; }
 		public string Token { get; set; }
-	}
-
-	public enum ApiConfigurationType
-	{
-		Gitlab = 1,
-		OpenProject = 2,
-		SonarQube = 3,
 	}
 }

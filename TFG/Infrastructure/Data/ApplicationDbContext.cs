@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs.Integrations;
 using TFG.Domain.Entities;
 using TFG.Model.Entities;
 
@@ -16,21 +17,8 @@ namespace TFG.Infrastructure.Data
 		public ApplicationDbContext(DbContextOptions options) : base(options)
 		{
 		}
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			optionsBuilder
-				.UseSeeding((context, _) =>
-				{
-					SeedConfig(context);
-				})
-				.UseAsyncSeeding(async (context, _, cancellationToken) =>
-				{
-					await SeedConfigAsync(context);
-				});
-			base.OnConfiguring(optionsBuilder);
-		}
 
-		private void SeedConfig(DbContext context)
+		public static void SeedConfig(DbContext context)
 		{
 			var gitlabConfig = context.Set<ApiConfiguration>().FirstOrDefault(c => c.Type == ApiConfigurationType.Gitlab);
 			if (gitlabConfig == null)
@@ -70,7 +58,7 @@ namespace TFG.Infrastructure.Data
 			context.SaveChanges();
 		}
 
-		private async Task SeedConfigAsync(DbContext context)
+		public static async Task SeedConfigAsync(DbContext context)
 		{
 			var gitlabConfig = await context.Set<ApiConfiguration>().FirstOrDefaultAsync(c => c.Type == ApiConfigurationType.Gitlab);
 			if (gitlabConfig == null)
