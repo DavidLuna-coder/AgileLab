@@ -9,13 +9,24 @@ namespace TFG.OpenProjectClient
 		{
 			if (url is null || token is null) throw new ArgumentNullException("OpenProject URL or token cannot be null");
 
-			services.AddSingleton<IOpenProjectHttpClient, OpenProjectHttpClient>(s => new OpenProjectHttpClient(url, token));
-			services.AddSingleton<IProjectsClient, ProjectClient>();
-			services.AddSingleton<IUsersClient, UserClient>();
-			services.AddSingleton<IWorkPackagesClient, WorkPackagesClient>();
-			services.AddSingleton<IMembershipsClient, MembershipClient>();
-			services.AddSingleton<IStatusesClient, StatusesClient>();
-			services.AddSingleton<IOpenProjectClient, OpenProjectClientImpl>();
+			services.AddScoped<IOpenProjectHttpClient, OpenProjectHttpClient>(s => new OpenProjectHttpClient(url, token));
+			services.AddScoped<IProjectsClient, ProjectClient>();
+			services.AddScoped<IUsersClient, UserClient>();
+			services.AddScoped<IWorkPackagesClient, WorkPackagesClient>();
+			services.AddScoped<IMembershipsClient, MembershipClient>();
+			services.AddScoped<IStatusesClient, StatusesClient>();
+			services.AddScoped<IOpenProjectClient, OpenProjectClientImpl>();
+		}
+
+		public static void AddOpenProjectApiClient(this IServiceCollection services, Func<IServiceProvider, OpenProjectHttpClient> factory)
+		{
+			services.AddScoped<IOpenProjectHttpClient>(factory);
+			services.AddScoped<IProjectsClient, ProjectClient>();
+			services.AddScoped<IUsersClient, UserClient>();
+			services.AddScoped<IWorkPackagesClient, WorkPackagesClient>();
+			services.AddScoped<IMembershipsClient, MembershipClient>();
+			services.AddScoped<IStatusesClient, StatusesClient>();
+			services.AddScoped<IOpenProjectClient, OpenProjectClientImpl>();
 		}
 	}
 }

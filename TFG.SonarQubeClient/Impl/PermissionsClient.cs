@@ -4,7 +4,7 @@ using TFG.SonarQubeClient.Models;
 
 namespace TFG.SonarQubeClient.Impl
 {
-	class PermissionsClient(ISonarHttpClient client) : IPermissionsClient
+	public class PermissionsClient(ISonarHttpClient client) : IPermissionsClient
 	{
 		private readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
 		{

@@ -7,12 +7,22 @@ namespace TFG.SonarQubeClient
     {
 		public static void AddSonarApiClient(this IServiceCollection services, string url, string token)
 		{
-			services.AddSingleton<ISonarHttpClient, SonarHttpClient>(s => new SonarHttpClient(url, token));
-			services.AddSingleton<IDopTranslationsClient, DopTranslationsClient>();
-			services.AddSingleton<IUsersManagementClient, UsersManagementClient>();
-			services.AddSingleton<IPermissionsClient, PermissionsClient>();
-			services.AddSingleton<IProjectsClient, ProjectsClient>();
-			services.AddSingleton<ISonarQubeClient, SonarClient>();
+			services.AddScoped<ISonarHttpClient, SonarHttpClient>(s => new SonarHttpClient(url, token));
+			services.AddScoped<IDopTranslationsClient, DopTranslationsClient>();
+			services.AddScoped<IUsersManagementClient, UsersManagementClient>();
+			services.AddScoped<IPermissionsClient, PermissionsClient>();
+			services.AddScoped<IProjectsClient, ProjectsClient>();
+			services.AddScoped<ISonarQubeClient, SonarClient>();
+		}
+
+		public static void AddSonarApiClient(this IServiceCollection services, Func<IServiceProvider, SonarHttpClient> httpFactory)
+		{
+			services.AddScoped<ISonarHttpClient>(httpFactory);
+			services.AddScoped<IDopTranslationsClient, DopTranslationsClient>();
+			services.AddScoped<IUsersManagementClient, UsersManagementClient>();
+			services.AddScoped<IPermissionsClient, PermissionsClient>();
+			services.AddScoped<IProjectsClient, ProjectsClient>();
+			services.AddScoped<ISonarQubeClient, SonarClient>();
 		}
 	}
 }
