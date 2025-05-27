@@ -1,5 +1,5 @@
 ﻿using Shared.DTOs.Projects;
-using TFG.Model.Entities;
+using TFG.Domain.Entities;
 
 namespace TFG.Api.Mappers
 {

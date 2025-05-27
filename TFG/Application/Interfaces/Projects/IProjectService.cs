@@ -1,6 +1,6 @@
 ﻿using Shared.DTOs.Projects;
+using TFG.Domain.Entities;
 using TFG.Domain.Results;
-using TFG.Model.Entities;
 
 namespace TFG.Application.Interfaces.Projects
 {

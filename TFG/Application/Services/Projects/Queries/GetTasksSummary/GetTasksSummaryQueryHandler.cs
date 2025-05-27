@@ -10,7 +10,7 @@ using TFG.OpenProjectClient.Models;
 using TFG.OpenProjectClient.Models.BasicObjects;
 using TFG.OpenProjectClient.Models.WorkPackages;
 using Microsoft.EntityFrameworkCore;
-using User = TFG.Model.Entities.User;
+using User = TFG.Domain.Entities.User;
 
 namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 {

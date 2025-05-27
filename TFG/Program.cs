@@ -1,6 +1,9 @@
+using ApexCharts;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TFG.Api.Middlewares;
+using TFG.Application.Security;
 using TFG.Application.Services;
 using TFG.Infrastructure;
 using TFG.Infrastructure.Data;
@@ -26,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
 		Scheme = "Bearer",
 		BearerFormat = "JWT",
 		In = ParameterLocation.Header,
-		Description = "Introduce el token JWT con el esquema 'Bearer'. Ejemplo: Bearer {tu token}"
+		Description = "Introduce el token JWT con el esquema 'Bearer'. Ejemplo: {tu token}"
 	});
 
 	// Requerir seguridad en todos los endpoints
@@ -65,6 +68,7 @@ builder.Services.RegisterAppInfrastructure(builder.Configuration);
 builder.RegisterAppServices();
 builder.Services.AddRazorPages();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionBehavior<,>));
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())

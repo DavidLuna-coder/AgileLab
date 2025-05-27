@@ -14,7 +14,7 @@ using TFG.Infrastructure.Data;
 using TFG.OpenProjectClient;
 using TFG.OpenProjectClient.Models.Users;
 using TFG.SonarQubeClient;
-using User = TFG.Model.Entities.User;
+using User = TFG.Domain.Entities.User;
 
 namespace TFG.Application.Services.Auth
 {

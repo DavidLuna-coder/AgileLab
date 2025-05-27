@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Integrations;
+using Shared.Enums;
 using TFG.Domain.Entities;
-using TFG.Model.Entities;
 
 namespace TFG.Infrastructure.Data
 {
@@ -16,6 +16,28 @@ namespace TFG.Infrastructure.Data
 		//public DbSet<Template> Templates { get; set; }
 		public ApplicationDbContext(DbContextOptions options) : base(options)
 		{
+		}
+
+		protected override void OnModelCreating(ModelBuilder builder)
+		{
+			builder.Entity<Rol>()
+				.Property(r => r.Permissions)
+				.HasConversion<int>();
+			builder.Entity<Rol>().HasData(
+				new Rol
+				{
+					Id = new Guid("85a374fa-242a-4323-8b31-32165e0b8e44"),
+					Name = "Profesor",
+					Permissions = Permissions.All
+				},
+				new Rol
+				{
+					Id = Guid.NewGuid(),
+					Name = "Alumno",
+					Permissions = Permissions.ViewSonarQubeKpis 
+				}
+			);
+			base.OnModelCreating(builder);
 		}
 
 		public static void SeedConfig(DbContext context)

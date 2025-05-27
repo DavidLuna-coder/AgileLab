@@ -1,6 +1,4 @@
-﻿using TFG.Model.Entities;
-
-namespace TFG.Domain.Entities
+﻿namespace TFG.Domain.Entities
 {
 	public class UserProject
 	{

@@ -6,6 +6,7 @@ using Shared.Utils.DateTimeProvider;
 using System;
 using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Security;
 using TFG.Application.Services.Auth;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.Projects;
@@ -28,7 +29,7 @@ namespace TFG.Application.Services
 			services.AddScoped<IProjectService, ProjectService>();
 
 			services.AddScoped<OpenProjectApi, OpenProjectApi>();
-
+			services.AddScoped<IUserInfoAccessor, HttpContextUserInfoAccessor>();
 
 			services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 			services.AddSonarApiClient(serviceProvider =>

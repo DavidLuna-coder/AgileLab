@@ -5,8 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
-using TFG.Model.Entities;
 
 namespace TFG.Infrastructure
 {

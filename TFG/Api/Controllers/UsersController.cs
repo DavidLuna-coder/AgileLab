@@ -4,7 +4,8 @@ using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
-using TFG.Model.Entities;
+using TFG.Domain.Entities;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

@@ -1,4 +1,4 @@
-﻿namespace TFG.Model.Entities
+﻿namespace TFG.Domain.Entities
 {
     public class Notification
     {

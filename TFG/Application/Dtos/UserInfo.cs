@@ -1,6 +1,8 @@
-﻿namespace TFG.Application.Dtos
+﻿using TFG.Application.Security;
+
+namespace TFG.Application.Dtos
 {
-	public class UserInfo
+	public class UserInfo : IUserInfo
 	{
 		public string Email { get; set; }
 		public string Username { get; set; }

@@ -1,7 +1,7 @@
 ﻿using LinqKit;
 using Shared.DTOs.Projects;
 using System.Linq.Expressions;
-using TFG.Model.Entities;
+using TFG.Domain.Entities;
 
 namespace TFG.Api.FilterHandlers
 {

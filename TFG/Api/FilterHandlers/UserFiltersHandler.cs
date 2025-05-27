@@ -2,7 +2,7 @@
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
 using System.Linq.Expressions;
-using TFG.Model.Entities;
+using TFG.Domain.Entities;
 
 namespace TFG.Api.FilterHandlers
 {

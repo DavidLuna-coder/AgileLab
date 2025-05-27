@@ -15,8 +15,8 @@ using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
+using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
-using TFG.Model.Entities;
 
 namespace TFG.Api.Controllers
 {

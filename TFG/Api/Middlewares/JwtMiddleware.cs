@@ -1,5 +1,6 @@
 ﻿using TFG.Application.Dtos;
 using TFG.Application.Interfaces;
+using TFG.Application.Security;
 using TFG.Domain.Results;
 using TFG.Infrastructure.Security;
 
@@ -29,7 +30,7 @@ namespace TFG.Api.Middlewares
 					return;
 				}
 
-				context.Items["UserInfo"] = result.Value;
+				context.Items[nameof(IUserInfo)] = result.Value;
 			}
 			await _next(context);
 		}

@@ -1,7 +1,7 @@
 ﻿using Shared.DTOs.Projects;
 using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Users;
-using TFG.Model.Entities;
+using TFG.Domain.Entities;
 using TFG.SonarQubeClient.Models.Metrics;
 
 namespace TFG.Api.Mappers
