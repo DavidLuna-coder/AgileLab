@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Roles;
+using System.Threading.Tasks;
 using TFG.Application.Services.Roles.Commands.CreateRol;
+using TFG.Application.Services.Roles.Queries.GetRol;
 
 namespace TFG.Api.Controllers
 {
@@ -38,10 +40,13 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpGet("{id}")]
-		public IActionResult GetRol(Guid id)
+		public async Task<IActionResult> GetRol(Guid id)
 		{
-			// Placeholder for getting a role by ID
-			return NotFound(); // Implement the logic to retrieve a role by ID
+			GetRolQuery query = new() { Id = id };
+
+			var result = await mediator.Send(query);
+
+			return Ok(result);
 		}
 	}
 }

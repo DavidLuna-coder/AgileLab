@@ -19,11 +19,11 @@ namespace Shared.Enums
         DeleteUsers = 1 << 10,
         CreateRoles = 1 << 11,
         UpdateRoles = 1 << 12,
-
-        //Config
-        UpdateApiIntegrations = 1 << 13,
+        ViewRoles = 1 << 13,
+							 //Config
+		UpdateApiIntegrations = 1 << 14,
 
         All = ViewAllProjects | EditProjects | DeleteProjects | CreateProjects | ViewProjectUsers | ViewProjectKpis | ViewProjectOtherUserData |
-              ViewUsers | CreateUsers | EditUsers | DeleteUsers | CreateRoles | UpdateRoles | UpdateApiIntegrations
+              ViewUsers | CreateUsers | EditUsers | DeleteUsers | CreateRoles | UpdateRoles | UpdateApiIntegrations | ViewRoles
 	}
 }
