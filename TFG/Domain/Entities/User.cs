@@ -11,7 +11,6 @@ namespace TFG.Domain.Entities
         public string OpenProjectId { get; set; }
         public string SonarQubeId { get; set; }
         public ICollection<Project> Projects { get; set; }
-        public Guid RolId { get; set; }
-        public Rol Rol { get; set; }
+        public ICollection<Rol> Roles { get; set; }
     }
 }

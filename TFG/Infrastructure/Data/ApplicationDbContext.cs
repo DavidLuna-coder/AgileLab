@@ -26,15 +26,31 @@ namespace TFG.Infrastructure.Data
 			builder.Entity<Rol>().HasData(
 				new Rol
 				{
-					Id = new Guid("85a374fa-242a-4323-8b31-32165e0b8e44"),
-					Name = "Profesor",
+					Id = new Guid("d3b1f5c2-8e4a-4c0b-9f6e-7c1d2e3f4a5b"),
+					Name = "Administrador",
 					Permissions = Permissions.All
 				},
 				new Rol
 				{
-					Id = Guid.NewGuid(),
+					Id = new Guid("85a374fa-242a-4323-8b31-32165e0b8e44"),
+					Name = "Profesor",
+					Permissions = Permissions.CreateProjects
+				   | Permissions.EditProjects
+				   | Permissions.ViewAllProjects
+				   | Permissions.ViewProjectUsers
+				   | Permissions.ViewProjectKpis
+				   | Permissions.ViewProjectOtherUserData
+				   | Permissions.CreateUsers
+				   | Permissions.EditUsers
+				   | Permissions.DeleteUsers
+				   | Permissions.CreateRoles
+				   | Permissions.UpdateRoles
+				},
+				new Rol
+				{
+					Id = new Guid("8ce70a12-67b6-451c-82b8-763c18f44a1e"),
 					Name = "Alumno",
-					Permissions = Permissions.ViewSonarQubeKpis 
+					Permissions = Permissions.None
 				}
 			);
 			base.OnModelCreating(builder);

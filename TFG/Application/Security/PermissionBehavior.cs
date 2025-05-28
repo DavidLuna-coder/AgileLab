@@ -6,10 +6,11 @@ namespace TFG.Application.Security
 		   where TRequest : notnull
 	{
 		private readonly IEnumerable<IPermissionValidator<TRequest>> _validators;
-
-		public PermissionBehavior(IEnumerable<IPermissionValidator<TRequest>> validators)
+		private readonly IUserInfoAccessor _userInfoAccessor;
+		public PermissionBehavior(IEnumerable<IPermissionValidator<TRequest>> validators, IUserInfoAccessor userInfoAccessor)
 		{
 			_validators = validators;
+			_userInfoAccessor = userInfoAccessor;
 		}
 
 		public async Task<TResponse> Handle(
@@ -19,7 +20,8 @@ namespace TFG.Application.Security
 		{
 			foreach (var validator in _validators)
 			{
-				if (!await validator.HasPermissionAsync(request))
+				bool hasPermission = (_userInfoAccessor.UserInfo is not null && _userInfoAccessor.UserInfo.IsAdmin) || await validator.HasPermissionAsync(request);
+				if (!hasPermission)
 				{
 					throw new UnauthorizedAccessException("Permission denied.");
 				}
