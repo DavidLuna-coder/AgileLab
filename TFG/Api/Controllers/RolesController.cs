@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Roles;
 using System.Threading.Tasks;
 using TFG.Application.Services.Roles.Commands.CreateRol;
+using TFG.Application.Services.Roles.Queries.GetAllRoles;
 using TFG.Application.Services.Roles.Queries.GetRol;
 
 namespace TFG.Api.Controllers
@@ -33,10 +34,11 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpGet]
-		public IActionResult GetRoles()
+		public async Task<IActionResult> GetRoles()
 		{
-			// Placeholder for getting all roles
-			return NotFound(); // Implement the logic to retrieve all roles
+			GetAllRolesQuery query = new();
+			var result = await mediator.Send(query);
+			return Ok(result); // Implement the logic to retrieve all roles
 		}
 
 		[HttpGet("{id}")]

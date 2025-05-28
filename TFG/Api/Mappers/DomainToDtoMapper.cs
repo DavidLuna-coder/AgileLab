@@ -1,5 +1,6 @@
 ﻿using Shared.DTOs.Projects;
 using Shared.DTOs.Projects.Metrics;
+using Shared.DTOs.Roles;
 using Shared.DTOs.Users;
 using TFG.Domain.Entities;
 using TFG.SonarQubeClient.Models.Metrics;
@@ -64,6 +65,16 @@ namespace TFG.Api.Mappers
 			};
 
 			return dto;
+		}
+
+		public static RolDto ToRolDto(this Rol rol)
+		{
+			return new RolDto
+			{
+				Id = rol.Id,
+				Name = rol.Name,
+				Permissions = rol.Permissions
+			};
 		}
 	}
 }
