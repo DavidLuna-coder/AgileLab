@@ -1,0 +1,38 @@
+﻿@page "/administration/roles/create"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Shared.DTOs.Roles
+@using Shared.Enums
+@using Front.Helpers
+@inject IRolesApi rolesApi
+@inject NavigationManager Nav
+
+<Section Title="Creación de roles">
+	<MudStack>
+		<MudTextField @bind-Value=model.Name Required RequiredError="El rol debe tener un nombre"> </MudTextField>
+		<RolesForm @bind-Permissions=model.Permissions />
+		<MudStack Row Justify="Justify.FlexEnd">
+			<MudButton  Variant="Variant.Filled" OnClick="ReturnToRolesPage">Cancelar</MudButton>
+			<MudButton Disabled=isCreating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
+		</MudStack>
+	</MudStack>
+
+</Section>
+
+@code {
+	CreateRolDto model = new() { Name = null, Permissions = Permissions.None };
+	Permissions permissions = Permissions.None;
+	bool isCreating;
+	async Task Save()
+	{
+		isCreating = true;
+		await rolesApi.CreateRol(model);
+		isCreating = false;
+		ReturnToRolesPage();
+	}
+
+	void ReturnToRolesPage()
+	{
+		Nav.NavigateTo<RolesPage>();
+	}
+}

@@ -1,5 +1,6 @@
 ﻿@using Front.Helpers
 @using Front.Pages
+@using Front.Pages.Administration
 @using Front.Pages.Configuration
 @inject NavigationManager Nav
 <MudStack Spacing="0">
@@ -16,6 +17,14 @@
 			<div class="d-flex flex-row gap-3 align-center">
 				<MudIcon Icon="@Icons.Material.Filled.Settings" />
 				<MudText>Configuración</MudText>
+			</div>
+		</MudNavLink>
+	</MudItem>
+	<MudItem>
+		<MudNavLink Href="@(Nav.GetUrl<RolesPage>())">
+			<div class="d-flex flex-row gap-3 align-center">
+				<MudIcon Icon="@Icons.Material.Filled.Lock" />
+				<MudText>Roles</MudText>
 			</div>
 		</MudNavLink>
 	</MudItem>

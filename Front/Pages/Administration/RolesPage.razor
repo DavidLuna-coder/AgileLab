@@ -1,0 +1,54 @@
+﻿@page "/administration/roles"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Front.Helpers
+@using Shared.DTOs.Roles
+@inject IRolesApi RolesApi
+@inject NavigationManager Nav
+<Section Title="Roles" >
+	<ChildContent>
+		<MudTable T="RolDto" Hover ServerData="OnServerDataRequested" >
+			<HeaderContent>
+				<MudTh>Rol</MudTh>
+				<MudTh>Acciones</MudTh>
+			</HeaderContent>
+			<RowTemplate>
+				<MudTd DataLabel="Role Name">@context.Name</MudTd>
+				<MudTd DataLabel="Actions">
+					<MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="@(() => EditRole(@context.Id))">Editar</MudButton>
+					<MudButton Variant="Variant.Text" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteRole(@context.Id))">Eliminar</MudButton>
+				</MudTd>
+			</RowTemplate>
+			<ToolBarContent>
+				<MudStack Row>
+					<MudText Typo="Typo.h6">Roles</MudText>
+					<MudButton Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateRolPage>()">Crear Rol</MudButton>
+				</MudStack>
+			</ToolBarContent>
+		</MudTable>
+	</ChildContent>
+</Section>
+
+@code {
+
+	void EditRole(Guid roleId)
+	{
+		// Logic to edit the role
+		Console.WriteLine($"Edit role with ID: {roleId}");
+	}
+
+	void DeleteRole(Guid roleId)
+	{
+		// Logic to delete the role
+		Console.WriteLine($"Delete role with ID: {roleId}");
+	}
+
+	async Task<TableData<RolDto>> OnServerDataRequested(TableState ts, CancellationToken ct)
+	{
+		TableData<RolDto> tableData = new TableData<RolDto>();
+		var roles = await RolesApi.GetRoles();
+		tableData.Items = roles.ToList();
+		tableData.TotalItems = roles.Count();
+		return tableData;	
+	}
+}

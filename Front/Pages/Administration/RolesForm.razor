@@ -1,0 +1,74 @@
+@using Front.Components
+@using Shared.DTOs.Roles
+@using Shared.Enums
+
+<MudStack>
+	<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.All)) Value=@permissions.HasFlag(Permissions.All) Label="Seleccionar todo" />
+	<MudText Typo="Typo.subtitle1">Administración</MudText>
+	<MudGrid>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ViewUsers)) Value=@permissions.HasFlag(Permissions.ViewUsers) Label="Ver Usuarios" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.CreateUsers)) Value=@permissions.HasFlag(Permissions.CreateUsers) Label="Crear Usuarios" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.EditUsers)) Value=@permissions.HasFlag(Permissions.EditUsers) Label="Editar Usuarios" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteUsers)) Value=@permissions.HasFlag(Permissions.DeleteUsers) Label="Borrar Usuarios" />
+		</MudItem>
+
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ViewRoles)) Value=@permissions.HasFlag(Permissions.ViewRoles) Label="Ver Roles" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.CreateRoles)) Value=@permissions.HasFlag(Permissions.CreateRoles) Label="Crear Roles" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.UpdateRoles)) Value=@permissions.HasFlag(Permissions.UpdateRoles) Label="Editar Roles" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteRoles)) Value=@permissions.HasFlag(Permissions.DeleteRoles) Label="Borrar Roles" />
+		</MudItem>
+	</MudGrid>
+	<MudDivider />
+	<MudText Typo="Typo.subtitle1">Proyectos</MudText>
+	<MudGrid>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ViewAllProjects)) Value=@permissions.HasFlag(Permissions.ViewAllProjects) Label="Ver todos los proyectos" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ViewProjectUsers)) Value=@permissions.HasFlag(Permissions.ViewProjectUsers) Label="Ver usuarios de proyectos" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ViewProjectKpis)) Value=@permissions.HasFlag(Permissions.ViewProjectKpis) Label="Ver Kpis del proyecto" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.CreateProjects)) Value=@permissions.HasFlag(Permissions.CreateProjects) Label="Crear Proyectos" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.EditProjects)) Value=@permissions.HasFlag(Permissions.EditProjects) Label="Editar Proyectos" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteProjects)) Value=@permissions.HasFlag(Permissions.DeleteProjects) Label="Borrar Proyectos" />
+		</MudItem>
+	</MudGrid>
+	<MudDivider />
+</MudStack>
+
+@code {
+	[Parameter]
+	public Permissions permissions { get; set; } = Permissions.None;
+	[Parameter]
+	public EventCallback<Permissions> PermissionsChanged { get; set; }
+
+	void PermissionsChange(bool active, Permissions permission)
+	{
+		if (active) permissions |= permission;
+		else permissions &= ~permission;
+		Console.WriteLine($"Permissions {(int)permissions}");
+		StateHasChanged();
+		PermissionsChanged.InvokeAsync(permissions);
+	}
+}

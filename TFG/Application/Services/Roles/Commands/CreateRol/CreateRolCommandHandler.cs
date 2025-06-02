@@ -17,8 +17,7 @@ namespace TFG.Application.Services.Roles.Commands.CreateRol
 			};
 
 			await dbContext.Roles.AddAsync(newRol, cancellationToken);
-			await dbContext.AddAsync(cancellationToken, cancellationToken);
-
+			await dbContext.SaveChangesAsync(cancellationToken);
 			RolDto createdRole = newRol.ToRolDto();
 
 			return createdRole;
