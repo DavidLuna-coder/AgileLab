@@ -33,8 +33,8 @@
 
 	void EditRole(Guid roleId)
 	{
-		// Logic to edit the role
-		Console.WriteLine($"Edit role with ID: {roleId}");
+		var parameters = new Dictionary<string, string> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
+		Nav.NavigateTo<UpdateRolPage>(parameters);
 	}
 
 	void DeleteRole(Guid roleId)
@@ -50,5 +50,11 @@
 		tableData.Items = roles.ToList();
 		tableData.TotalItems = roles.Count();
 		return tableData;	
+	}
+
+	string NavigateToUpdateRolePage(Guid roleId)
+	{
+		var parameters = new Dictionary<string, string> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
+		return Nav.GetUrl<UpdateRolPage>(parameters);
 	}
 }

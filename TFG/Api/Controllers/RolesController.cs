@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Roles;
-using System.Threading.Tasks;
 using TFG.Application.Services.Roles.Commands.CreateRol;
+using TFG.Application.Services.Roles.Commands.UpdateRol;
 using TFG.Application.Services.Roles.Queries.GetAllRoles;
 using TFG.Application.Services.Roles.Queries.GetRol;
 
@@ -27,10 +27,16 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateRol(Guid id, CreateRolDto updateRolDto)
+		public async Task<IActionResult> UpdateRol(Guid id, UpdateRolDto updateRolDto)
 		{
-			// Placeholder for updating a role
-			return NotFound(); // Implement the logic to update a role by ID
+			UpdateRolCommand command = new()
+			{
+				Id = id,
+				UpdateRol = updateRolDto
+			};
+
+			var response = await mediator.Send(command);
+			return Ok(response);
 		}
 
 		[HttpGet]

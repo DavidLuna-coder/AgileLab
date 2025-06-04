@@ -10,7 +10,7 @@ namespace TFG.Application.Services.Roles.Commands.CreateRol
 	{
 		public async Task<RolDto> Handle(CreateRolCommand request, CancellationToken cancellationToken)
 		{
-			Rol newRol = new Rol
+			Rol newRol = new()
 			{
 				Name = request.Name,
 				Permissions = request.Permissions

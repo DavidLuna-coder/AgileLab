@@ -1,0 +1,82 @@
+﻿@page "/administration/{RoleId}/update"
+
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Shared.DTOs.Roles
+@using Shared.Enums
+@using Front.Helpers
+@inject IRolesApi rolesApi
+@inject NavigationManager Nav
+
+<Section Title="Edición de rol">
+	<MudStack>
+		@if (isLoading)
+		{
+			<MudProgressCircular Indeterminate Color="Color.Primary" Size="Size.Large" />
+		}
+		else if (rol == null)
+		{
+			<MudText Typo="Typo.h6">No se encontró el rol.</MudText>
+		}
+		else
+		{
+			<MudTextField @bind-Value=model.Name Required RequiredError="El rol debe tener un nombre"> </MudTextField>
+			<RolesForm @bind-Permissions=model.Permissions />
+			<MudStack Row Justify="Justify.FlexEnd">
+				<MudButton Variant="Variant.Filled" OnClick="ReturnToRolesPage">Cancelar</MudButton>
+				<MudButton Disabled=isUpdating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
+			</MudStack>
+		}
+	</MudStack>
+
+</Section>
+
+@code {
+	[Parameter]
+	public string RoleId { get; set; } = string.Empty;
+
+	RolDto rol;
+	UpdateRolDto model;
+	Guid roleId;
+	bool isUpdating;
+	bool isLoading = true;
+	protected override void OnInitialized()
+	{
+		roleId = new Guid(RoleId);
+		base.OnInitialized();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		isLoading = true;
+		try
+		{
+			rol = await rolesApi.GetRol(roleId);
+			model = new UpdateRolDto
+			{
+				Name = rol.Name,
+				Permissions = rol.Permissions
+			};
+		}
+		catch { } // Se mostrará un mensaje de error en la UI si no se encuentra el rol.
+		finally
+		{
+			isLoading = false;
+			await base.OnInitializedAsync();
+		}
+	}
+
+
+	void ReturnToRolesPage()
+	{
+		Nav.NavigateTo<RolesPage>();
+	}
+
+	async Task Save()
+	{
+		isUpdating = true;
+		await rolesApi.UpdateRol(roleId, model);
+		isUpdating = false;
+		ReturnToRolesPage();
+	}
+}

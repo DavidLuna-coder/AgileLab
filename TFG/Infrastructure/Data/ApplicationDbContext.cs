@@ -44,7 +44,7 @@ namespace TFG.Infrastructure.Data
 				   | Permissions.EditUsers
 				   | Permissions.DeleteUsers
 				   | Permissions.CreateRoles
-				   | Permissions.UpdateRoles
+				   | Permissions.EditRoles
 				},
 				new Rol
 				{

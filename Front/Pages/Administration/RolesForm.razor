@@ -26,7 +26,7 @@
 			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.CreateRoles)) Value=@permissions.HasFlag(Permissions.CreateRoles) Label="Crear Roles" />
 		</MudItem>
 		<MudItem>
-			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.UpdateRoles)) Value=@permissions.HasFlag(Permissions.UpdateRoles) Label="Editar Roles" />
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.EditRoles)) Value=@permissions.HasFlag(Permissions.EditRoles) Label="Editar Roles" />
 		</MudItem>
 		<MudItem>
 			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteRoles)) Value=@permissions.HasFlag(Permissions.DeleteRoles) Label="Borrar Roles" />
