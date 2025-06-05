@@ -7,7 +7,7 @@
 @inject NavigationManager Nav
 <Section Title="Roles" >
 	<ChildContent>
-		<MudTable T="RolDto" Hover ServerData="OnServerDataRequested" >
+		<MudTable @ref=table T="RolDto" Hover ServerData="OnServerDataRequested" >
 			<HeaderContent>
 				<MudTh>Rol</MudTh>
 				<MudTh>Acciones</MudTh>
@@ -30,17 +30,17 @@
 </Section>
 
 @code {
-
+	MudTable<RolDto> table;
 	void EditRole(Guid roleId)
 	{
 		var parameters = new Dictionary<string, string> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
 		Nav.NavigateTo<UpdateRolPage>(parameters);
 	}
 
-	void DeleteRole(Guid roleId)
+	async Task DeleteRole(Guid roleId)
 	{
-		// Logic to delete the role
-		Console.WriteLine($"Delete role with ID: {roleId}");
+		await RolesApi.DeleteRol(roleId);
+	 	await table.ReloadServerData();
 	}
 
 	async Task<TableData<RolDto>> OnServerDataRequested(TableState ts, CancellationToken ct)

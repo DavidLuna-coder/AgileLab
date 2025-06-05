@@ -27,5 +27,10 @@ namespace Front.ApiClient.Implementations
 			var response = await client.PutAsync<UpdateRolDto, RolDto>($"api/roles/{id}", updateRolDto);
 			return response;
 		}
+
+		public async Task DeleteRol(Guid id)
+		{
+			await client.DeleteAsync($"api/roles/{id}");
+		}
 	}
 }
