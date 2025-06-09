@@ -13,6 +13,7 @@ using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Projects.Commands.CreateProject;
+using TFG.Application.Services.Projects.Commands.DeleteProject;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
@@ -138,11 +139,12 @@ namespace TFG.Api.Controllers
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteProject(Guid id)
 		{
-			var result = await _projectService.DeleteProject(id);
-			if(!result.Success)
+			DeleteProjectCommand command = new()
 			{
-				return BadRequest();
-			}
+				ProjectId = id
+			};
+
+			await _mediator.Send(command);
 			return NoContent();
 		}
 
