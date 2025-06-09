@@ -12,6 +12,7 @@ using TFG.Api.Exeptions;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
+using TFG.Application.Services.Projects.Commands.CreateProject;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
@@ -121,16 +122,16 @@ namespace TFG.Api.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Project>> CreateProject(CreateProjectDto projectDto)
 		{
-			var project = projectDto.ToProject();
-			var result = await _projectService.CreateProject(projectDto);
-
-			if (!result.Success)
+			CreateProjectCommand command = new()
 			{
-				return BadRequest(result.Errors);
-			}
+				Description = projectDto.Description,
+				Name = projectDto.Name,
+				Template = projectDto.Template,
+				UsersIds = projectDto.UsersIds ?? new List<string>()
+			};
 
-			ProjectDto projectResponse = result.Value.ToProjectDto();
-			return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectResponse);
+			ProjectDto response = await _mediator.Send(command);
+			return CreatedAtAction(nameof(GetProject), new { id = response.Id }, response);
 		}
 
 		// DELETE: api/Projects/5
