@@ -1,7 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NGitLab;
 using NGitLab.Models;
+using TFG.Domain.Entities;
+using TFG.Infrastructure.Data;
 using TFG.OpenProjectClient;
 using TFG.OpenProjectClient.Models.Users;
 using TFG.SonarQubeClient;
@@ -9,7 +12,7 @@ using User = TFG.Domain.Entities.User;
 
 namespace TFG.Application.Services.Users.Commands.RegisterUser
 {
-	public class RegisterUserCommandHandler(IGitLabClient gitLabClient, IOpenProjectClient openProjectClient, ISonarQubeClient sonarQubeClient, UserManager<User> userManager) : IRequestHandler<RegisterUserCommand>
+	public class RegisterUserCommandHandler(IGitLabClient gitLabClient, IOpenProjectClient openProjectClient, ISonarQubeClient sonarQubeClient, UserManager<User> userManager, ApplicationDbContext dbContext) : IRequestHandler<RegisterUserCommand>
 	{
 		public async Task Handle(RegisterUserCommand request, CancellationToken cancellationToken)
 		{
@@ -25,15 +28,19 @@ namespace TFG.Application.Services.Users.Commands.RegisterUser
 				GitlabId = string.Empty,
 				SonarQubeId = string.Empty,
 			};
+
 			try
 			{
 				user.GitlabId = (await RegisterInGitlab(request)).ToString();
 				user.OpenProjectId = (await RegisterOpenProject(request)).Id.ToString();
 				user.SonarQubeId = await RegisterSonarQube(request);
 
-				var result = await userManager.CreateAsync(user, request.Password);
 
-				if(!result.Succeeded)
+				List<Rol> roles = await dbContext.Roles.Where(r => request.Roles.Contains(r.Id)).ToListAsync();
+				user.Roles = roles;
+				var result = await userManager.CreateAsync(user, request.Password);
+				
+				if (!result.Succeeded)
 				{
 					throw new Exception();
 				}
@@ -45,7 +52,6 @@ namespace TFG.Application.Services.Users.Commands.RegisterUser
 				throw new Exception("An error occurred while registering the user.", ex);
 			}
 			// Implement the logic to register a user here
-			throw new NotImplementedException("User registration logic is not implemented yet.");
 		}
 
 		private async Task TryDeleteUserFromServices(User user)

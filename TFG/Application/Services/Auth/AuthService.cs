@@ -36,7 +36,6 @@ namespace TFG.Application.Services.Auth
 				Email = model.Email,
 				EmailConfirmed = true,
 				UserName = model.UserName,
-				IsAdmin = model.IsAdmin,
 				FirstName = model.FirstName,
 				LastName = model.LastName,
 				OpenProjectId = string.Empty,
@@ -96,7 +95,6 @@ namespace TFG.Application.Services.Auth
 		{
 			OpenProjectClient.Models.Users.UserCreation userToCreate = new()
 			{
-				Admin = model.IsAdmin,
 				Email = model.Email,
 				Login = model.UserName,
 				FirstName = model.FirstName,

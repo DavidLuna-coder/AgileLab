@@ -10,4 +10,6 @@ public class RegisterUserCommand : IRequest
 	public required string FirstName { get; set; }
 	public required string LastName { get; set; }
 	public string Language { get; set; } = "es";
+	public List<Guid> Roles { get; set; } = [];
+
 }

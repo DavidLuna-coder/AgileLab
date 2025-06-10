@@ -61,7 +61,7 @@ namespace TFG.Api.Controllers
 
 		// POST api/<UsersController>
 		[HttpPost]
-		public async Task<IActionResult> Post([FromBody] RegistrationDto value)
+		public async Task<IActionResult> Post([FromBody] CreateUserDto value)
 		{
 			RegisterUserCommand command = new()
 			{
