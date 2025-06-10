@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Shared.DTOs;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
+using TFG.Application.Services.Users.Commands;
 using TFG.Domain.Entities;
 
 
@@ -13,7 +16,7 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/users")]
 	[ApiController]
-	public class UsersController(UserManager<User> userManager) : ControllerBase
+	public class UsersController(UserManager<User> userManager, IMediator mediator) : ControllerBase
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		// GET: api/<UsersController>
@@ -49,16 +52,27 @@ namespace TFG.Api.Controllers
 		{
 			var usersQuery = _userManager.Users.AsQueryable();
 			User? user = usersQuery.FirstOrDefault(u => u.Id == id);
-			if(user == null) return NotFound();
-			
+			if (user == null) return NotFound();
+
 			UserDto userDto = user.ToUserDto();
 			return Ok(userDto);
 		}
 
 		// POST api/<UsersController>
 		[HttpPost]
-		public IActionResult Post([FromBody] string value)
+		public async Task<IActionResult> Post([FromBody] RegistrationDto value)
 		{
+			RegisterUserCommand command = new()
+			{
+				Email = value.Email,
+				Password = value.Password,
+				UserName = value.UserName,
+				FirstName = value.FirstName,
+				LastName = value.LastName,
+				Language = value.Language
+			};
+
+			await mediator.Send(command);
 			return Created("", "");
 		}
 
