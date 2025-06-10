@@ -2,7 +2,7 @@
 using TFG.Application.Security;
 using TFG.Infrastructure.Data;
 
-namespace TFG.Application.Services.Users.Commands
+namespace TFG.Application.Services.Users.Commands.RegisterUser
 {
 	public class RegisterUserCommandPermissions(IUserInfoAccessor userInfoAccessor, ApplicationDbContext context) : IPermissionValidator<RegisterUserCommand>
 	{

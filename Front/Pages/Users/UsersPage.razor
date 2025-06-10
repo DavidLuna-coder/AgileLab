@@ -1,0 +1,59 @@
+﻿@page "/users"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Front.Components.Tables
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Users
+@inject IUsersApi UsersApi
+<PageTitle>Usuarios</PageTitle>
+
+
+<Section Title="Usuarios">
+	<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
+		<HeaderContent>
+			<MudTh>Nombre</MudTh>
+			<MudTh>Email</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+			<MudTd DataLabel="Email">@context.Email</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			@if (users.Any())
+			{
+				<MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
+			}
+		</PagerContent>
+	</MudTable>
+</Section>
+
+@code {
+	private HashSet<FilteredUserDto> selectedUsers { get; set; } = new();
+	private List<FilteredUserDto> users = [];
+	[Parameter]
+	public string Class { get; set; } = string.Empty;
+	private IEqualityComparer<FilteredUserDto> comparer = new FilteredUserDtoComparer();
+
+	async Task<TableData<FilteredUserDto>> ReloadUsers(TableState tableState, CancellationToken cancellationToken)
+	{
+		GetUsersQueryParameters getUserQueryParameters = new GetUsersQueryParameters();
+		var request = new FilteredPaginatedRequestDto<GetUsersQueryParameters> { Filters = getUserQueryParameters, Page = tableState.Page, PageSize = tableState.PageSize };
+		var response = await UsersApi.GetFilteredUsers(request);
+		users = response.Items.ToList();
+		return new TableData<FilteredUserDto>() { TotalItems = response.TotalCount, Items = response.Items };
+	}
+
+	class FilteredUserDtoComparer : IEqualityComparer<FilteredUserDto>
+	{
+		public bool Equals(FilteredUserDto? x, FilteredUserDto? y)
+		{
+			if (x == null && y == null) return true;
+			if (x == null || y == null) return false;
+			return x.Id == y.Id &&
+				   x.FirstName == y.FirstName &&
+				   x.LastName == y.LastName &&
+				   x.Email == y.Email;
+		}
+		public int GetHashCode(FilteredUserDto obj) { if (obj == null) return 0; int hashId = obj.Id == null ? 0 : obj.Id.GetHashCode(); int hashFirstName = obj.FirstName == null ? 0 : obj.FirstName.GetHashCode(); int hashLastName = obj.LastName == null ? 0 : obj.LastName.GetHashCode(); int hashEmail = obj.Email == null ? 0 : obj.Email.GetHashCode(); return hashId ^ hashFirstName ^ hashLastName ^ hashEmail; }
+	}
+}

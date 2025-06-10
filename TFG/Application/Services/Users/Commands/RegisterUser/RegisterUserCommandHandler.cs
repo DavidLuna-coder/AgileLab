@@ -7,7 +7,7 @@ using TFG.OpenProjectClient.Models.Users;
 using TFG.SonarQubeClient;
 using User = TFG.Domain.Entities.User;
 
-namespace TFG.Application.Services.Users.Commands
+namespace TFG.Application.Services.Users.Commands.RegisterUser
 {
 	public class RegisterUserCommandHandler(IGitLabClient gitLabClient, IOpenProjectClient openProjectClient, ISonarQubeClient sonarQubeClient, UserManager<User> userManager) : IRequestHandler<RegisterUserCommand>
 	{
@@ -84,7 +84,7 @@ namespace TFG.Application.Services.Users.Commands
 
 		private async Task<UserCreated> RegisterOpenProject(RegisterUserCommand model)
 		{
-			OpenProjectClient.Models.Users.UserCreation userToCreate = new()
+			UserCreation userToCreate = new()
 			{
 				Admin = false,
 				Email = model.Email,

@@ -2,6 +2,7 @@
 @using Front.Pages
 @using Front.Pages.Administration
 @using Front.Pages.Configuration
+@using Front.Pages.Users
 @inject NavigationManager Nav
 <MudStack Spacing="0">
 	<MudItem>
@@ -25,6 +26,14 @@
 			<div class="d-flex flex-row gap-3 align-center">
 				<MudIcon Icon="@Icons.Material.Filled.Lock" />
 				<MudText>Roles</MudText>
+			</div>
+		</MudNavLink>
+	</MudItem>
+	<MudItem>
+		<MudNavLink Href="@(Nav.GetUrl<UsersPage>())">
+			<div class="d-flex flex-row gap-3 align-center">
+				<MudIcon Icon="@Icons.Material.Filled.Person" />
+				<MudText>Usuarios</MudText>
 			</div>
 		</MudNavLink>
 	</MudItem>

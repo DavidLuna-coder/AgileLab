@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace TFG.Application.Services.Users.Commands;
+namespace TFG.Application.Services.Users.Commands.RegisterUser;
 
 public class RegisterUserCommand : IRequest
 {

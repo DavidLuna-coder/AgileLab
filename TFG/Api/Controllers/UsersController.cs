@@ -6,7 +6,8 @@ using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
-using TFG.Application.Services.Users.Commands;
+using TFG.Application.Services.Users.Commands.DeleteUser;
+using TFG.Application.Services.Users.Commands.RegisterUser;
 using TFG.Domain.Entities;
 
 
@@ -84,8 +85,13 @@ namespace TFG.Api.Controllers
 
 		// DELETE api/<UsersController>/5
 		[HttpDelete("{id}")]
-		public void Delete(string id)
+		public async Task<IActionResult> Delete(string id)
 		{
+			DeleteUserCommand command = new() { UserId = id };
+
+			await mediator.Send(command);
+
+			return NoContent();
 		}
 	}
 }
