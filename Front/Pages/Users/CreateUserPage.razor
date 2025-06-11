@@ -1,0 +1,95 @@
+﻿@page "/users/create"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Front.Helpers
+@using Front.Validators
+@using Shared.DTOs.Roles
+@using Shared.DTOs.Users
+@inject IRolesApi RolesApi
+@inject IUsersApi UsersApi
+@inject NavigationManager Nav
+<PageTitle>Crear usuario</PageTitle>
+
+<Section Title="Crear usuarios">
+	<MudForm @ref=form Model="createUserDto" Validation="validator.ValidateValues">
+		<MudStack>
+			<MudGrid>
+				<MudItem xs="6">
+					<MudTextField T="string" Label="Nombre" @bind-Value="createUserDto.FirstName" Required="true" For="@(() => createUserDto.FirstName)" />
+				</MudItem>
+				<MudItem xs="6">
+					<MudTextField T="string" Label="Apellidos" @bind-Value="createUserDto.LastName" Required="true" For="@(() => createUserDto.LastName)" />
+				</MudItem>
+				<MudItem xs="6">
+					<MudTextField T="string" Label="Nombre de usuario" @bind-Value="createUserDto.UserName" Required="true" For="@(() => createUserDto.UserName)" />
+				</MudItem>
+				<MudItem xs="6">
+					<MudTextField T="string" Label="Email" @bind-Value="createUserDto.Email" Required="true" For="@(() => createUserDto.Email)" />
+				</MudItem>
+				<MudItem xs="12">
+					<MudTextField T="string" Label="Contraseña" @bind-Value="createUserDto.Password" Required="true" For="@(() => createUserDto.Password)" InputType="InputType.Password" />
+				</MudItem>
+			</MudGrid>
+			<MudDivider />
+			<MudText Typo="Typo.subtitle1">Roles</MudText>
+			<MudGrid>
+				@foreach(var rol in rolDtos)
+				{
+					<MudItem>
+						<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => RolChange(rol.Id, value)) Value=createUserDto.Roles!.Contains(rol.Id) Label="@rol.Name" />
+					</MudItem>
+				}
+			</MudGrid>
+			<MudStack Row Justify="Justify.FlexEnd">
+				<MudButton Variant="Variant.Filled" OnClick="ReturnToUsersPage">Cancelar</MudButton>
+				<MudButton Disabled=isCreating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
+			</MudStack>
+		</MudStack>
+	</MudForm>
+</Section>
+
+@code {
+	CreateUserDto createUserDto = new CreateUserDto() { Email = string.Empty, FirstName = string.Empty, LastName = string.Empty, Password = string.Empty, UserName = string.Empty, Roles = [] };
+	List<RolDto> rolDtos = new List<RolDto>();
+	bool isLoading = true;
+	bool isCreating = false;
+	MudForm form;
+
+	RegisterFormValidator validator = new RegisterFormValidator();
+
+	protected override async Task OnInitializedAsync()
+	{
+		rolDtos = [.. await RolesApi.GetRoles()];
+		isLoading = true;
+	}
+
+	void RolChange(Guid rolId, bool value)
+	{
+		if (value && !createUserDto.Roles!.Contains(rolId))
+		{
+			createUserDto.Roles.Add(rolId);
+		}
+		else if (!value && createUserDto.Roles!.Contains(rolId))
+		{
+			createUserDto.Roles.Remove(rolId);
+		}
+	}
+
+	void ReturnToUsersPage()
+	{
+		Nav.NavigateTo<UsersPage>();
+	}
+
+	async Task Save()
+	{
+		await form.Validate();
+		if (form.IsValid)
+		{
+			isCreating = true;
+			await UsersApi.Create(createUserDto);
+			isCreating = false;
+			ReturnToUsersPage();			
+		}
+
+	}
+}

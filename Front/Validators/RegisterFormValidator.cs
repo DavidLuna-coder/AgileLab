@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
 using Shared.DTOs;
+using Shared.DTOs.Users;
 
 namespace Front.Validators
 {
-	public class RegisterFormValidator: AbstractValidator<RegistrationDto>
+	public class RegisterFormValidator: AbstractValidator<CreateUserDto>
 	{
 		public RegisterFormValidator()
 		{
@@ -19,7 +20,7 @@ namespace Front.Validators
 
 		public Func<object, string, Task<IEnumerable<string>>> ValidateValues => async (model, propertyName) =>
 		{
-			var result = await ValidateAsync(ValidationContext<RegistrationDto>.CreateWithOptions((RegistrationDto)model, x => x.IncludeProperties(propertyName)));
+			var result = await ValidateAsync(ValidationContext<CreateUserDto>.CreateWithOptions((CreateUserDto)model, x => x.IncludeProperties(propertyName)));
 			if (result.IsValid)
 				return Array.Empty<string>();
 			return result.Errors.Select(e => e.ErrorMessage);

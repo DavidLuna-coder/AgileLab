@@ -26,10 +26,14 @@
 	</MudDrawer>
 
 	<MudMainContent>
-		@Body
+		@if (isAuthenticated)
+		{
+			@Body
+		}
 	</MudMainContent>
 </MudLayout>
 @code {
+	bool isAuthenticated = false;
 	protected override async Task OnInitializedAsync()
 	{
 		await AuthenticationService.Initialize();
@@ -37,6 +41,7 @@
 		{
 			Nav.NavigateTo<Login>();
 		}
+		isAuthenticated = true;
 		await base.OnInitializedAsync();
 	}
 	bool _drawerOpen = true;

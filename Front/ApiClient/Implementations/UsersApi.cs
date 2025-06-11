@@ -12,7 +12,7 @@ namespace Front.ApiClient.Implementations
 
 		public Task Create(CreateUserDto registrationDto, CancellationToken cancellationToken = default)
 		{
-			return _apiHttpClient.PostAsync<CreateUserDto, object>($"{BASE_URL}", registrationDto);
+			return _apiHttpClient.PostAsync<CreateUserDto, object?>($"{BASE_URL}", registrationDto);
 		}
 
 		public Task Delete(string id, CancellationToken cancellationToken = default)
