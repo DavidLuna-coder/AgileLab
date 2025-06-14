@@ -2,21 +2,33 @@
 @using Front.ApiClient.Interfaces
 @using Front.Components
 @using Front.Components.Tables
+@using Front.Helpers
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Users
 @inject IUsersApi UsersApi
+@inject NavigationManager Nav
 <PageTitle>Usuarios</PageTitle>
 
 
 <Section Title="Usuarios">
-	<MudTable Class="@Class" T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
+	<MudTable Class="@Class" @ref=table T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
+		<ToolBarContent>
+			<MudStack Row>
+				<MudText Typo="Typo.h6">Usuarios</MudText>
+				<MudButton Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateUserPage>()">Crear usuario</MudButton>
+			</MudStack>
+		</ToolBarContent>
 		<HeaderContent>
 			<MudTh>Nombre</MudTh>
 			<MudTh>Email</MudTh>
+			<MudTh>Acciones</MudTh>
 		</HeaderContent>
 		<RowTemplate>
 			<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
 			<MudTd DataLabel="Email">@context.Email</MudTd>
+			<MudTd DataLabel="Acciones">
+				<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => Delete(context.Id))" StartIcon="@Icons.Material.Filled.Delete">Eliminar</MudButton>
+			</MudTd>
 		</RowTemplate>
 		<PagerContent>
 			@if (users.Any())
@@ -28,6 +40,7 @@
 </Section>
 
 @code {
+	MudTable<FilteredUserDto> table;
 	private HashSet<FilteredUserDto> selectedUsers { get; set; } = new();
 	private List<FilteredUserDto> users = [];
 	[Parameter]
@@ -50,10 +63,16 @@
 			if (x == null && y == null) return true;
 			if (x == null || y == null) return false;
 			return x.Id == y.Id &&
-				   x.FirstName == y.FirstName &&
-				   x.LastName == y.LastName &&
-				   x.Email == y.Email;
+							x.FirstName == y.FirstName &&
+							x.LastName == y.LastName &&
+							x.Email == y.Email;
 		}
 		public int GetHashCode(FilteredUserDto obj) { if (obj == null) return 0; int hashId = obj.Id == null ? 0 : obj.Id.GetHashCode(); int hashFirstName = obj.FirstName == null ? 0 : obj.FirstName.GetHashCode(); int hashLastName = obj.LastName == null ? 0 : obj.LastName.GetHashCode(); int hashEmail = obj.Email == null ? 0 : obj.Email.GetHashCode(); return hashId ^ hashFirstName ^ hashLastName ^ hashEmail; }
+	}
+
+	async Task Delete(string userId)
+	{
+		await UsersApi.Delete(userId);
+		await table.ReloadServerData();
 	}
 }
