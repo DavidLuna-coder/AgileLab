@@ -7,6 +7,7 @@ using NuGet.Packaging;
 using Shared.DTOs.Filters;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Projects;
+using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Users;
 using TFG.Api.Exeptions;
 using TFG.Api.FilterHandlers;
@@ -14,6 +15,7 @@ using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Projects.Commands.CreateProject;
 using TFG.Application.Services.Projects.Commands.DeleteProject;
+using TFG.Application.Services.Projects.Queries.GetGitlabMetrics;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
@@ -224,6 +226,20 @@ namespace TFG.Api.Controllers
 		private bool ProjectExists(Guid id)
 		{
 			return _context.Projects.Any(e => e.Id == id);
+		}
+
+		[HttpPost("{projectId}/gitlab-metrics")]
+		public async Task<IActionResult> GetGitlabMetrics(Guid projectId, [FromBody] GetGitlabMetricsDto? request)
+		{
+			GetGitlabMetricsQuery query = new()
+			{
+				UserId = request?.UserId,
+				ProjectId = projectId
+			};
+
+			var result = await _mediator.Send(query);
+
+			return Ok(result);
 		}
 	}
 }
