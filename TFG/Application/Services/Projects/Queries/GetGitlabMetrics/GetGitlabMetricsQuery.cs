@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Projects.Metrics;
+using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 
 namespace TFG.Application.Services.Projects.Queries.GetGitlabMetrics;
 
