@@ -17,6 +17,7 @@ using TFG.Application.Services.Projects.Commands.CreateProject;
 using TFG.Application.Services.Projects.Commands.DeleteProject;
 using TFG.Application.Services.Projects.Queries.GetGitlabMetrics;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
+using TFG.Application.Services.Projects.Queries.GetOpenProjectMetrics;
 using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Domain.Entities;
@@ -232,6 +233,20 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> GetGitlabMetrics(Guid projectId, [FromBody] GetGitlabMetricsDto? request)
 		{
 			GetGitlabMetricsQuery query = new()
+			{
+				UserId = request?.UserId,
+				ProjectId = projectId
+			};
+
+			var result = await _mediator.Send(query);
+
+			return Ok(result);
+		}
+
+		[HttpPost("{projectId}/openproject-metrics")]
+		public async Task<IActionResult> GetOpenProjectMetrics(Guid projectId, [FromBody] GetOpenProjectMetricsDto? request)
+		{
+			GetOpenProjectMetricsQuery query = new()
 			{
 				UserId = request?.UserId,
 				ProjectId = projectId
