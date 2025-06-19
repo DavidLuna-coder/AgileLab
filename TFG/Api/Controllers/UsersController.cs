@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
+using System.Threading.Tasks;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
 using TFG.Application.Services.Users.Commands.DeleteUser;
+using TFG.Application.Services.Users.Commands.EditUser;
 using TFG.Application.Services.Users.Commands.RegisterUser;
 using TFG.Domain.Entities;
 
@@ -79,8 +81,16 @@ namespace TFG.Api.Controllers
 
 		// PUT api/<UsersController>/5
 		[HttpPut("{id}")]
-		public void Put(string id, [FromBody] string value)
+		public async Task<IActionResult> Put(string id, [FromBody] EditUserDto request)
 		{
+			EditUserCommand command = new()
+			{
+				UserId = id,
+				RolesIds = request.RolesIds
+			};
+
+			var result = await mediator.Send(command);
+			return Ok(result);
 		}
 
 		// DELETE api/<UsersController>/5
