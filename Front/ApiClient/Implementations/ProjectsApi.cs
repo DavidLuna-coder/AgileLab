@@ -20,9 +20,19 @@ namespace Front.ApiClient.Implementations
 			await client.DeleteAsync($"{PROJECTS_ENDPOINT}/{projectId}");
 		}
 
+		public Task<GitlabMetricsDto> GetGitlabMetrics(Guid projectId, GetGitlabMetricsDto getGitlabMetricsDto)
+		{
+			return client.PostAsync<GetGitlabMetricsDto, GitlabMetricsDto>($"{PROJECTS_ENDPOINT}/{projectId}/gitlab-metrics", getGitlabMetricsDto);
+		}
+
 		public Task<List<AffectedFileDto>> GetMostAffectedFiles(Guid projectId)
 		{
 			return client.GetAsync<List<AffectedFileDto>>($"{PROJECTS_ENDPOINT}/{projectId}/metrics/most-affected-files");
+		}
+
+		public Task<OpenProjectMetricsDto> GetOpenProjectMetrics(Guid projectId, GetOpenProjectMetricsDto getOpenProjectMetricsDto)
+		{
+			return client.PostAsync<GetOpenProjectMetricsDto, OpenProjectMetricsDto>($"{PROJECTS_ENDPOINT}/{projectId}/openproject-metrics", getOpenProjectMetricsDto);
 		}
 
 		public Task<ProjectDto> GetProject(Guid projectId)

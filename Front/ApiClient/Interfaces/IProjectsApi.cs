@@ -17,5 +17,7 @@ namespace Front.ApiClient.Interfaces
         Task<PaginatedResponseDto<TaskSummaryDto>> GetTaskSummary(Guid projectid, FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request);
         Task<ProjectMetricsDto> GetProjectMetrics(Guid projectId);
         Task<List<AffectedFileDto>> GetMostAffectedFiles(Guid projectId);
+        Task<GitlabMetricsDto> GetGitlabMetrics(Guid projectId, GetGitlabMetricsDto getGitlabMetricsDto);
+        Task<OpenProjectMetricsDto> GetOpenProjectMetrics(Guid projectId, GetOpenProjectMetricsDto getOpenProjectMetricsDto);
 	}
 }
