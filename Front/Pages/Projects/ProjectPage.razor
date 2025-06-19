@@ -45,8 +45,7 @@ else
 					</MudTable>
 				</MudTabPanel>
 				<MudTabPanel Text="Tareas">
-					<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
-					<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+					<UsersKPIs ProjectId="@projectId" />
 				</MudTabPanel>
 				<MudTabPanel Text="Kpis">
 					<SonarQubeKpis ProjectId="@ProjectId" />
@@ -108,8 +107,5 @@ else
 		Nav.NavigateTo<ProjectsPage>();
 	}
 
-	Task<PaginatedResponseDto<TaskSummaryDto>> GetTasks(FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
-	{
-		return ProjectsApi.GetTaskSummary(projectId, request);
-	}
+
 }

@@ -1,5 +1,6 @@
 ﻿@page "/projects"
 @using Front.ApiClient.Interfaces
+@using Front.Components
 @using Front.Helpers
 @using Front.Pages.Projects
 @using Microsoft.AspNetCore.Components.Forms
@@ -11,58 +12,47 @@
 <PageTitle>Proyectos</PageTitle>
 
 <MudContainer Fixed="true" Class="mt-6">
-	<MudGrid Class="mb-4">
-		<MudItem xs="4">
-			<MudPaper Class="d-flex align-center justify-center" Height="200px">
-				<MudIcon Class="mr-2" Icon="@Icons.Material.Filled.FolderOpen" Style="font-size: 4rem;"></MudIcon>
-				<MudText Typo="Typo.h5" Style="font-size: 3rem;">
-					Abiertos 
-					<b>
-						@_projects.Count()
-					</b>
-				</MudText>
-			</MudPaper>
-		</MudItem>
-	</MudGrid>
-	<MudTable @ref=@_table T="FilteredProjectDto" Bordered="true" Elevation="1" ServerData="ReloadProjects">
-		<ToolBarContent>
-			<div class="d-flex align-baseline justify-center gap-3">
-				<MudText Typo="Typo.h6">Proyectos</MudText>
-				<MudButton Color="Color.Primary" OnClick="()=>Nav.NavigateTo<CreateProjectPage>()">Crear proyecto</MudButton>
-			</div>
-			<MudSpacer />
-			<MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-		</ToolBarContent>
-		<ColGroup>
-			<col style="width:66%;" />
-			<col style="width:33%;" />
-		</ColGroup>
-		<HeaderContent>
-			<MudTh>Nombre</MudTh>
-			<MudTh>Fecha de creación</MudTh>
-		</HeaderContent>
-		<RowTemplate>
-			<MudTd DataLabel="Nombre"><MudLink Href="@GetProjectUrl(context.Id)">@context.Name</MudLink></MudTd>
-			<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
-		</RowTemplate>
-		<NoRecordsContent>
-			@if (!string.IsNullOrEmpty(_lastSearch))
-			{
-				<MudText>No se han encontrado proyectos que contengan @_lastSearch en el nombre</MudText>
-			}
-			else
-			{
-				<MudText>Todavía no existen proyectos</MudText>
-			}
-			<MudButton OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear un proyecto</MudButton>
-		</NoRecordsContent>
-		<PagerContent>
-			@if (_projects.Any())
-			{
-				<MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
-			}
-		</PagerContent>
-	</MudTable>
+	<Section Title="Proyectos">
+		<MudTable @ref=@_table T="FilteredProjectDto" Bordered="true" Elevation="1" ServerData="ReloadProjects">
+			<ToolBarContent>
+				<div class="d-flex align-baseline justify-center gap-3">
+					<MudText Typo="Typo.h6">Proyectos</MudText>
+					<MudButton Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear proyecto</MudButton>
+				</div>
+				<MudSpacer />
+				<MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+			</ToolBarContent>
+			<ColGroup>
+				<col style="width:66%;" />
+				<col style="width:33%;" />
+			</ColGroup>
+			<HeaderContent>
+				<MudTh>Nombre</MudTh>
+				<MudTh>Fecha de creación</MudTh>
+			</HeaderContent>
+			<RowTemplate>
+				<MudTd DataLabel="Nombre"><MudLink Href="@GetProjectUrl(context.Id)">@context.Name</MudLink></MudTd>
+				<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
+			</RowTemplate>
+			<NoRecordsContent>
+				@if (!string.IsNullOrEmpty(_lastSearch))
+				{
+					<MudText>No se han encontrado proyectos que contengan @_lastSearch en el nombre</MudText>
+				}
+				else
+				{
+					<MudText>Todavía no existen proyectos</MudText>
+				}
+				<MudButton OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear un proyecto</MudButton>
+			</NoRecordsContent>
+			<PagerContent>
+				@if (_projects.Any())
+				{
+					<MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
+				}
+			</PagerContent>
+		</MudTable>
+	</Section>
 </MudContainer>
 
 

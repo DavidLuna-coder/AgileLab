@@ -3,23 +3,6 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 
-<MudGrid Class="mb-4" Spacing="4">
-	<MudItem sm="12" md="6">
-		<MudPaper Class="pa-4">
-			<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-				<MudChart ChartType="ChartType.Pie" InputData="[10,5]" Width="200px" InputLabels=@(["Tareas Completadas", "Tareas Pendientes"]) Height="200px" />
-			</MudStack>
-		</MudPaper>
-	</MudItem>
-
-	<MudItem sm="12" md="6">
-		<MudPaper Class="pa-4">
-			<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-				<MudChart ChartType="ChartType.Pie" InputData="[30,30,10]" Width="200px" Height="200px" />
-			</MudStack>
-		</MudPaper>
-	</MudItem>
-</MudGrid>
 <MudDataGrid Hover Class="@Class" ServerData="GetTaskData" T="TaskSummaryDto">
 	<Columns>
 		<HierarchyColumn T="TaskSummaryDto" />

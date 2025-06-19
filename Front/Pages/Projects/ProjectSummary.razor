@@ -2,15 +2,7 @@
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Projects.Metrics
 @inject IProjectsApi ProjectsApi
-<MudGrid>
-	<MudItem sm="12" md="4">
-		<MudPaper Class="pa-4">
-			<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-				<MudChart ChartType="ChartType.Pie" InputData="[30,40,14,41]" InputLabels=@(["Smells", "Issues"]) Width="200px" Height="200px" />
-			</MudStack>
-		</MudPaper>
-	</MudItem>
-</MudGrid>
+
 <MudText Typo="Typo.h6">Descripción</MudText>
 <MudText Class="mb-4" Typo="Typo.body1">@Project.Description</MudText>
 @code {

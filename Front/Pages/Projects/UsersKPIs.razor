@@ -1,0 +1,29 @@
+﻿@using Front.ApiClient.Interfaces
+@using Front.Components.Tables
+@using Shared.DTOs.Filters
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Projects
+@using Shared.DTOs.Projects.Metrics
+@inject IProjectsApi ProjectsApi
+
+<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
+<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+@code {
+	[Parameter]
+	public Guid ProjectId { get; set; }
+	GitlabMetricsDto gitlabMetricsDto;
+	OpenProjectMetricsDto openProjectMetricsDto;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await ProjectsApi.GetGitlabMetrics(ProjectId, new());
+		await ProjectsApi.GetOpenProjectMetrics(ProjectId, new());
+	}
+
+
+	Task<PaginatedResponseDto<TaskSummaryDto>> GetTasks(FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
+	{
+		return ProjectsApi.GetTaskSummary(ProjectId, request);
+	}
+}
