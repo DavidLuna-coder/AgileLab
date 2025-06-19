@@ -1,7 +1,6 @@
-﻿namespace TFG.Application.Services.Projects.Queries.GetOpenProjectMetrics;
+﻿namespace Shared.DTOs.Projects.Metrics;
 
 public class GetOpenProjectMetricsDto
 {
-	public Guid ProjectId { get; set; }
 	public string? UserId { get; set; }
 }
