@@ -11,7 +11,7 @@
 
 
 <Section Title="Usuarios">
-	<MudTable Class="@Class" @ref=table T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
+	<MudTable Hover Class="@Class" @ref=table T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
 		<ToolBarContent>
 			<MudStack Spacing="4" Row>
 				<MudText Typo="Typo.h6">Usuarios</MudText>

@@ -1,29 +1,97 @@
 ﻿@using Front.ApiClient.Interfaces
+@using Front.Components
 @using Front.Components.Tables
 @using Shared.DTOs.Filters
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Projects.Metrics
+@using Shared.DTOs.Users
 @inject IProjectsApi ProjectsApi
 
-<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
-<TaskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+<MudStack Spacing="3">
+	<MudStack Row Style="width:100%" Justify="Justify.SpaceBetween">
+		<MudText Class="mt-4" Typo="Typo.h6">Tareas</MudText>
+		<MudSelect Clearable Label="Usuarios" FitContent Variant=Variant.Outlined Margin=Margin.Dense T="FilteredUserDto" ValueChanged="ChangeSelectedUser" Value="selectedUser">
+			@foreach (FilteredUserDto user in projectUsers)
+			{
+				<MudSelectItem Value="user">@user.FirstName @user.LastName (@user.Email)</MudSelectItem>
+			}
+		</MudSelect>
+	</MudStack>
+	<MudGrid>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Commits totales" Value=@gitlabMetricsDto.TotalCommits IsLoading=isLoading Icon="@Icons.Material.Filled.History"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Commits por semana" Value=@gitlabMetricsDto.CommitsPerWeek IsLoading=isLoading Icon="@Icons.Material.Filled.Timeline"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Merge Request creadas" Value=@gitlabMetricsDto.CreatedMergeRequests IsLoading=isLoading Icon="@Icons.Material.Filled.CallSplit"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Merge request mergeadas" Value=@gitlabMetricsDto.MergedMergeRequests IsLoading=isLoading Icon="@Icons.Material.Filled.MergeType"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Total de tareas" Value=@openProjectMetricsDto.TotalTasks IsLoading=isLoading Icon="@Icons.Material.Filled.ListAlt"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Tareas asignadas" Value=@openProjectMetricsDto.AssignedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.AssignmentInd"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Tareas creadas" Value=@openProjectMetricsDto.CreatedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.AddTask"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Tareas cerradas" Value=@openProjectMetricsDto.ClosedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.TaskAlt"></KpiCard>
+		</MudItem>
+	</MudGrid>
+	<TaskSummaryTable SelectedUserId="@selectedUser?.Id" @ref=taskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>
+
+</MudStack>
 @code {
 	[Parameter]
 	public Guid ProjectId { get; set; }
-	GitlabMetricsDto gitlabMetricsDto;
-	OpenProjectMetricsDto openProjectMetricsDto;
-
-
+	GitlabMetricsDto gitlabMetricsDto = new();
+	OpenProjectMetricsDto openProjectMetricsDto = new();
+	bool isLoading;
+	List<FilteredUserDto> projectUsers = [];
+	FilteredUserDto? selectedUser;
+	TaskSummaryTable taskSummaryTable;
 	protected override async Task OnInitializedAsync()
 	{
-		await ProjectsApi.GetGitlabMetrics(ProjectId, new());
-		await ProjectsApi.GetOpenProjectMetrics(ProjectId, new());
+		var response = await ProjectsApi.GetProjectUsers(ProjectId, new() { Page = 0, PageSize = -1, Filters = new() });
+		projectUsers = response.Items.ToList();
+		await ReloadData();
 	}
 
 
 	Task<PaginatedResponseDto<TaskSummaryDto>> GetTasks(FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
 	{
+		if(selectedUser?.Id is not null)
+		{
+			request.Filters ??= new();
+			request.Filters.UserIds = [selectedUser.Id];
+		}
 		return ProjectsApi.GetTaskSummary(ProjectId, request);
+	}
+
+	async Task ReloadData()
+	{
+		GetGitlabMetricsDto gitlabFilters = new();
+		GetOpenProjectMetricsDto openProjectFilters = new();
+		if (selectedUser?.Id is not null)
+		{
+			gitlabFilters.UserId = selectedUser.Id;
+			openProjectFilters.UserId = selectedUser.Id;
+		}
+		isLoading = true;
+		gitlabMetricsDto = await ProjectsApi.GetGitlabMetrics(ProjectId, gitlabFilters);
+		openProjectMetricsDto = await ProjectsApi.GetOpenProjectMetrics(ProjectId, openProjectFilters);
+		isLoading = false;
+	}
+
+	async Task ChangeSelectedUser(FilteredUserDto newSelectedUser)
+	{
+		selectedUser = newSelectedUser;
+		await Task.WhenAll(ReloadData());
 	}
 }

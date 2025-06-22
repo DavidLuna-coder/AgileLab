@@ -3,7 +3,7 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 
-<MudDataGrid Hover Class="@Class" ServerData="GetTaskData" T="TaskSummaryDto">
+<MudDataGrid @ref=table Hover Class="@Class" ServerData="GetTaskData" T="TaskSummaryDto">
 	<Columns>
 		<HierarchyColumn T="TaskSummaryDto" />
 		<PropertyColumn Property="t => t.Name" Title="Nombre" />
@@ -43,13 +43,35 @@
 	public Func<FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>, Task<PaginatedResponseDto<TaskSummaryDto>>> GetServerData { get; set; }
 	[Parameter]
 	public string Class { get; set; }
+	[Parameter]
+	public string? SelectedUserId { get; set; }
+	MudDataGrid<TaskSummaryDto> table;
 	async Task<GridData<TaskSummaryDto>> GetTaskData(GridState<TaskSummaryDto> gridState)
 	{
 		if (GetServerData == null) return new();
 
 		FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> requestDto = gridState.ToFilteredPaginatedRequestDto<GetTaskSummaryQueryFilters, TaskSummaryDto>();
 		requestDto.Filters = new();
+		if (!string.IsNullOrEmpty(SelectedUserId))
+		{
+			requestDto.Filters.UserIds = [SelectedUserId];
+		}
+		Console.WriteLine(SelectedUserId);
 		PaginatedResponseDto<TaskSummaryDto> response = await GetServerData(requestDto);
 		return response.ToGridData<TaskSummaryDto>();
+	}
+
+	public Task ReloadData()
+	{
+		if(table is null)
+		{
+			return Task.CompletedTask;
+		}
+		return table.ReloadServerData();
+	}
+	protected override async Task OnParametersSetAsync()
+	{
+		await ReloadData();
+		await base.OnParametersSetAsync();
 	}
 }
