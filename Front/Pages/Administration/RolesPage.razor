@@ -15,14 +15,14 @@
 			<RowTemplate>
 				<MudTd DataLabel="Role Name">@context.Name</MudTd>
 				<MudTd DataLabel="Actions">
-					<MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="@(() => EditRole(@context.Id))">Editar</MudButton>
-					<MudButton Variant="Variant.Text" Color="Color.Secondary" Size="Size.Small" OnClick="@(() => DeleteRole(@context.Id))">Eliminar</MudButton>
+					<MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="@(() => EditRole(@context.Id))">Editar</MudButton>
+					<MudButton StartIcon="@Icons.Material.Filled.Delete" Variant=Variant.Text Color="Color.Error" OnClick="@(() => DeleteRole(@context.Id))">Eliminar</MudButton>
 				</MudTd>
 			</RowTemplate>
 			<ToolBarContent>
 				<MudStack Row>
 					<MudText Typo="Typo.h6">Roles</MudText>
-					<MudButton Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateRolPage>()">Crear Rol</MudButton>
+					<MudButton Color=Color.Primary Variant="Variant.Filled" OnClick="() => Nav.NavigateTo<CreateRolPage>()">Crear Rol</MudButton>
 				</MudStack>
 			</ToolBarContent>
 		</MudTable>

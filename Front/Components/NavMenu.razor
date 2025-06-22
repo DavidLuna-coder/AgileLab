@@ -4,36 +4,39 @@
 @using Front.Pages.Configuration
 @using Front.Pages.Users
 @inject NavigationManager Nav
-<MudStack Spacing="0">
-	<MudItem>
-		<MudNavLink Href="@(Nav.GetUrl<ProjectsPage>())">
-			<div class="d-flex flex-row gap-3 align-center">
-				<MudIcon Icon="@Icons.Material.Filled.Folder" />
-				<MudText>Proyectos</MudText>
-			</div>
-		</MudNavLink>
-	</MudItem>
+<MudStack Style="height:100%" Spacing="0" Justify="Justify.SpaceBetween">
+	<MudStack Spacing="0">
+		<MudItem>
+			<MudNavLink Href="@(Nav.GetUrl<ProjectsPage>())">
+				<div class="d-flex flex-row gap-3 align-center">
+					<MudIcon Icon="@Icons.Material.Filled.Folder" />
+					<MudText>Proyectos</MudText>
+				</div>
+			</MudNavLink>
+		</MudItem>
+
+		<MudItem>
+			<MudNavLink Href="@(Nav.GetUrl<RolesPage>())">
+				<div class="d-flex flex-row gap-3 align-center">
+					<MudIcon Icon="@Icons.Material.Filled.Lock" />
+					<MudText>Roles</MudText>
+				</div>
+			</MudNavLink>
+		</MudItem>
+		<MudItem>
+			<MudNavLink Href="@(Nav.GetUrl<UsersPage>())">
+				<div class="d-flex flex-row gap-3 align-center">
+					<MudIcon Icon="@Icons.Material.Filled.Person" />
+					<MudText>Usuarios</MudText>
+				</div>
+			</MudNavLink>
+		</MudItem>
+	</MudStack>
 	<MudItem>
 		<MudNavLink Href="@(Nav.GetUrl<ConfigurationPage>())">
 			<div class="d-flex flex-row gap-3 align-center">
 				<MudIcon Icon="@Icons.Material.Filled.Settings" />
 				<MudText>Configuración</MudText>
-			</div>
-		</MudNavLink>
-	</MudItem>
-	<MudItem>
-		<MudNavLink Href="@(Nav.GetUrl<RolesPage>())">
-			<div class="d-flex flex-row gap-3 align-center">
-				<MudIcon Icon="@Icons.Material.Filled.Lock" />
-				<MudText>Roles</MudText>
-			</div>
-		</MudNavLink>
-	</MudItem>
-	<MudItem>
-		<MudNavLink Href="@(Nav.GetUrl<UsersPage>())">
-			<div class="d-flex flex-row gap-3 align-center">
-				<MudIcon Icon="@Icons.Material.Filled.Person" />
-				<MudText>Usuarios</MudText>
 			</div>
 		</MudNavLink>
 	</MudItem>
