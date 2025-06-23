@@ -41,7 +41,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		{
 			var gitlabProject = await CreateAndConfigureGitlabProject(request, user, projectUsers);
 			gitlabId = gitlabProject.Id;
-			sonarQubeProjectKey = request.Name.ToLowerInvariant().Replace(" ", "_");
+			sonarQubeProjectKey = request.Name.ToLowerInvariant().Replace(" ", "-");
 			string sonarQubeRepositoryIdentifier = gitlabProject.Id.ToString();
 			BoundedProject sonarQubeProject = await CreateAndConfigureSonarQubeProject(request, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
 			OPProjectCreated opProjectCreated = await CreateAndConfigureOpenProjectProject(request, projectUsers);
@@ -50,10 +50,10 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 
 			return createdProject.ToProjectDto();
 		}
-		catch
+		catch(Exception ex)
 		{
 			await CancelCreation(gitlabId, sonarQubeProjectKey, openprojectProjectId);
-			throw new Exception("An error occurred while creating the project. The project has been rolled back and no changes have been made.");
+			throw new Exception($"An error occurred while creating the project. The project has been rolled back and no changes have been made: {ex.Message}", ex.InnerException);
 		}
 	}
 
