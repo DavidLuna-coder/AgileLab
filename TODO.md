@@ -1,11 +1,6 @@
 # TODO
-
-Es necesario conectar los datos de SonarQube, Gitlab y OpenProject
-Conexión de Commit con Tarea con análisis de SonarQube.
-
-Sería interesante capturar las actualizaciones de esos eventos. Hay dos opciones.
-Polling o trabajar con webhooks.
-
-Datos y enlaces
-OpenProject -> MergeRequestId -> Commits -> SonarQube
-SonarQube -> Commit -> Merge Request -> OP Task
+[] Añadir campo de si se cumple el deadline de las tareas. 
+[] Crear experiencias a nive de usuario o proyecto. Con JWT de GoRace. (Primero con usuarios)
+[] Posibles variables de Jira.
+[] Histórico de variables de proyecto. Para que pueda el profesor ver la evolución
+[] Config GoRace proyecto y usuario
