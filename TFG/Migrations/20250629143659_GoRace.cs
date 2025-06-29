@@ -6,11 +6,33 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TFG.Migrations
 {
     /// <inheritdoc />
-    public partial class GoRaceExperience_Added : Migration
+    public partial class GoRace : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Notifications_Projects_ProjectId",
+                table: "Notifications");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Notifications",
+                table: "Notifications");
+
+            migrationBuilder.RenameTable(
+                name: "Notifications",
+                newName: "Notification");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Notifications_ProjectId",
+                table: "Notification",
+                newName: "IX_Notification_ProjectId");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Notification",
+                table: "Notification",
+                column: "Id");
+
             migrationBuilder.CreateTable(
                 name: "GoRaceExperiences",
                 columns: table => new
@@ -31,22 +53,22 @@ namespace TFG.Migrations
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "GoRacePlatformExperienceProject",
                 columns: table => new
                 {
-                    GoRacePlatformExperienceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlatformExperiencesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GoRacePlatformExperienceProject", x => new { x.GoRacePlatformExperienceId, x.ProjectsId });
+                    table.PrimaryKey("PK_GoRacePlatformExperienceProject", x => new { x.PlatformExperiencesId, x.ProjectsId });
                     table.ForeignKey(
-                        name: "FK_GoRacePlatformExperienceProject_GoRaceExperiences_GoRacePlatformExperienceId",
-                        column: x => x.GoRacePlatformExperienceId,
+                        name: "FK_GoRacePlatformExperienceProject_GoRaceExperiences_PlatformExperiencesId",
+                        column: x => x.PlatformExperiencesId,
                         principalTable: "GoRaceExperiences",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -67,16 +89,54 @@ namespace TFG.Migrations
                 name: "IX_GoRacePlatformExperienceProject_ProjectsId",
                 table: "GoRacePlatformExperienceProject",
                 column: "ProjectsId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Notification_Projects_ProjectId",
+                table: "Notification",
+                column: "ProjectId",
+                principalTable: "Projects",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Notification_Projects_ProjectId",
+                table: "Notification");
+
             migrationBuilder.DropTable(
                 name: "GoRacePlatformExperienceProject");
 
             migrationBuilder.DropTable(
                 name: "GoRaceExperiences");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Notification",
+                table: "Notification");
+
+            migrationBuilder.RenameTable(
+                name: "Notification",
+                newName: "Notifications");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Notification_ProjectId",
+                table: "Notifications",
+                newName: "IX_Notifications_ProjectId");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Notifications",
+                table: "Notifications",
+                column: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Notifications_Projects_ProjectId",
+                table: "Notifications",
+                column: "ProjectId",
+                principalTable: "Projects",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }

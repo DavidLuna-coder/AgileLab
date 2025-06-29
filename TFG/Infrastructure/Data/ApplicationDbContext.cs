@@ -10,7 +10,6 @@ namespace TFG.Infrastructure.Data
 	{
 		public DbSet<User> Users { get; set; }
 		public DbSet<Project> Projects { get; set; }
-		public DbSet<Notification> Notifications { get; set; }
 		public DbSet<Rol> Roles { get; set; }
 		public DbSet<ApiConfiguration> ApiConfigurations { get; set; }
 		//public DbSet<Template> Templates { get; set; }
@@ -65,15 +64,6 @@ namespace TFG.Infrastructure.Data
 				.HasValue<GoRaceExperience>("Base")
 				.HasValue<GoRaceProjectExperience>("Project")
 				.HasValue<GoRacePlatformExperience>("Platform");
-
-			builder.Entity<GoRaceProjectExperience>()
-				.HasOne(e => e.Project)
-				.WithMany()
-				.HasForeignKey(e => e.ProjectId);
-
-			builder.Entity<GoRacePlatformExperience>()
-				.HasMany(e => e.Projects)
-				.WithMany();
 
 			base.OnModelCreating(builder);
 		}

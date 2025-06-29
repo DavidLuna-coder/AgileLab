@@ -11,5 +11,7 @@
         public string GitlabId { get; set; }
         public int OpenProjectId { get; set; }
         public string SonarQubeProjectKey { get; set; }
+        public ICollection<GoRaceProjectExperience> ProjectExperiences { get; set; }
+        public ICollection<GoRacePlatformExperience> PlatformExperiences { get; set; }
 	}
 }

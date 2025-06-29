@@ -23,6 +23,7 @@ builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
 builder.Services.AddScoped<IUsersApi, UsersApi>();
 builder.Services.AddScoped<IApiIntegrationsApi, ApiIntegrationsApi>();
 builder.Services.AddScoped<IRolesApi, RolesApi>();
+builder.Services.AddScoped<IGoRaceExperiencesApi, Front.ApiClient.Implementations.GoRaceExperiences.GoRaceExperiencesApi>();
 builder.Services.AddScoped<ProjectStateService>();
 
 await builder.Build().RunAsync();

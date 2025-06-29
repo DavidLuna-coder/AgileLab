@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NGitLab;
 using NGitLab.Models;
@@ -18,7 +19,7 @@ using User = TFG.Domain.Entities.User;
 
 namespace TFG.Application.Services.Auth
 {
-	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration,  ISonarQubeClient sonarQubeClient, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient, IOpenProjectClient openProjectClient) : IAuthService
+	public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, ISonarQubeClient sonarQubeClient, IDateTimeProvider dateTimeProvider, IGitLabClient gitLabClient, IOpenProjectClient openProjectClient, ILogger<AuthService> logger) : IAuthService
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly SignInManager<User> _signInManager = signInManager;
@@ -27,6 +28,8 @@ namespace TFG.Application.Services.Auth
 		private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 		private readonly IGitLabClient _gitLabClient = gitLabClient;
 		private readonly IOpenProjectClient _openProjectClient = openProjectClient;
+		private readonly ILogger<AuthService> _logger = logger;
+
 		#region REGISTER
 		public async Task<IdentityResult> RegisterAsync(RegistrationDto model)
 		{
@@ -68,7 +71,7 @@ namespace TFG.Application.Services.Auth
 				user.SonarQubeId = sonarUser.Id;
 
 				//App registration
-				                                                                                                                                                                
+
 				var result = await _userManager.CreateAsync(user, model.Password);
 				if (!result.Succeeded)
 				{
@@ -102,7 +105,7 @@ namespace TFG.Application.Services.Auth
 				Language = "es",
 				Password = model.Password
 			};
-			UserCreated userCreated	= await	_openProjectClient.Users.CreateAsync(userToCreate);
+			UserCreated userCreated = await _openProjectClient.Users.CreateAsync(userToCreate);
 			return userCreated;
 		}
 
@@ -120,7 +123,7 @@ namespace TFG.Application.Services.Auth
 				NGitLab.Models.User gitlabUser = await _gitLabClient.Users.CreateAsync(user);
 				return gitlabUser.Id;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				return new([ex.Message]);
 			}
@@ -130,13 +133,20 @@ namespace TFG.Application.Services.Auth
 		#region LOGIN
 		public async Task<Result<LoginResponseDto>> LoginAsync(LoginRequestDto model)
 		{
+			_logger.LogInformation("Intentando login para email: {Email}", model.Email);
 			var user = await _userManager.FindByEmailAsync(model.Email);
-			if (user == null) return new Result<LoginResponseDto>(["User Not found"]);
+			if (user == null)
+			{
+				_logger.LogWarning("Usuario no encontrado para email: {Email}", model.Email);
+				return new Result<LoginResponseDto>(["User Not found"]);
+			}
 			var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, false, false);
 			if (!result.Succeeded)
 			{
+				_logger.LogWarning("Login fallido para email: {Email} (UserName: {UserName})", model.Email, user.UserName);
 				return new Result<LoginResponseDto>(["Login failed"]);
 			}
+			_logger.LogInformation("Login exitoso para email: {Email} (UserName: {UserName})", model.Email, user.UserName);
 
 			var token = GenerateJwtToken(user);
 			return new LoginResponseDto()

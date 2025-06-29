@@ -16,5 +16,5 @@ public class GoRaceProjectExperience : GoRaceExperience
 
 public class GoRacePlatformExperience : GoRaceExperience
 {
-	public ICollection<Project> Projects { get; set; } = [];
+	public ICollection<Project> Projects { get; set; }
 }

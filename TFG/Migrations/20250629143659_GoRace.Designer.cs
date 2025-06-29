@@ -12,8 +12,8 @@ using TFG.Infrastructure.Data;
 namespace TFG.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250629122714_GoRaceExperience_Added")]
-    partial class GoRaceExperience_Added
+    [Migration("20250629143659_GoRace")]
+    partial class GoRace
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,13 +27,13 @@ namespace TFG.Migrations
 
             modelBuilder.Entity("GoRacePlatformExperienceProject", b =>
                 {
-                    b.Property<Guid>("GoRacePlatformExperienceId")
+                    b.Property<Guid>("PlatformExperiencesId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProjectsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("GoRacePlatformExperienceId", "ProjectsId");
+                    b.HasKey("PlatformExperiencesId", "ProjectsId");
 
                     b.HasIndex("ProjectsId");
 
@@ -279,7 +279,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notification");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.Project", b =>
@@ -464,7 +464,7 @@ namespace TFG.Migrations
                 {
                     b.HasOne("TFG.Domain.Entities.GoRacePlatformExperience", null)
                         .WithMany()
-                        .HasForeignKey("GoRacePlatformExperienceId")
+                        .HasForeignKey("PlatformExperiencesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -570,7 +570,7 @@ namespace TFG.Migrations
             modelBuilder.Entity("TFG.Domain.Entities.GoRaceProjectExperience", b =>
                 {
                     b.HasOne("TFG.Domain.Entities.Project", "Project")
-                        .WithMany()
+                        .WithMany("ProjectExperiences")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -581,6 +581,8 @@ namespace TFG.Migrations
             modelBuilder.Entity("TFG.Domain.Entities.Project", b =>
                 {
                     b.Navigation("Notifications");
+
+                    b.Navigation("ProjectExperiences");
                 });
 #pragma warning restore 612, 618
         }
