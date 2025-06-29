@@ -2,6 +2,7 @@
 using Shared.DTOs.Projects.Metrics;
 using Shared.DTOs.Roles;
 using Shared.DTOs.Users;
+using Shared.DTOs.Experiences;
 using TFG.Domain.Entities;
 using TFG.SonarQubeClient.Models.Metrics;
 
@@ -75,6 +76,21 @@ namespace TFG.Api.Mappers
 				Name = rol.Name,
 				Permissions = rol.Permissions
 			};
+		}
+
+		public static GoRaceExperienceDto ToGoRaceExperienceDto(this GoRaceExperience exp)
+		{
+			var dto = new GoRaceExperienceDto
+			{
+				Id = exp.Id,
+				Name = exp.Name,
+				Token = exp.Token,
+				Description = exp.Description,
+				CreatedAt = exp.CreatedAt,
+				ProjectId = (exp is GoRaceProjectExperience p) ? p.ProjectId : null,
+				ProjectsIds = (exp is GoRacePlatformExperience plat) ? plat.Projects?.Select(pr => pr.Id).ToList() : null
+			};
+			return dto;
 		}
 	}
 }

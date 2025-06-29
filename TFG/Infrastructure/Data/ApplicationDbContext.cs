@@ -14,6 +14,10 @@ namespace TFG.Infrastructure.Data
 		public DbSet<Rol> Roles { get; set; }
 		public DbSet<ApiConfiguration> ApiConfigurations { get; set; }
 		//public DbSet<Template> Templates { get; set; }
+		public DbSet<GoRaceExperience> GoRaceExperiences { get; set; }
+		public DbSet<GoRaceProjectExperience> GoRaceProjectExperiences { get; set; }
+		public DbSet<GoRacePlatformExperience> GoRacePlatformExperiences { get; set; }
+
 		public ApplicationDbContext(DbContextOptions options) : base(options)
 		{
 		}
@@ -55,6 +59,22 @@ namespace TFG.Infrastructure.Data
 					Permissions = Permissions.None
 				}
 			);
+
+			builder.Entity<GoRaceExperience>()
+				.HasDiscriminator<string>("ExperienceType")
+				.HasValue<GoRaceExperience>("Base")
+				.HasValue<GoRaceProjectExperience>("Project")
+				.HasValue<GoRacePlatformExperience>("Platform");
+
+			builder.Entity<GoRaceProjectExperience>()
+				.HasOne(e => e.Project)
+				.WithMany()
+				.HasForeignKey(e => e.ProjectId);
+
+			builder.Entity<GoRacePlatformExperience>()
+				.HasMany(e => e.Projects)
+				.WithMany();
+
 			base.OnModelCreating(builder);
 		}
 
