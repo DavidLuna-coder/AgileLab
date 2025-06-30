@@ -23,9 +23,6 @@ namespace TFG.Application.Services.Experiences.Queries
 				case GoRaceExperienceTypes.Platform:
 					exp = await _context.GoRacePlatformExperiences.Include(e => e.Projects).FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 					break;
-				case GoRaceExperienceTypes.Base:
-					exp = await _context.GoRaceExperiences.FirstOrDefaultAsync(e => e.Id == request.Id && e.GetType() == typeof(GoRaceExperience), cancellationToken);
-					break;
 				default:
 					return null;
 			}
@@ -47,9 +44,6 @@ namespace TFG.Application.Services.Experiences.Queries
 					break;
 				case GoRaceExperienceTypes.Platform:
 					exps = (await _context.GoRacePlatformExperiences.Include(e => e.Projects).ToListAsync(cancellationToken)).Cast<GoRaceExperience>();
-					break;
-				case GoRaceExperienceTypes.Base:
-					exps = await _context.GoRaceExperiences.Where(e => e.GetType() == typeof(GoRaceExperience)).ToListAsync(cancellationToken);
 					break;
 				default:
 					exps = Enumerable.Empty<GoRaceExperience>();

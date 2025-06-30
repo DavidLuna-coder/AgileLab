@@ -1,177 +1,118 @@
 @page "/experiences"
 @using Front.Components
+@using Front.Helpers
+@using Front.Pages.Experiences
 @inject IGoRaceExperiencesApi ExperiencesApi
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Experiencias</PageTitle>
 
 <MudContainer Fixed="true" Class="mt-6">
-    <Section Title="Experiencias GoRace">
-        <MudTable Hover @ref="_table" T="GoRaceExperienceDto" Bordered="true" Elevation="1" ServerData="ReloadExperiences">
-            <ToolBarContent>
-                <div class="d-flex align-baseline justify-center gap-3">
-                    <MudText Typo="Typo.h6">Experiencias</MudText>
-                    <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="ShowCreateDialog">Crear experiencia</MudButton>
-                </div>
-                <MudSpacer />
-                <MudSelect T="string" @bind-Value="_selectedType" Label="Tipo" Dense Class="me-2" Style="min-width: 180px">
-                    <MudSelectItem Value="@GoRaceExperienceTypes.Project">Proyecto</MudSelectItem>
-                    <MudSelectItem Value="@GoRaceExperienceTypes.Platform">Plataforma</MudSelectItem>
-                    <MudSelectItem Value="@GoRaceExperienceTypes.Base">Base</MudSelectItem>
-                </MudSelect>
-                <MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Buscar por nombre" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>Nombre</MudTh>
-                <MudTh>Tipo</MudTh>
-                <MudTh>Fecha de creación</MudTh>
-                <MudTh>Acciones</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Nombre">@context.Name</MudTd>
-                <MudTd DataLabel="Tipo">@context.ExperienceType</MudTd>
-                <MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
-                <MudTd DataLabel="Acciones">
-                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => ShowEditDialog(context)">Editar</MudButton>
-                    <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeleteExperience(context.Id)">Eliminar</MudButton>
-                </MudTd>
-            </RowTemplate>
-            <NoRecordsContent>
-                <MudText>No se han encontrado experiencias.</MudText>
-                <MudButton OnClick="ShowCreateDialog">Crear una experiencia</MudButton>
-            </NoRecordsContent>
-            <PagerContent>
-                @if (_experiences.Any())
-                {
-                    <MudTablePager AllItemsText="Todas las experiencias" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
-                }
-            </PagerContent>
-        </MudTable>
-    </Section>
+	<Section Title="Experiencias GoRace">
+		<MudTable Hover @ref="_table" T="GoRaceExperienceDto" Bordered="true" Elevation="1" ServerData="ReloadExperiences">
+			<ToolBarContent>
+				<MudStack Row>
+					<MudText Typo="Typo.h6">Experiencias</MudText>
+					<MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="ShowCreateDialog">Crear experiencia</MudButton>
+				</MudStack>
+				<MudSpacer />
+				<MudSelect T="string" @bind-Value="_selectedType" Placeholder="Tipo" FitContent Dense Class="me-2" Style="min-width: 180px">
+					<MudSelectItem Value="@GoRaceExperienceTypes.Project">Proyecto</MudSelectItem>
+					<MudSelectItem Value="@GoRaceExperienceTypes.Platform">Plataforma</MudSelectItem>
+				</MudSelect>
+				<MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Buscar por nombre" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+			</ToolBarContent>
+			<HeaderContent>
+				<MudTh>Nombre</MudTh>
+				<MudTh>Tipo</MudTh>
+				<MudTh>Fecha de creación</MudTh>
+				<MudTh>Acciones</MudTh>
+			</HeaderContent>
+			<RowTemplate>
+				<MudTd DataLabel="Nombre">@context.Name</MudTd>
+				<MudTd DataLabel="Tipo">@context.ExperienceType</MudTd>
+				<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
+				<MudTd DataLabel="Acciones">
+					<MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => ShowEditDialog(context)">Editar</MudButton>
+					<MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeleteExperience(context.Id)">Eliminar</MudButton>
+				</MudTd>
+			</RowTemplate>
+			<NoRecordsContent>
+				<MudText>No se han encontrado experiencias.</MudText>
+				<MudButton OnClick="ShowCreateDialog">Crear una experiencia</MudButton>
+			</NoRecordsContent>
+			<PagerContent>
+				@if (_experiences.Any())
+				{
+					<MudTablePager AllItemsText="Todas las experiencias" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
+				}
+			</PagerContent>
+		</MudTable>
+	</Section>
 </MudContainer>
 
-<MudDialog @bind-IsOpen="_dialogOpen">
-    <DialogContent>
-        <MudForm @ref="_form" Model="_editExperience">
-            <MudTextField T="string" @bind-Value="_editExperience.Name" Label="Nombre" Required="true" />
-            <MudTextField T="string" @bind-Value="_editExperience.Description" Label="Descripción" />
-            <MudTextField T="string" @bind-Value="_editExperience.Token" Label="Token" />
-            <MudSelect T="string" @bind-Value="_editExperience.ExperienceType" Label="Tipo" Required="true">
-                <MudSelectItem Value="@GoRaceExperienceTypes.Project">Proyecto</MudSelectItem>
-                <MudSelectItem Value="@GoRaceExperienceTypes.Platform">Plataforma</MudSelectItem>
-                <MudSelectItem Value="@GoRaceExperienceTypes.Base">Base</MudSelectItem>
-            </MudSelect>
-        </MudForm>
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="SaveExperience" Color="Color.Primary">Guardar</MudButton>
-        <MudButton OnClick="() => _dialogOpen = false">Cancelar</MudButton>
-    </DialogActions>
-</MudDialog>
 
 @code {
-    MudTable<GoRaceExperienceDto> _table;
-    string _search = string.Empty;
-    string _selectedType = GoRaceExperienceTypes.Project;
-    IEnumerable<GoRaceExperienceDto> _experiences = [];
-    bool _dialogOpen = false;
-    GoRaceExperienceDto _editExperience = new();
-    MudForm _form;
-    bool _isEdit = false;
+	MudTable<GoRaceExperienceDto> _table;
+	string _search = string.Empty;
+	string _selectedType = GoRaceExperienceTypes.Project;
+	IEnumerable<GoRaceExperienceDto> _experiences = [];
+	bool _dialogOpen = false;
+	GoRaceExperienceDto _editExperience = new();
+	MudForm _form;
+	bool _isEdit = false;
 
-    private async Task<TableData<GoRaceExperienceDto>> ReloadExperiences(TableState tableState, CancellationToken cancellationToken)
-    {
-        var all = await ExperiencesApi.GetAll(_selectedType);
-        var filtered = string.IsNullOrWhiteSpace(_search) ? all : all.Where(e => e.Name.Contains(_search, StringComparison.OrdinalIgnoreCase)).ToList();
-        _experiences = filtered;
-        return new TableData<GoRaceExperienceDto> { Items = _experiences.Skip(tableState.Page * tableState.PageSize).Take(tableState.PageSize), TotalItems = _experiences.Count() };
-    }
+	private async Task<TableData<GoRaceExperienceDto>> ReloadExperiences(TableState tableState, CancellationToken cancellationToken)
+	{
+		var all = await ExperiencesApi.GetAll(_selectedType);
+		var filtered = string.IsNullOrWhiteSpace(_search) ? all : all.Where(e => e.Name.Contains(_search, StringComparison.OrdinalIgnoreCase)).ToList();
+		_experiences = filtered;
+		return new TableData<GoRaceExperienceDto> { Items = _experiences.Skip(tableState.Page * tableState.PageSize).Take(tableState.PageSize), TotalItems = _experiences.Count() };
+	}
 
-    private async void OnKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Key == "Enter")
-        {
-            await _table.ReloadServerData();
-        }
-    }
+	private async void OnKeyDown(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+		{
+			await _table.ReloadServerData();
+		}
+	}
 
-    void ShowCreateDialog()
-    {
-        _editExperience = new GoRaceExperienceDto { ExperienceType = _selectedType };
-        _isEdit = false;
-        _dialogOpen = true;
-    }
+	async Task ShowCreateDialog()
+	{
+		Nav.NavigateTo<CreateExperiencePage>();
+	}
 
-    void ShowEditDialog(GoRaceExperienceDto exp)
-    {
-        _editExperience = new GoRaceExperienceDto
-        {
-            Id = exp.Id,
-            Name = exp.Name,
-            Description = exp.Description,
-            Token = exp.Token,
-            ExperienceType = exp.ExperienceType,
-            ProjectId = exp.ProjectId,
-            ProjectsIds = exp.ProjectsIds
-        };
-        _isEdit = true;
-        _dialogOpen = true;
-    }
+	void ShowEditDialog(GoRaceExperienceDto exp)
+	{
+		_editExperience = new GoRaceExperienceDto
+		{
+			Id = exp.Id,
+			Name = exp.Name,
+			Description = exp.Description,
+			Token = exp.Token,
+			ExperienceType = exp.ExperienceType,
+			ProjectId = exp.ProjectId,
+			ProjectsIds = exp.ProjectsIds
+		};
+		_isEdit = true;
+		_dialogOpen = true;
+	}
 
-    async Task SaveExperience()
-    {
-        await _form.Validate();
-        if (!_form.IsValid) return;
-        try
-        {
-            if (_isEdit)
-            {
-                var updateDto = new UpdateGoRaceExperienceDto
-                {
-                    Name = _editExperience.Name,
-                    Description = _editExperience.Description,
-                    Token = _editExperience.Token,
-                    ProjectId = _editExperience.ProjectId,
-                    ProjectsIds = _editExperience.ProjectsIds
-                };
-                await ExperiencesApi.Update(_editExperience.Id, updateDto);
-                Snackbar.Add("Experiencia actualizada", Severity.Success);
-            }
-            else
-            {
-                var createDto = new CreateGoRaceExperienceDto
-                {
-                    Name = _editExperience.Name,
-                    Description = _editExperience.Description,
-                    Token = _editExperience.Token,
-                    ExperienceType = _editExperience.ExperienceType,
-                    ProjectId = _editExperience.ProjectId,
-                    ProjectsIds = _editExperience.ProjectsIds
-                };
-                await ExperiencesApi.Create(createDto);
-                Snackbar.Add("Experiencia creada", Severity.Success);
-            }
-            _dialogOpen = false;
-            await _table.ReloadServerData();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
-    }
 
-    async Task DeleteExperience(Guid id)
-    {
-        try
-        {
-            await ExperiencesApi.Delete(id);
-            Snackbar.Add("Experiencia eliminada", Severity.Success);
-            await _table.ReloadServerData();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
-    }
+	async Task DeleteExperience(Guid id)
+	{
+		try
+		{
+			await ExperiencesApi.Delete(id);
+			Snackbar.Add("Experiencia eliminada", Severity.Success);
+			await _table.ReloadServerData();
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+		}
+	}
 }

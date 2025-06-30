@@ -4,6 +4,5 @@ namespace Shared.DTOs.Experiences
 	{
 		public const string Project = "Project";
 		public const string Platform = "Platform";
-		public const string Base = "Base";
 	}
 }

@@ -15,7 +15,7 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> GetAll([FromQuery] string experienceType)
 		{
 			if (string.IsNullOrWhiteSpace(experienceType))
-				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}, {GoRaceExperienceTypes.Base}");
+				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}");
 			var result = await mediator.Send(new GetAllGoRaceExperiencesQuery { ExperienceType = experienceType });
 			return Ok(result);
 		}
@@ -24,7 +24,7 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> Get(Guid id, [FromQuery] string experienceType)
 		{
 			if (string.IsNullOrWhiteSpace(experienceType))
-				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}, {GoRaceExperienceTypes.Base}");
+				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}");
 			var result = await mediator.Send(new GetGoRaceExperienceQuery { Id = id, ExperienceType = experienceType });
 			if (result == null) return NotFound();
 			return Ok(result);
