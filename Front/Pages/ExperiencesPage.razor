@@ -12,14 +12,14 @@
 
 <MudContainer Fixed="true" Class="mt-6">
 	<Section Title="Experiencias GoRace">
-		<MudTable Hover @ref="_table" T="GoRaceExperienceDto" Bordered="true" Elevation="1" ServerData="ReloadExperiences">
+		<MudTable Hover @ref="_table" T="GoRaceExperienceDto" Elevation="1" ServerData="ReloadExperiences">
 			<ToolBarContent>
 				<MudStack Row>
 					<MudText Typo="Typo.h6">Experiencias</MudText>
 					<MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="ShowCreateDialog">Crear experiencia</MudButton>
 				</MudStack>
 				<MudSpacer />
-				<MudSelect T="string" @bind-Value="_selectedType" Placeholder="Tipo" FitContent Dense Class="me-2" Style="min-width: 180px">
+				<MudSelect T="string" Value="_selectedType" ValueChanged=TypeChanged Placeholder="Tipo" FitContent Dense Class="me-2" Style="min-width: 180px">
 					<MudSelectItem Value="@GoRaceExperienceTypes.Project">Proyecto</MudSelectItem>
 					<MudSelectItem Value="@GoRaceExperienceTypes.Platform">Plataforma</MudSelectItem>
 				</MudSelect>
@@ -27,17 +27,15 @@
 			</ToolBarContent>
 			<HeaderContent>
 				<MudTh>Nombre</MudTh>
-				<MudTh>Tipo</MudTh>
 				<MudTh>Fecha de creación</MudTh>
 				<MudTh>Acciones</MudTh>
 			</HeaderContent>
 			<RowTemplate>
 				<MudTd DataLabel="Nombre">@context.Name</MudTd>
-				<MudTd DataLabel="Tipo">@context.ExperienceType</MudTd>
 				<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
 				<MudTd DataLabel="Acciones">
 					<MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => ShowEditDialog(context)">Editar</MudButton>
-					<MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => DeleteExperience(context.Id)">Eliminar</MudButton>
+					<MudButton Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteExperience(context.Id)">Eliminar</MudButton>
 				</MudTd>
 			</RowTemplate>
 			<NoRecordsContent>
@@ -115,5 +113,11 @@
 		{
 			Snackbar.Add($"Error: {ex.Message}", Severity.Error);
 		}
+	}
+
+	void TypeChanged(string type)
+	{
+		_selectedType = type;
+		_table.ReloadServerData();
 	}
 }
