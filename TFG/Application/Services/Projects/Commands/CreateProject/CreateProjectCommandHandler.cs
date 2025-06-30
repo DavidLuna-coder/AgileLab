@@ -53,7 +53,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		catch(Exception ex)
 		{
 			await CancelCreation(gitlabId, sonarQubeProjectKey, openprojectProjectId);
-			throw new Exception($"An error occurred while creating the project. The project has been rolled back and no changes have been made: {ex.Message}", ex.InnerException);
+			throw;
 		}
 	}
 
@@ -101,7 +101,12 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 
 		string gilabId = dopSettings.DopSettings.First(ds => ds.Type == "gitlab").Id;
 		ProjectBinding projectBinding = new() { DevOpsPlatformSettingId = gilabId, ProjectKey = projectKey, ProjectName = projectDto.Name, RepositoryIdentifier = repositoryIdentifier, Monorepo = true };
-		BoundedProject project = await sonarQubeClient.DopTranslations.BoundProjectAsync(projectBinding);
+
+		// Retry logic extraído a función
+		BoundedProject project = await RetryAsync(
+			() => sonarQubeClient.DopTranslations.BoundProjectAsync(projectBinding),
+			new int[] { 0, 300, 1000 }
+		);
 
 		foreach (var user in usersToInclude)
 		{
@@ -109,6 +114,27 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 			await sonarQubeClient.Permissions.AddUserAsync(userPermission);
 		}
 		return project;
+	}
+
+	private async Task<T> RetryAsync<T>(Func<Task<T>> action, int[] delays)
+	{
+		Exception? lastException = null;
+		for (int attempt = 0; attempt < delays.Length; attempt++)
+		{
+			if (delays[attempt] > 0)
+				await Task.Delay(delays[attempt]);
+			try
+			{
+				return await action();
+			}
+			catch (Exception ex)
+			{
+				lastException = ex;
+				if (attempt == delays.Length - 1)
+					throw;
+			}
+		}
+		throw lastException!;
 	}
 
 	private async Task<OPProjectCreated> CreateAndConfigureOpenProjectProject(CreateProjectCommand projectDto, IEnumerable<User> users)
