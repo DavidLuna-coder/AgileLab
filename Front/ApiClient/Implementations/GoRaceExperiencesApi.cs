@@ -1,5 +1,6 @@
 using Shared.DTOs.Experiences;
 using Front.ApiClient.Interfaces;
+using Front.ApiClient.Interfaces.GoRaceExperiences;
 
 namespace Front.ApiClient.Implementations.GoRaceExperiences
 {
@@ -17,12 +18,12 @@ namespace Front.ApiClient.Implementations.GoRaceExperiences
 			return client.GetAsync<GoRaceExperienceDto>($"{ENDPOINT}/{id}?experienceType={experienceType}");
 		}
 
-		public Task<GoRaceExperienceDto> Create(CreateGoRaceExperienceDto dto)
+		public Task Create(CreateGoRaceExperienceDto dto)
 		{
 			return client.PostAsync<CreateGoRaceExperienceDto, GoRaceExperienceDto>(ENDPOINT, dto);
 		}
 
-		public Task<GoRaceExperienceDto> Update(Guid id, UpdateGoRaceExperienceDto dto)
+		public Task Update(Guid id, UpdateGoRaceExperienceDto dto)
 		{
 			return client.PutAsync<UpdateGoRaceExperienceDto, GoRaceExperienceDto>($"{ENDPOINT}/{id}", dto);
 		}

@@ -43,7 +43,13 @@ namespace Front.ApiClient.Implementations
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
         }
-
+        public async Task PostAsync<TRequest>(string endpoint, TRequest data)
+        {
+			string json = JsonSerializer.Serialize(data, _serializerOptions);
+			var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+			var response = await Client.PostAsync(endpoint, jsonContent);
+			response.EnsureSuccessStatusCode();
+		}
         public async Task<TResponse> PutAsync<TRequest,TResponse>(string endpoint, TRequest data)
         {
             var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
@@ -52,8 +58,14 @@ namespace Front.ApiClient.Implementations
 			var content = await response.Content.ReadAsStringAsync();
 			return JsonSerializer.Deserialize<TResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 		}
+		public async Task PutAsync<TRequest>(string endpoint, TRequest data)
+		{
+			var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+			var response = await Client.PutAsync(endpoint, jsonContent);
+			response.EnsureSuccessStatusCode();
+		}
 
-        public async Task DeleteAsync(string endpoint)
+		public async Task DeleteAsync(string endpoint)
         {
             var response = await Client.DeleteAsync(endpoint);
             response.EnsureSuccessStatusCode();
