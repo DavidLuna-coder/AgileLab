@@ -2,29 +2,27 @@
 @using Front.Components
 @using Front.Helpers
 @using Front.Pages
+@using MudBlazor
 @inherits LayoutComponentBase
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
-<MudThemeProvider />
+
+<MudThemeProvider Theme="_myTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-
-<MudThemeProvider />
-
 <MudLayout>
-
 	<MudAppBar Elevation="1">
 		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
 		<MudText Typo="Typo.h5" Class="ml-3">AgileLab</MudText>
 		<MudSpacer />
+		<MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="ToggleDarkMode" Color="Color.Inherit" Edge="Edge.End" />
 		<MudIconButton OnClick="Logout" Icon="@Icons.Material.Filled.Logout"></MudIconButton>
 		<MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
 	</MudAppBar>
 	<MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
 		<NavMenu />
 	</MudDrawer>
-
 	<MudMainContent>
 		@if (isAuthenticated)
 		{
@@ -32,8 +30,70 @@
 		}
 	</MudMainContent>
 </MudLayout>
+
 @code {
 	bool isAuthenticated = false;
+	bool _drawerOpen = true;
+	bool _isDarkMode = false;
+    MudTheme _myTheme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#4F46E5",          // Indigo-600
+            Secondary = "#0D9488",        // Teal-600
+            Tertiary = "#E879F9",         // Pink-400
+            Background = "#F9FAFB",       // Gray-50
+            Surface = "#FFFFFF",          // Blanco limpio
+            AppbarBackground = "#FFFFFF",
+            AppbarText = "#1F2937",       // Gray-800
+            DrawerBackground = "#FFFFFF",
+            DrawerText = "#1F2937",
+            DrawerIcon = "#4F46E5",       // Íconos con color primario
+            TextPrimary = "#1F2937",      // Gray-800
+            TextSecondary = "#4B5563",    // Gray-600
+            ActionDefault = "#6B7280",    // Gray-500
+            ActionDisabled = "#D1D5DB",   // Gray-300
+            ActionDisabledBackground = "#F3F4F6", // Gray-100
+            TableLines = "#E5E7EB",       // Gray-200
+            TableStriped = "#F9FAFB",     // Fondo fila alterna
+            LinesDefault = "#E5E7EB",     // Bordes y divisores
+            Divider = "#E5E7EB",
+            OverlayDark = "rgba(0,0,0,0.5)",
+            Success = "#16A34A",          // Green-600
+            Error = "#DC2626",            // Red-600
+            Warning = "#D97706",          // Amber-600
+            Info = "#2563EB",             // Blue-600
+        },
+
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#6366F1",           // Indigo-500 (más contraste)
+            Secondary = "#2DD4BF",         // Teal-400
+            Tertiary = "#F472B6",          // Pink-400
+            Background = "#1E1E2F",        // Oscuro suave
+            Surface = "#2A2A40",           // Fondo de componentes
+            AppbarBackground = "#111827",  // Gray-900
+            AppbarText = "#F9FAFB",        // Blanco casi puro
+            DrawerBackground = "#1F2937",  // Gray-800
+            DrawerText = "#F9FAFB",
+            DrawerIcon = "#A5B4FC",        // Indigo-300
+            TextPrimary = "#F3F4F6",       // Gray-100
+            TextSecondary = "#9CA3AF",     // Gray-400
+            ActionDefault = "#9CA3AF",
+            ActionDisabled = "#4B5563",
+            ActionDisabledBackground = "#374151", // Gray-700
+            TableLines = "#374151",        // Líneas de tabla en gris oscuro
+            TableStriped = "#1F2937",      // Fondo fila alterna
+            LinesDefault = "#374151",
+            Divider = "#374151",
+            OverlayDark = "rgba(255,255,255,0.05)",
+            Success = "#22C55E",           // Green-500
+            Error = "#EF4444",             // Red-500
+            Warning = "#FBBF24",           // Amber-400
+            Info = "#3B82F6",              // Blue-500
+        }
+    };
+
 	protected override async Task OnInitializedAsync()
 	{
 		await AuthenticationService.Initialize();
@@ -44,12 +104,14 @@
 		isAuthenticated = true;
 		await base.OnInitializedAsync();
 	}
-	bool _drawerOpen = true;
 	void DrawerToggle()
 	{
 		_drawerOpen = !_drawerOpen;
 	}
-
+	void ToggleDarkMode()
+	{
+		_isDarkMode = !_isDarkMode;
+	}
 	void Logout()
 	{
 		AuthenticationService.Logout();
