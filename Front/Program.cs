@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Front;
 using Front.ApiClient.Implementations;
 using Front.ApiClient.Interfaces;
+using Front.ApiClient.Interfaces.GoRaceExperiences;
 using Front.Services.StateService;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;

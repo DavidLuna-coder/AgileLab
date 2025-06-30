@@ -4,8 +4,8 @@ public class GoRaceExperience
 {
 	public Guid Id { get; set; }
 	public string Name { get; set; }
-	public string Token { get; set; }
-	public string Description { get; set; }
+	public string? Token { get; set; }
+	public string? Description { get; set; }
 	public DateTimeOffset CreatedAt { get; set; }
 }
 public class GoRaceProjectExperience : GoRaceExperience

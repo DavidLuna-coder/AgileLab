@@ -15,8 +15,8 @@ namespace Shared.DTOs.Experiences
 	public class CreateGoRaceExperienceDto
 	{
 		public string Name { get; set; }
-		public string Token { get; set; }
-		public string Description { get; set; }
+		public string? Token { get; set; }
+		public string? Description { get; set; }
 		public string ExperienceType { get; set; } // "Base", "Project", "Platform"
 		public Guid? ProjectId { get; set; }
 		public List<Guid>? ProjectsIds { get; set; }
@@ -25,8 +25,8 @@ namespace Shared.DTOs.Experiences
 	public class UpdateGoRaceExperienceDto
 	{
 		public string Name { get; set; }
-		public string Token { get; set; }
-		public string Description { get; set; }
+		public string? Token { get; set; }
+		public string? Description { get; set; }
 		public Guid? ProjectId { get; set; }
 		public List<Guid>? ProjectsIds { get; set; }
 	}

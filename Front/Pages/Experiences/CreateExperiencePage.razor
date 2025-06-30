@@ -1,8 +1,12 @@
 @inject IGoRaceExperiencesApi ExperiencesApi
 @page "/experiences/create"
+@using Front.ApiClient.Interfaces.GoRaceExperiences
 @using Front.Components
 @using Front.Helpers
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Projects
 @inject NavigationManager NavigationManager
+@inject IProjectsApi ProjectApi
 <PageTitle>Crear experiencia</PageTitle>
 
 <Section Title="Crear experiencia">
@@ -17,7 +21,10 @@
 			</MudSelect>
 			@if (_createExperience.ExperienceType == GoRaceExperienceTypes.Project)
 			{
-				//Selector de proyecto con buscador por nombre
+				<MudAutocomplete @bind-Value=selectedProject Required Label="Proyecto" ShowProgressIndicator DebounceInterval=200 T="FilteredProjectDto" ToStringFunc=@((p) => p.Name) SearchFunc="SearchProjects">
+
+				</MudAutocomplete>
+				//Selector de proyecto con buscador por nomb</ItemSelectedTemplate>re
 			}
 			else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 			{
@@ -36,7 +43,7 @@
 
 	MudForm _form;
 	CreateGoRaceExperienceDto _createExperience = new();
-
+	FilteredProjectDto? selectedProject;
 	async Task SaveExperience()
 	{
 		await _form.Validate();
@@ -45,11 +52,26 @@
 			return;
 		}
 
+		_createExperience.ProjectId = selectedProject?.Id;
 		await ExperiencesApi.Create(_createExperience);
 		NavigationManager.NavigateTo<ExperiencesPage>();
 	}
 
 	void Cancel() => NavigationManager.NavigateTo<ExperiencesPage>();
 
-
+	async Task<IEnumerable<FilteredProjectDto>> SearchProjects(string s, CancellationToken token)
+	{
+		if (token.IsCancellationRequested)
+		{
+			return Enumerable.Empty<FilteredProjectDto>();
+		}
+		FilteredPaginatedRequestDto<ProjectQueryParameters> request = new()
+		{
+			Filters = new() { Name = s ?? string.Empty },
+			Page = 0,
+			PageSize = 10
+		};
+		var result = await ProjectApi.GetProjects(request);
+		return result.Items;
+	}
 }
