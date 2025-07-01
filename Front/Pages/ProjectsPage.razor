@@ -1,6 +1,7 @@
 ﻿@page "/projects"
 @using Front.ApiClient.Interfaces
 @using Front.Components
+@using Front.Components.Tables
 @using Front.Helpers
 @using Front.Pages.Projects
 @using Microsoft.AspNetCore.Components.Forms
@@ -12,81 +13,33 @@
 <PageTitle>Proyectos</PageTitle>
 
 <MudContainer Fixed="true" Class="mt-6">
-	<Section Title="Proyectos">
-		<MudTable Hover @ref=@_table T="FilteredProjectDto" Bordered="true" Elevation="1" ServerData="ReloadProjects">
-			<ToolBarContent>
-				<div class="d-flex align-baseline justify-center gap-3">
-					<MudText Typo="Typo.h6">Proyectos</MudText>
-					<MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear proyecto</MudButton>
-				</div>
-				<MudSpacer />
-				<MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-			</ToolBarContent>
-			<ColGroup>
-				<col style="width:66%;" />
-				<col style="width:33%;" />
-			</ColGroup>
-			<HeaderContent>
-				<MudTh>Nombre</MudTh>
-				<MudTh>Fecha de creación</MudTh>
-			</HeaderContent>
-			<RowTemplate>
-				<MudTd DataLabel="Nombre"><MudLink Href="@GetProjectUrl(context.Id)">@context.Name</MudLink></MudTd>
-				<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
-			</RowTemplate>
-			<NoRecordsContent>
-				@if (!string.IsNullOrEmpty(_lastSearch))
-				{
-					<MudText>No se han encontrado proyectos que contengan @_lastSearch en el nombre</MudText>
-				}
-				else
-				{
-					<MudText>Todavía no existen proyectos</MudText>
-				}
-				<MudButton OnClick="() => Nav.NavigateTo<CreateProjectPage>()">Crear un proyecto</MudButton>
-			</NoRecordsContent>
-			<PagerContent>
-				@if (_projects.Any())
-				{
-					<MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
-				}
-			</PagerContent>
-		</MudTable>
-	</Section>
+    <Section Title="Proyectos">
+        <ProjectTable 
+            GetProjects="GetProjectsAsync"
+            OnCreateProjectClicked="NavigateToCreateProject"
+            GetProjectUrl="GetProjectUrl">
+            <TableActions>
+                <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="NavigateToCreateProject">Crear proyecto</MudButton>
+            </TableActions>
+        </ProjectTable>
+    </Section>
 </MudContainer>
 
-
 @code {
-	MudTable<FilteredProjectDto> _table;
-	string _search = string.Empty;
-	string _lastSearch = string.Empty;
-	IEnumerable<FilteredProjectDto> _projects = [];
+    private async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
+    {
+        return await ProjectsApi.GetProjects(request);
+    }
 
+    private void NavigateToCreateProject()
+    {
+        Nav.NavigateTo<CreateProjectPage>();
+    }
 
-	private async Task<TableData<FilteredProjectDto>> ReloadProjects(TableState tableState, CancellationToken cancellationToken)
-	{
-		_lastSearch = _search;
-		ProjectQueryParameters projectQueryParameters = new ProjectQueryParameters() { Name = _search };
-		var request = new FilteredPaginatedRequestDto<ProjectQueryParameters> { Page = tableState.Page, PageSize = tableState.PageSize, Filters = projectQueryParameters };
-		var response = (await ProjectsApi.GetProjects(request));
-
-		_projects = response.Items;
-		var tableData = new TableData<FilteredProjectDto> { Items = _projects, TotalItems = response.TotalCount };
-		return tableData;
-	}
-
-	private async void OnKeyDown(KeyboardEventArgs args)
-	{
-		if (args.Key == "Enter")
-		{
-			await _table.ReloadServerData();
-		}
-	}
-
-	private string GetProjectUrl(Guid ProjectId)
-	{
-		Dictionary<string, string> parameters = new Dictionary<string, string>();
-		parameters.Add(nameof(ProjectPage.ProjectId), ProjectId.ToString());
-		return Nav.GetUrl<ProjectPage>(parameters);
-	}
+    private string GetProjectUrl(Guid ProjectId)
+    {
+        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        parameters.Add(nameof(ProjectPage.ProjectId), ProjectId.ToString());
+        return Nav.GetUrl<ProjectPage>(parameters);
+    }
 }

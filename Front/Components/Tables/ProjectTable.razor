@@ -1,0 +1,95 @@
+@using Front.Helpers
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Projects
+
+<MudTable Hover @ref=_table T="FilteredProjectDto" Bordered="true" Elevation="1" ServerData="ReloadProjects">
+    <ToolBarContent>
+        <div class="d-flex align-baseline justify-center gap-3">
+            <MudText Typo="Typo.h6">Proyectos</MudText>
+            @if (TableActions != null)
+            {
+                @TableActions
+            }
+        </div>
+        <MudSpacer />
+        <MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width:66%;" />
+        <col style="width:33%;" />
+    </ColGroup>
+    <HeaderContent>
+        <MudTh>Nombre</MudTh>
+        <MudTh>Fecha de creación</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nombre"><MudLink Href="@GetProjectUrl(context.Id)">@context.Name</MudLink></MudTd>
+        <MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        @if (!string.IsNullOrEmpty(_lastSearch))
+        {
+            <MudText>No se han encontrado proyectos que contengan @_lastSearch en el nombre</MudText>
+        }
+        else
+        {
+            <MudText>Todavía no existen proyectos</MudText>
+        }
+        @if (OnCreateProjectClicked.HasDelegate)
+        {
+            <MudButton OnClick="OnCreateProject">Crear un proyecto</MudButton>
+        }
+    </NoRecordsContent>
+    <PagerContent>
+        @if (_projects.Any())
+        {
+            <MudTablePager AllItemsText="Todos los proyectos" RowsPerPageString="Elementos por página" InfoFormat="{first_item}-{last_item} de {all_items}" />
+        }
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<FilteredProjectDto> _table;
+    private string _search = string.Empty;
+    private string _lastSearch = string.Empty;
+    private IEnumerable<FilteredProjectDto> _projects = Array.Empty<FilteredProjectDto>();
+
+    [Parameter]
+    public Func<FilteredPaginatedRequestDto<ProjectQueryParameters>, Task<PaginatedResponseDto<FilteredProjectDto>>>? GetProjects { get; set; }
+
+    [Parameter]
+    public EventCallback OnCreateProjectClicked { get; set; }
+
+    [Parameter]
+    public Func<Guid, string> GetProjectUrl { get; set; }
+
+    [Parameter]
+    public RenderFragment? TableActions { get; set; }
+
+    private async Task<TableData<FilteredProjectDto>> ReloadProjects(TableState tableState, CancellationToken cancellationToken)
+    {
+        _lastSearch = _search;
+        var projectQueryParameters = new ProjectQueryParameters { Name = _search };
+        var request = new FilteredPaginatedRequestDto<ProjectQueryParameters> { Page = tableState.Page, PageSize = tableState.PageSize, Filters = projectQueryParameters };
+        if (GetProjects is null)
+            return new TableData<FilteredProjectDto> { Items = Array.Empty<FilteredProjectDto>(), TotalItems = 0 };
+        var response = await GetProjects(request);
+        _projects = response.Items;
+        return new TableData<FilteredProjectDto> { Items = _projects, TotalItems = response.TotalCount };
+    }
+
+    private async void OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await _table.ReloadServerData();
+        }
+    }
+
+    private void OnCreateProject()
+    {
+        OnCreateProjectClicked.InvokeAsync();
+    }
+}
