@@ -69,7 +69,7 @@ else
 
 	void GoToProjectPage()
 	{
-		Dictionary<string, string> parameters = new() { { nameof(ProjectPage.ProjectId), ProjectId } };
+		Dictionary<string, object> parameters = new() { { nameof(ProjectPage.ProjectId), ProjectId } };
 		Nav.NavigateTo<ProjectPage>(parameters);
 	}
 }

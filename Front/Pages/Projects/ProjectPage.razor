@@ -96,7 +96,7 @@ else
 
 	void OnEditButtonClick()
 	{
-		Dictionary<string, string> parameters = new();
+		Dictionary<string, object> parameters = new();
 		parameters.Add(nameof(EditProjectPage.ProjectId), project.Id.ToString());
 		Nav.NavigateTo<EditProjectPage>(parameters);
 	}

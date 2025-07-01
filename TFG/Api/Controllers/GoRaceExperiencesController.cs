@@ -25,7 +25,7 @@ namespace TFG.Api.Controllers
 		{
 			if (string.IsNullOrWhiteSpace(experienceType))
 				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}");
-			var result = await mediator.Send(new GetGoRaceExperienceQuery { Id = id, ExperienceType = experienceType });
+			var result = await mediator.Send(new GetGoRaceExperienceQuery { Id = id });
 			if (result == null) return NotFound();
 			return Ok(result);
 		}

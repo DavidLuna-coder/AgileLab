@@ -6,7 +6,6 @@ namespace TFG.Application.Services.Experiences.Queries
 	public class GetGoRaceExperienceQuery : IRequest<GoRaceExperienceDto?>
 	{
 		public Guid Id { get; set; }
-		public string ExperienceType { get; set; } // Use GoRaceExperienceTypes constants
 	}
 
 	public class GetAllGoRaceExperiencesQuery : IRequest<List<GoRaceExperienceDto>>

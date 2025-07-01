@@ -33,7 +33,7 @@
 	MudTable<RolDto> table;
 	void EditRole(Guid roleId)
 	{
-		var parameters = new Dictionary<string, string> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
+		var parameters = new Dictionary<string, object> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
 		Nav.NavigateTo<UpdateRolPage>(parameters);
 	}
 
@@ -54,7 +54,7 @@
 
 	string NavigateToUpdateRolePage(Guid roleId)
 	{
-		var parameters = new Dictionary<string, string> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
+		var parameters = new Dictionary<string, object> { { nameof(UpdateRolPage.RoleId), roleId.ToString() } };
 		return Nav.GetUrl<UpdateRolPage>(parameters);
 	}
 }

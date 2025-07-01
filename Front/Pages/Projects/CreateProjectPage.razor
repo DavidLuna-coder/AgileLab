@@ -56,7 +56,7 @@
 			createProjectDto.UsersIds = users.Select(u => u.Id).ToList();
 			loading = true;
 			ProjectDto createdProject = await ProjectsApi.CreateProject(createProjectDto);
-			Dictionary<string, string> parameters = new();
+			Dictionary<string, object> parameters = new();
 			parameters.Add(nameof(ProjectPage.ProjectId), createdProject.Id.ToString());
 			Nav.NavigateTo<ProjectPage>(parameters);
 		}

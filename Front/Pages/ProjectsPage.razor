@@ -38,7 +38,7 @@
 
     private string GetProjectUrl(Guid ProjectId)
     {
-        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
         parameters.Add(nameof(ProjectPage.ProjectId), ProjectId.ToString());
         return Nav.GetUrl<ProjectPage>(parameters);
     }

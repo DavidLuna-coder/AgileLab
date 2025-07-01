@@ -1,0 +1,26 @@
+﻿@page "/experiences/{ExperienceId:guid}"
+
+
+@using Front.ApiClient.Interfaces.GoRaceExperiences
+@using Front.Helpers
+@using Shared.DTOs.Pagination
+@using Shared.DTOs.Projects
+@inject NavigationManager NavigationManager
+@inject IProjectsApi ProjectApi
+@inject IGoRaceExperiencesApi ExperiencesApi
+
+<PageTitle>Actualizar experiencia</PageTitle>
+
+
+@code {
+	[Parameter]
+	public Guid ExperienceId { get; set; }
+
+	UpdateGoRaceExperienceDto _updateExperience = new();
+
+	protected override Task OnInitializedAsync()
+	{
+		var result = ExperiencesApi.Get(ExperienceId);
+		return base.OnInitializedAsync();
+	}
+}

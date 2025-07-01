@@ -4,7 +4,6 @@ using Shared.DTOs.Experiences;
 using TFG.Api.Mappers;
 using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
-using System.Linq;
 
 namespace TFG.Application.Services.Experiences.Queries
 {
@@ -14,18 +13,17 @@ namespace TFG.Application.Services.Experiences.Queries
 		public GetGoRaceExperienceQueryHandler(ApplicationDbContext context) => _context = context;
 		public async Task<GoRaceExperienceDto?> Handle(GetGoRaceExperienceQuery request, CancellationToken cancellationToken)
 		{
-			GoRaceExperience? exp = null;
-			switch (request.ExperienceType)
+			GoRaceExperience? exp = await _context.GoRaceProjectExperiences
+				.Include(e => e.Project)
+				.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+
+			if (exp == null)
 			{
-				case GoRaceExperienceTypes.Project:
-					exp = await _context.GoRaceProjectExperiences.Include(e => e.Project).FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
-					break;
-				case GoRaceExperienceTypes.Platform:
-					exp = await _context.GoRacePlatformExperiences.Include(e => e.Projects).FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
-					break;
-				default:
-					return null;
+				exp = await _context.GoRacePlatformExperiences
+					.Include(e => e.Projects)
+					.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 			}
+
 			return exp?.ToGoRaceExperienceDto();
 		}
 	}

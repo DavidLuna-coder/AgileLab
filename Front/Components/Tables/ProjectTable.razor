@@ -4,7 +4,7 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 
-<MudTable Hover @ref=_table T="FilteredProjectDto" Bordered="true" Elevation="1" ServerData="ReloadProjects" MultiSelection="@MultiSelection" SelectedItems="SelectedProjects" SelectedItemsChanged="OnSelectedProjectsChanged">
+<MudTable Hover @ref=_table T="FilteredProjectDto" Comparer=_comparer Bordered="true" Elevation="1" ServerData="ReloadProjects" MultiSelection="@MultiSelection" SelectedItems="SelectedProjects" SelectedItemsChanged="OnSelectedProjectsChanged">
 	<ToolBarContent>
 		<div class="d-flex align-baseline justify-center gap-3">
 			<MudText Typo="Typo.h6">Proyectos</MudText>
@@ -91,6 +91,12 @@
 	public EventCallback<HashSet<FilteredProjectDto>> SelectedProjectsChanged { get; set; }
 	[Parameter]
 	public bool MultiSelection { get; set; }
+
+	IEqualityComparer<FilteredProjectDto> _comparer = EqualityComparer<FilteredProjectDto>.Create(
+		(x, y) => x?.Id == y?.Id,
+		(x) => x.Id.GetHashCode()
+	);
+
 	private async Task<TableData<FilteredProjectDto>> ReloadProjects(TableState tableState, CancellationToken cancellationToken)
 	{
 		_lastSearch = _search;

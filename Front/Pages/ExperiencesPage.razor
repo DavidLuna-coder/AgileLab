@@ -86,18 +86,7 @@
 
 	void ShowEditDialog(GoRaceExperienceDto exp)
 	{
-		_editExperience = new GoRaceExperienceDto
-		{
-			Id = exp.Id,
-			Name = exp.Name,
-			Description = exp.Description,
-			Token = exp.Token,
-			ExperienceType = exp.ExperienceType,
-			ProjectId = exp.ProjectId,
-			ProjectsIds = exp.ProjectsIds
-		};
-		_isEdit = true;
-		_dialogOpen = true;
+		Nav.NavigateTo<UpdateExperiencePage>(new Dictionary<string, object> { { nameof(UpdateExperiencePage.ExperienceId), exp.Id } });
 	}
 
 
