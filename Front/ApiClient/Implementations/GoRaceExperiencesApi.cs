@@ -15,7 +15,7 @@ namespace Front.ApiClient.Implementations.GoRaceExperiences
 
 		public Task<GoRaceExperienceDto> Get(Guid id)
 		{
-			return client.GetAsync<GoRaceExperienceDto>($"{ENDPOINT}");
+			return client.GetAsync<GoRaceExperienceDto>($"{ENDPOINT}/{id}");
 		}
 
 		public Task Create(CreateGoRaceExperienceDto dto)

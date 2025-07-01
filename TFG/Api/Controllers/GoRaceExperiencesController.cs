@@ -21,10 +21,8 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpGet("{id}")]
-		public async Task<IActionResult> Get(Guid id, [FromQuery] string experienceType)
+		public async Task<IActionResult> Get(Guid id)
 		{
-			if (string.IsNullOrWhiteSpace(experienceType))
-				return BadRequest($"experienceType is required. Use one of: {GoRaceExperienceTypes.Project}, {GoRaceExperienceTypes.Platform}");
 			var result = await mediator.Send(new GetGoRaceExperienceQuery { Id = id });
 			if (result == null) return NotFound();
 			return Ok(result);
