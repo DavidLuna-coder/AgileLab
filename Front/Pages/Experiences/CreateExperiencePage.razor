@@ -2,6 +2,7 @@
 @page "/experiences/create"
 @using Front.ApiClient.Interfaces.GoRaceExperiences
 @using Front.Components
+@using Front.Components.Tables
 @using Front.Helpers
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
@@ -24,17 +25,15 @@
 				<MudAutocomplete @bind-Value=selectedProject Required Label="Proyecto" ShowProgressIndicator DebounceInterval=200 T="FilteredProjectDto" ToStringFunc=@((p) => p.Name) SearchFunc="SearchProjects">
 
 				</MudAutocomplete>
-				//Selector de proyecto con buscador por nomb</ItemSelectedTemplate>re
 			}
 			else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 			{
-
-				//Tabla de proyectos con selección múltiple
+				<ProjectTable GetProjects="@GetProjectsAsync" MultiSelection @bind-SelectedProjects=selectedProjects/>
 			}
 
 			<MudStack Row Justify="Justify.FlexEnd">
-				<MudButton OnClick="Cancel" Variant="Variant.Filled">Cancelar</MudButton>
-				<MudButton OnClick="SaveExperience" Variant=Variant.Filled Color="Color.Primary">Guardar</MudButton>
+				<MudButton Disabled=isSaving OnClick="Cancel" Variant="Variant.Filled">Cancelar</MudButton>
+				<MudButton Disabled=isSaving OnClick="SaveExperience" Variant=Variant.Filled Color="Color.Primary">Guardar</MudButton>
 			</MudStack>
 		</MudStack>
 	</MudForm>
@@ -45,16 +44,27 @@
 	MudForm _form;
 	CreateGoRaceExperienceDto _createExperience = new();
 	FilteredProjectDto? selectedProject;
+	HashSet<FilteredProjectDto> selectedProjects = new();
+	bool isSaving;
 	async Task SaveExperience()
 	{
+		isSaving = true;
 		await _form.Validate();
 		if (!_form.IsValid)
 		{
+			isSaving = false;
 			return;
 		}
-
-		_createExperience.ProjectId = selectedProject?.Id;
+		if( _createExperience.ExperienceType == GoRaceExperienceTypes.Project)
+		{
+			_createExperience.ProjectId = selectedProject?.Id;
+		}
+		else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
+		{
+			_createExperience.ProjectsIds = selectedProjects.Select(p => p.Id).ToList();
+		}
 		await ExperiencesApi.Create(_createExperience);
+		isSaving = false;
 		NavigationManager.NavigateTo<ExperiencesPage>();
 	}
 
@@ -75,4 +85,10 @@
 		var result = await ProjectApi.GetProjects(request);
 		return result.Items;
 	}
+
+	private async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
+	{
+		return await ProjectApi.GetProjects(request);
+	}
+
 }
