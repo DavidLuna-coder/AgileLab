@@ -12,7 +12,6 @@
 
 <PageTitle>Proyectos</PageTitle>
 
-<MudContainer Fixed="true" Class="mt-6">
     <Section Title="Proyectos">
         <ProjectTable 
             GetProjects="GetProjectsAsync"
@@ -23,7 +22,6 @@
             </TableActions>
         </ProjectTable>
     </Section>
-</MudContainer>
 
 @code {
     private async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
