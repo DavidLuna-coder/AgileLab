@@ -47,10 +47,19 @@ namespace TFG.Api.Controllers
 
 			// Paginación
 			var totalItems = await projectsQuery.CountAsync();
-			var projects = await projectsQuery
+			List<Project>? projects;
+			if (request.PageSize >= 0)
+			{
+				projects = await projectsQuery
 				.Skip((request.Page) * request.PageSize)
 				.Take(request.PageSize)
 				.ToListAsync();
+			}
+			else
+			{
+				projects = await projectsQuery
+				.ToListAsync();
+			}
 
 			List<FilteredProjectDto> items = projects.Select(p => p.ToFilteredProjectDto()).ToList();
 

@@ -14,6 +14,14 @@ namespace TFG.Api.FilterHandlers
 			if (filters == null) return predicate;
 
 			predicate = predicate.And(p => string.IsNullOrEmpty(filters.Name) || p.Name.Contains(filters.Name));
+			predicate = predicate.And(p => filters.ExperiencesIds == null
+								  || filters.ExperiencesIds.Count == 0
+								  || p.ProjectExperiences.Any(e => filters.ExperiencesIds.Contains(e.Id))
+								  || p.PlatformExperiences.Any(e => filters.ExperiencesIds.Contains(e.Id)));
+
+			predicate = predicate.And(p => filters.ProjectIds == null
+					  || filters.ProjectIds.Count == 0
+					  || filters.ProjectIds.Contains(p.Id));
 
 			return predicate;
 		}

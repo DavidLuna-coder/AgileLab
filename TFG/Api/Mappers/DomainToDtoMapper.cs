@@ -88,7 +88,13 @@ namespace TFG.Api.Mappers
 				Description = exp.Description,
 				CreatedAt = exp.CreatedAt,
 				ProjectId = (exp is GoRaceProjectExperience p) ? p.ProjectId : null,
-				ProjectsIds = (exp is GoRacePlatformExperience plat) ? plat.Projects?.Select(pr => pr.Id).ToList() : null
+				ProjectsIds = (exp is GoRacePlatformExperience plat) ? plat.Projects?.Select(pr => pr.Id).ToList() : null,
+				ExperienceType = exp switch
+				{
+					GoRaceProjectExperience => GoRaceExperienceTypes.Project,
+					GoRacePlatformExperience => GoRaceExperienceTypes.Platform,
+					_ => "Base"
+				}
 			};
 			return dto;
 		}

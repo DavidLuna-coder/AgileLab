@@ -1,7 +1,8 @@
 ﻿@page "/experiences/{ExperienceId:guid}"
 
-
 @using Front.ApiClient.Interfaces.GoRaceExperiences
+@using Front.Components
+@using Front.Components.Tables
 @using Front.Helpers
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
@@ -10,17 +11,142 @@
 @inject IGoRaceExperiencesApi ExperiencesApi
 
 <PageTitle>Actualizar experiencia</PageTitle>
-
+@if (!isLoading)
+{
+	<Section Title="@experienceDto.Name">
+		<MudForm @ref=_form>
+			<MudStack>
+				<MudTextField T="string" @bind-Value="_updateExperience.Name" Label="Nombre" Required />
+				<MudTextField T="string" @bind-Value="_updateExperience.Description" Label="Descripción" />
+				<MudTextField T="string" @bind-Value="_updateExperience.Token" Label="Token" />
+				@if (experienceDto.ExperienceType == GoRaceExperienceTypes.Project)
+				{
+					<MudAutocomplete @bind-Value=selectedProject
+									 Required
+									 Label="Proyecto"
+									 ShowProgressIndicator
+									 DebounceInterval=200
+									 T="FilteredProjectDto"
+									 ToStringFunc=@((p) => p.Name)
+									 SearchFunc="SearchProjects">
+					</MudAutocomplete>
+				}
+				else if (experienceDto.ExperienceType == GoRaceExperienceTypes.Platform)
+				{
+					<ProjectTable GetProjects="@GetProjectsAsync"
+				   MultiSelection
+				   @bind-SelectedProjects=selectedProjects />
+				}
+				@if (selectedProjects.Count > 0)
+				{
+					<MudText>Proyectos seleccionados: @string.Join(", ", selectedProjects.Select(s => s.Name))</MudText>
+				}
+				<MudStack Row Justify="Justify.FlexEnd">
+					<MudButton Disabled=isSaving OnClick="Cancel" Variant="Variant.Filled">Cancelar</MudButton>
+					<MudButton Disabled=isSaving OnClick="UpdateExperience" Variant=Variant.Filled Color="Color.Primary">Guardar</MudButton>
+				</MudStack>
+			</MudStack>
+		</MudForm>
+	</Section>
+}
+else
+{
+	<MudProgressLinear Indeterminate />
+}
 
 @code {
 	[Parameter]
 	public Guid ExperienceId { get; set; }
-
-	UpdateGoRaceExperienceDto _updateExperience = new();
-
-	protected override Task OnInitializedAsync()
+	MudForm _form;
+	UpdateGoRaceExperienceDto _updateExperience;
+	GoRaceExperienceDto experienceDto;
+	FilteredProjectDto? selectedProject;
+	HashSet<FilteredProjectDto> selectedProjects = new();
+	bool isSaving;
+	bool isLoading;
+	protected override async Task OnInitializedAsync()
 	{
-		var result = ExperiencesApi.Get(ExperienceId);
-		return base.OnInitializedAsync();
+		isLoading = true;
+		experienceDto = await ExperiencesApi.Get(ExperienceId);
+		_updateExperience = new UpdateGoRaceExperienceDto
+		{
+			Description = experienceDto.Description,
+			Name = experienceDto.Name,
+			Token = experienceDto.Token,
+			ProjectId = experienceDto.ProjectId,
+			ProjectsIds = experienceDto.ProjectsIds,
+		};
+
+		if (experienceDto.ExperienceType == GoRaceExperienceTypes.Project && experienceDto.ProjectId is not null)
+		{
+			await InitializeSelectedProject();
+		}
+		else
+		{
+			await InitializeSelectedProjects();
+		}
+		isLoading = false;
+		await base.OnInitializedAsync();
+	}
+
+	private async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
+	{
+		return await ProjectApi.GetProjects(request);
+	}
+
+	async Task<IEnumerable<FilteredProjectDto>> SearchProjects(string s, CancellationToken token)
+	{
+		if (token.IsCancellationRequested)
+		{
+			return Enumerable.Empty<FilteredProjectDto>();
+		}
+		FilteredPaginatedRequestDto<ProjectQueryParameters> request = new()
+		{
+			Filters = new() { Name = s ?? string.Empty },
+			Page = 0,
+			PageSize = 10
+		};
+		var result = await ProjectApi.GetProjects(request);
+		return result.Items;
+	}
+
+	void Cancel() => NavigationManager.NavigateTo<ExperiencesPage>();
+	async Task UpdateExperience()
+	{
+		await _form.Validate();
+		if (!_form.IsValid) return;
+
+		isSaving = true;
+		_updateExperience.ProjectId = selectedProject?.Id ?? null;
+		_updateExperience.ProjectsIds = selectedProjects.Select(p => p.Id).ToList();
+		await ExperiencesApi.Update(ExperienceId, _updateExperience);
+		isSaving = false;
+		NavigationManager.NavigateTo<ExperiencesPage>();
+	}
+
+	async Task InitializeSelectedProject()
+	{
+		var filteredProject = await ProjectApi.GetProject(experienceDto.ProjectId!.Value);
+		selectedProject = new()
+		{
+			CreatedAt = filteredProject.CreatedAt,
+			Id = filteredProject.Id,
+			Name = filteredProject.Name,
+		};
+		_updateExperience.ProjectId = selectedProject.Id;
+	}
+
+	async Task InitializeSelectedProjects()
+	{
+		FilteredPaginatedRequestDto<ProjectQueryParameters> request = new()
+		{
+			PageSize = -1,
+			Filters = new()
+			{
+				ProjectIds = experienceDto.ProjectsIds
+			}
+		};
+		var result = await ProjectApi.GetProjects(request);
+		selectedProjects = result.Items.ToHashSet();
 	}
 }
