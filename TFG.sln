@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFG.OpenProjectClient", "TF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGitLab", "NGitlab\NGitLab\NGitLab.csproj", "{23DD1ECC-FA46-607F-E5CF-5B6D73F76ABB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFG.GoRaceClient", "TFG.GoRaceClient\TFG.GoRaceClient.csproj", "{B33B4784-7BD8-4820-AB9C-0E534A70447B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{23DD1ECC-FA46-607F-E5CF-5B6D73F76ABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23DD1ECC-FA46-607F-E5CF-5B6D73F76ABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23DD1ECC-FA46-607F-E5CF-5B6D73F76ABB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B33B4784-7BD8-4820-AB9C-0E534A70447B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B33B4784-7BD8-4820-AB9C-0E534A70447B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B33B4784-7BD8-4820-AB9C-0E534A70447B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B33B4784-7BD8-4820-AB9C-0E534A70447B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
