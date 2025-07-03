@@ -1,7 +1,9 @@
-﻿namespace TFG.GoRaceClient
+﻿using TFG.GoRaceClient.Dtos;
+
+namespace TFG.GoRaceClient
 {
 	public interface IGoRaceApiClient
 	{
-
+		Task<GoRaceDataResponseDto> SendData(List<GoRaceDataRequestBase> activities);
 	}
 }
