@@ -16,5 +16,14 @@ public class GoRaceProjectExperience : GoRaceExperience
 
 public class GoRacePlatformExperience : GoRaceExperience
 {
-	public ICollection<Project> Projects { get; set; }
+	public ICollection<GoRacePlatformExperienceProject> Projects { get; set; }
+}
+
+public class GoRacePlatformExperienceProject
+{
+	public Guid GoRacePlatformExperienceId { get; set; }
+	public GoRacePlatformExperience GoRacePlatformExperience { get; set; }
+	public Guid ProjectId { get; set; }
+	public Project Project { get; set; }
+	public string? OwnerEmail { get; set; }
 }

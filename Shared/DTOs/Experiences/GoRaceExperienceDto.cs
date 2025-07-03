@@ -9,7 +9,7 @@ namespace Shared.DTOs.Experiences
 		public DateTimeOffset CreatedAt { get; set; }
 		public string ExperienceType { get; set; } // "Base", "Project", "Platform"
 		public Guid? ProjectId { get; set; }
-		public List<Guid>? ProjectsIds { get; set; } // For Platform experiences
+		public List<ProjectOwners>? ProjectOwners { get; set; } // For Platform experiences
 	}
 
 	public class CreateGoRaceExperienceDto
@@ -19,7 +19,7 @@ namespace Shared.DTOs.Experiences
 		public string? Description { get; set; }
 		public string ExperienceType { get; set; } // "Base", "Project", "Platform"
 		public Guid? ProjectId { get; set; }
-		public List<Guid>? ProjectsIds { get; set; }
+		public List<ProjectOwners>? ProjectOwners { get; set; }
 	}
 
 	public class UpdateGoRaceExperienceDto
@@ -28,6 +28,12 @@ namespace Shared.DTOs.Experiences
 		public string? Token { get; set; }
 		public string? Description { get; set; }
 		public Guid? ProjectId { get; set; }
-		public List<Guid>? ProjectsIds { get; set; }
+		public List<ProjectOwners>? ProjectOwners { get; set; }
+	}
+
+	public class ProjectOwners 
+	{
+		public Guid ProjectId { get; set; }
+		public string Email { get; set; }
 	}
 }

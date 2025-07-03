@@ -29,15 +29,24 @@ namespace TFG.Application.Services.Experiences.Commands
 			}
 			else if (dto.ExperienceType == "Platform")
 			{
+				var projects = await _context.Projects.Where(p => dto.ProjectOwners!.Contains(p.Id)).ToListAsync(cancellationToken);
+				var id = Guid.NewGuid();
 				entity = new GoRacePlatformExperience
 				{
-					Id = Guid.NewGuid(),
+					Id = id,
 					Name = dto.Name,
 					Token = dto.Token,
 					Description = dto.Description,
 					CreatedAt = DateTimeOffset.UtcNow,
-					Projects = dto.ProjectsIds != null ? await _context.Projects.Where(p => dto.ProjectsIds.Contains(p.Id)).ToListAsync(cancellationToken) : []
+					Projects = [.. projects.Select(p => new GoRacePlatformExperienceProject
+					{
+						GoRacePlatformExperienceId = id,
+						ProjectId = p.Id,
+						Project = p,
+						OwnerEmail = request.Dto.OwnerEmail // Assuming OwnerEmail is passed in the command
+					})]
 				};
+				
 			}
 			else
 			{
@@ -72,8 +81,18 @@ namespace TFG.Application.Services.Experiences.Commands
 			entity.Description = request.Dto.Description;
 			if (entity is GoRaceProjectExperience p && request.Dto.ProjectId.HasValue)
 				p.ProjectId = request.Dto.ProjectId.Value;
-			if (entity is GoRacePlatformExperience plat && request.Dto.ProjectsIds != null)
-				plat.Projects = await _context.Projects.Where(pr => request.Dto.ProjectsIds.Contains(pr.Id)).ToListAsync(cancellationToken);
+			if (entity is GoRacePlatformExperience plat && request.Dto.ProjectOwners != null)
+			{
+
+				plat.Projects = await _context.Projects.Where(pr => request.Dto.ProjectOwners.Contains(pr.Id))
+					.Select(p => new GoRacePlatformExperienceProject
+					{
+						GoRacePlatformExperienceId = plat.Id,
+						ProjectId = p.Id,
+						Project = p,
+						OwnerEmail = request.Dto.OwnerEmail
+					}).ToListAsync(cancellationToken);
+			}
 			await _context.SaveChangesAsync(cancellationToken);
 			return entity.ToGoRaceExperienceDto();
 		}
