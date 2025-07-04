@@ -21,6 +21,7 @@ public class GoRacePlatformExperience : GoRaceExperience
 
 public class GoRacePlatformExperienceProject
 {
+	public Guid Id { get; set; }
 	public Guid GoRacePlatformExperienceId { get; set; }
 	public GoRacePlatformExperience GoRacePlatformExperience { get; set; }
 	public Guid ProjectId { get; set; }

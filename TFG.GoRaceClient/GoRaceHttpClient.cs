@@ -28,14 +28,14 @@ namespace TFG.GoRaceClient
 
 		public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
 		{
-			var response = await _httpClient.DeleteAsync(endpoint));
+			var response = await _httpClient.DeleteAsync(endpoint);
 			EnsureSuccessStatusCode(response);
 			return response;
 		}
 
 		public async Task<HttpResponseMessage> GetAsync(string endpoint)
 		{
-			var response = await _httpClient.GetAsync(endpoint));
+			var response = await _httpClient.GetAsync(endpoint);
 			EnsureSuccessStatusCode(response);
 			return response;
 		}
