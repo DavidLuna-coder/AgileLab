@@ -29,7 +29,8 @@ namespace TFG.Application.Services.Experiences.Commands
 			}
 			else if (dto.ExperienceType == "Platform")
 			{
-				var projects = await _context.Projects.Where(p => dto.ProjectOwners!.Any(po => po.ProjectId == p.Id)).ToListAsync(cancellationToken);
+				var projectOwnersProjectIds = dto.ProjectOwners!.Select(p => p.ProjectId).ToList();
+				var projects = await _context.Projects.Where(p => projectOwnersProjectIds.Contains(p.Id)).ToListAsync(cancellationToken);
 				var id = Guid.NewGuid();
 				entity = new GoRacePlatformExperience
 				{

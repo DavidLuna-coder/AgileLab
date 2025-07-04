@@ -59,7 +59,6 @@
 					?? new ProjectOwnerDto
 					{
 						ProjectId = context.Id,
-						Email = context.Members.First().Email
 					};
 
 					<MudSelect T="string"
@@ -165,18 +164,21 @@
 		_projects = response.Items;
 
 		// Asegurar que todos los proyectos seleccionados tengan owner
-		foreach (var project in _projects)
+		if (showOwners)
 		{
-			if (SelectedProjects.Contains(project))
+			foreach (var project in _projects)
 			{
-				var existing = ProjectOwners.FirstOrDefault(po => po.ProjectId == project.Id);
-				if (existing == null)
+				if (SelectedProjects.Contains(project))
 				{
-					ProjectOwners.Add(new ProjectOwnerDto
+					var existing = ProjectOwners.FirstOrDefault(po => po.ProjectId == project.Id);
+					if (existing == null)
 					{
-						ProjectId = project.Id,
-						Email = project.Members.FirstOrDefault()?.Email ?? string.Empty
-					});
+						ProjectOwners.Add(new ProjectOwnerDto
+						{
+							ProjectId = project.Id,
+							Email = project.Members.FirstOrDefault()?.Email ?? string.Empty
+						});
+					}
 				}
 			}
 		}
@@ -206,6 +208,25 @@
 	void OnSelectedProjectsChanged(HashSet<FilteredProjectDto> projects)
 	{
 		SelectedProjects = projects;
+
+		if (showOwners)
+		{
+			foreach (var project in SelectedProjects)
+			{
+				var exists = ProjectOwners.Any(po => po.ProjectId == project.Id);
+				if (!exists && project.Members?.Any() == true)
+				{
+					ProjectOwners.Add(new ProjectOwnerDto
+					{
+						ProjectId = project.Id,
+						Email = project.Members.First().Email
+					});
+				}
+			}
+
+			ProjectOwnersChanged.InvokeAsync(ProjectOwners);
+		}
+
 		SelectedProjectsChanged.InvokeAsync(SelectedProjects);
 	}
 
