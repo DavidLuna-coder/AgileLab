@@ -16,6 +16,7 @@
 		<MudSpacer />
 		<MudTextField OnKeyDown="OnKeyDown" OnAdornmentClick="_table.ReloadServerData" Immediate="true" @bind-Value="_search" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 	</ToolBarContent>
+
 	<ColGroup>
 		@if (MultiSelection)
 		{
@@ -29,10 +30,16 @@
 			<col style="width:30%;" />
 		}
 	</ColGroup>
+
 	<HeaderContent>
 		<MudTh>Nombre</MudTh>
+		@if (showOwners)
+		{
+			<MudTh>Representante</MudTh>
+		}
 		<MudTh>Fecha de creación</MudTh>
 	</HeaderContent>
+
 	<RowTemplate>
 		@if (GetProjectUrl != null)
 		{
@@ -42,8 +49,40 @@
 		{
 			<MudTd DataLabel="Nombre"><MudText>@context.Name</MudText></MudTd>
 		}
+
+		@if (showOwners)
+		{
+			<MudTd DataLabel="Representante">
+				@if (SelectedProjects.Contains(context))
+				{
+					var owner = ProjectOwners.FirstOrDefault(po => po.ProjectId == context.Id)
+					?? new ProjectOwnerDto
+					{
+						ProjectId = context.Id,
+						Email = context.Members.First().Email
+					};
+
+					<MudSelect T="string"
+							   Value="@owner.Email"
+							   ValueChanged="(e) => SelecteOwnerChanged(context.Id, e)"
+							   ToStringFunc="email => email"
+							   Dense="true">
+						@foreach (var member in context.Members)
+						{
+							<MudSelectItem T="string" Value="@member.Email">@member.Email</MudSelectItem>
+						}
+					</MudSelect>
+				}
+				else
+				{
+					<MudText>-</MudText>
+				}
+			</MudTd>
+		}
+
 		<MudTd DataLabel="Fecha de creación">@context.CreatedAt.ToLocalTime().ToString()</MudTd>
 	</RowTemplate>
+
 	<NoRecordsContent>
 		@if (!string.IsNullOrEmpty(_lastSearch))
 		{
@@ -58,6 +97,7 @@
 			<MudButton OnClick="OnCreateProject">Crear un proyecto</MudButton>
 		}
 	</NoRecordsContent>
+
 	<PagerContent>
 		@if (_projects.Any())
 		{
@@ -89,8 +129,17 @@
 
 	[Parameter]
 	public EventCallback<HashSet<FilteredProjectDto>> SelectedProjectsChanged { get; set; }
+
 	[Parameter]
 	public bool MultiSelection { get; set; }
+
+	[Parameter]
+	public List<ProjectOwnerDto> ProjectOwners { get; set; }
+
+	[Parameter]
+	public EventCallback<List<ProjectOwnerDto>> ProjectOwnersChanged { get; set; }
+
+	private bool showOwners => ProjectOwners is not null;
 
 	IEqualityComparer<FilteredProjectDto> _comparer = EqualityComparer<FilteredProjectDto>.Create(
 		(x, y) => x?.Id == y?.Id,
@@ -100,13 +149,45 @@
 	private async Task<TableData<FilteredProjectDto>> ReloadProjects(TableState tableState, CancellationToken cancellationToken)
 	{
 		_lastSearch = _search;
+
 		var projectQueryParameters = new ProjectQueryParameters { Name = _search };
-		var request = new FilteredPaginatedRequestDto<ProjectQueryParameters> { Page = tableState.Page, PageSize = tableState.PageSize, Filters = projectQueryParameters };
+		var request = new FilteredPaginatedRequestDto<ProjectQueryParameters>
+		{
+			Page = tableState.Page,
+			PageSize = tableState.PageSize,
+			Filters = projectQueryParameters
+		};
+
 		if (GetProjects is null)
 			return new TableData<FilteredProjectDto> { Items = Array.Empty<FilteredProjectDto>(), TotalItems = 0 };
+
 		var response = await GetProjects(request);
 		_projects = response.Items;
-		return new TableData<FilteredProjectDto> { Items = _projects, TotalItems = response.TotalCount };
+
+		// Asegurar que todos los proyectos seleccionados tengan owner
+		foreach (var project in _projects)
+		{
+			if (SelectedProjects.Contains(project))
+			{
+				var existing = ProjectOwners.FirstOrDefault(po => po.ProjectId == project.Id);
+				if (existing == null)
+				{
+					ProjectOwners.Add(new ProjectOwnerDto
+					{
+						ProjectId = project.Id,
+						Email = project.Members.FirstOrDefault()?.Email ?? string.Empty
+					});
+				}
+			}
+		}
+
+		await ProjectOwnersChanged.InvokeAsync(ProjectOwners);
+
+		return new TableData<FilteredProjectDto>
+		{
+			Items = _projects,
+			TotalItems = response.TotalCount
+		};
 	}
 
 	private async void OnKeyDown(KeyboardEventArgs args)
@@ -126,5 +207,18 @@
 	{
 		SelectedProjects = projects;
 		SelectedProjectsChanged.InvokeAsync(SelectedProjects);
+	}
+
+	void SelecteOwnerChanged(Guid projectId, string email)
+	{
+		var owner = ProjectOwners.FirstOrDefault(po => po.ProjectId == projectId);
+		if (owner == null)
+		{
+			owner = new ProjectOwnerDto { ProjectId = projectId };
+			ProjectOwners.Add(owner);
+		}
+
+		owner.Email = email;
+		ProjectOwnersChanged.InvokeAsync(ProjectOwners);
 	}
 }

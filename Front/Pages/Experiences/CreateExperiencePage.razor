@@ -28,7 +28,7 @@
 			}
 			else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 			{
-				<ProjectTable GetProjects="@GetProjectsAsync" MultiSelection @bind-SelectedProjects=selectedProjects/>
+				<ProjectTable GetProjects="@GetProjectsAsync" MultiSelection @bind-ProjectOwners=projectOwners @bind-SelectedProjects=selectedProjects/>
 			}
 
 			<MudStack Row Justify="Justify.FlexEnd">
@@ -45,6 +45,7 @@
 	CreateGoRaceExperienceDto _createExperience = new();
 	FilteredProjectDto? selectedProject;
 	HashSet<FilteredProjectDto> selectedProjects = new();
+	List<ProjectOwnerDto> projectOwners = new();
 	bool isSaving;
 	async Task SaveExperience()
 	{
@@ -61,7 +62,7 @@
 		}
 		else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 		{
-			_createExperience.ProjectOwners = selectedProjects.Select(p => new ProjectOwnerDto{ ProjectId = p.Id, Email = string.Empty }).ToList();
+			_createExperience.ProjectOwners = selectedProjects.Select(p => new ProjectOwnerDto{ ProjectId = p.Id, Email = projectOwners.First(po => po.ProjectId == p.Id).Email }).ToList();
 		}
 		await ExperiencesApi.Create(_createExperience);
 		isSaving = false;
