@@ -62,7 +62,7 @@
 		}
 		else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 		{
-			_createExperience.ProjectOwners = selectedProjects.Select(p => new ProjectOwnerDto{ ProjectId = p.Id, Email = projectOwners.First(po => po.ProjectId == p.Id).Email }).ToList();
+			_createExperience.ProjectOwners = selectedProjects.Select(p => projectOwners.First(po => po.ProjectId == p.Id)).ToList();
 		}
 		await ExperiencesApi.Create(_createExperience);
 		isSaving = false;

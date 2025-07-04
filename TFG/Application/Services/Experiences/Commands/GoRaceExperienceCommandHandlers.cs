@@ -1,3 +1,4 @@
+using Humanizer;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Experiences;
@@ -84,15 +85,17 @@ namespace TFG.Application.Services.Experiences.Commands
 				p.ProjectId = request.Dto.ProjectId.Value;
 			if (entity is GoRacePlatformExperience plat && request.Dto.ProjectOwners != null)
 			{
+				var projectOwnersProjectIds = request.Dto.ProjectOwners!.Select(p => p.ProjectId).ToList();
+				var projects = await _context.Projects.Where(p => projectOwnersProjectIds.Contains(p.Id)).ToListAsync(cancellationToken);
 
-				plat.Projects = await _context.Projects.Where(pr => request.Dto.ProjectOwners.Any(po => po.ProjectId == pr.Id))
+				plat.Projects = projects
 					.Select(p => new GoRacePlatformExperienceProject
 					{
 						GoRacePlatformExperienceId = plat.Id,
 						ProjectId = p.Id,
 						Project = p,
 						OwnerEmail = request.Dto.ProjectOwners.First(po => po.ProjectId == p.Id).Email ?? null
-					}).ToListAsync(cancellationToken);
+					}).ToList();
 			}
 			await _context.SaveChangesAsync(cancellationToken);
 			return entity.ToGoRaceExperienceDto();
