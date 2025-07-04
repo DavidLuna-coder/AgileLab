@@ -50,14 +50,14 @@ namespace TFG.Api.Controllers
 			List<Project>? projects;
 			if (request.PageSize >= 0)
 			{
-				projects = await projectsQuery
+				projects = await projectsQuery.Include(p => p.Users)
 				.Skip((request.Page) * request.PageSize)
 				.Take(request.PageSize)
 				.ToListAsync();
 			}
 			else
 			{
-				projects = await projectsQuery
+				projects = await projectsQuery.Include(p => p.Users)
 				.ToListAsync();
 			}
 
@@ -76,7 +76,7 @@ namespace TFG.Api.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<ProjectDto>> GetProject(Guid id)
 		{
-			Project? project = await _context.Projects.FindAsync(id);
+			Project? project = await _context.Projects.Where(p => p.Id == id).Include(p => p.Users).FirstOrDefaultAsync();
 
 			if (project == null)
 			{

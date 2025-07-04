@@ -28,7 +28,12 @@ namespace TFG.Api.Mappers
 			{
 				Id = project.Id,
 				Name = project.Name,
-				CreatedAt = project.CreatedAt
+				CreatedAt = project.CreatedAt,
+				Members = project.Users.Select(u => new UserReferenceDto
+				{
+					Id = u.Id,
+					Email = u.Email!
+				}).ToList()
 			};
 		}
 
@@ -88,7 +93,12 @@ namespace TFG.Api.Mappers
 				Description = exp.Description,
 				CreatedAt = exp.CreatedAt,
 				ProjectId = (exp is GoRaceProjectExperience p) ? p.ProjectId : null,
-				ProjectOwners = (exp is GoRacePlatformExperience plat) ? plat.Projects?.Select(pr => pr.ProjectId).ToList() : null,
+				ProjectOwners = (exp is GoRacePlatformExperience plat) ? 
+					plat.Projects?.Select(pr => new ProjectOwnerDto
+					{
+						ProjectId = pr.ProjectId,
+						Email = pr.OwnerEmail
+					}).ToList() : null,
 				ExperienceType = exp switch
 				{
 					GoRaceProjectExperience => GoRaceExperienceTypes.Project,

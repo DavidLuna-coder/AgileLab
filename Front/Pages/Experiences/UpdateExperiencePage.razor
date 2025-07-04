@@ -118,7 +118,7 @@ else
 
 		isSaving = true;
 		_updateExperience.ProjectId = selectedProject?.Id ?? null;
-		_updateExperience.ProjectOwners = selectedProjects.Select(p => new ProjectOwners() { ProjectId = p.Id, Email = string.Empty }).ToList(); // Added Email mapping
+		_updateExperience.ProjectOwners = selectedProjects.Select(p => new ProjectOwnerDto() { ProjectId = p.Id, Email = string.Empty }).ToList(); // Added Email mapping
 		await ExperiencesApi.Update(ExperienceId, _updateExperience);
 		isSaving = false;
 		NavigationManager.NavigateTo<ExperiencesPage>();
