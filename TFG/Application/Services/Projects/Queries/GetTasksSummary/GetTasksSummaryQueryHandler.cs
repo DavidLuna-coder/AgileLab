@@ -61,7 +61,7 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 				.ToArrayAsync(cancellationToken);
 
 			return openProjectUserIds.Length > 0
-				? [new OpenProjectFilters { Name = "user", Operator = "=", Values = openProjectUserIds }]
+				? [new OpenProjectFilters { Name = "assignee", Operator = "=", Values = openProjectUserIds }]
 				: null;
 		}
 

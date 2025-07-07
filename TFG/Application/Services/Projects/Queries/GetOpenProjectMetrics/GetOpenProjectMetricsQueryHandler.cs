@@ -27,7 +27,7 @@ public class GetOpenProjectMetricsQueryHandler(IOpenProjectClient openProjectCli
 
 		WorkPackage[] assignedTasks = await GetAssignedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
 		WorkPackage[] createdTasks = await GetCreatedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
-		WorkPackage[] closedTasks = await GetClosedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
+		WorkPackage[] closedTasks = await GetClosedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId, closedStatusIds);
 
 		// Calcular tareas asignadas vencidas
 		int overdueAssignedTasks = assignedTasks.Count(wp =>
@@ -72,15 +72,19 @@ public class GetOpenProjectMetricsQueryHandler(IOpenProjectClient openProjectCli
 		return assignedTasks?.Embedded?.Elements ?? [];
 	}
 
-	private static async Task<WorkPackage[]> GetClosedTasks(int openProjectProjectId, IWorkPackagesClient workPackagesClient, string? userId)
+	private static async Task<WorkPackage[]> GetClosedTasks(int openProjectProjectId, IWorkPackagesClient workPackagesClient, string? userId, HashSet<string> closedStatusIds)
 	{
 		GetWorkPackagesQuery query = new();
-		List<OpenProjectFilters> filters = [new() { Name = "status", Operator = "operator", Values = ["5"] }]; // Assuming "5" is the ID for closed tasks in OpenProject
+		var filters = new List<OpenProjectFilters>();
+		if (closedStatusIds != null && closedStatusIds.Count > 0)
+		{
+			filters.Add(new OpenProjectFilters { Name = "status", Operator = "=", Values = closedStatusIds.ToArray() });
+		}
 		if (!string.IsNullOrEmpty(userId))
 		{
-			OpenProjectFilters filter = new() { Name = "author", Operator = "=", Values = [userId] };
-			filters.Add(filter);
+			filters.Add(new OpenProjectFilters { Name = "assignee", Operator = "=", Values = [userId] });
 		}
+		query.Filters = filters.ToArray();
 		var assignedTasks = await workPackagesClient.GetAsync(openProjectProjectId, query);
 		return assignedTasks?.Embedded?.Elements ?? [];
 	}

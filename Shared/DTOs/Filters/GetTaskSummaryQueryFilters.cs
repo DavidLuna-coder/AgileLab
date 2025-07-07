@@ -2,6 +2,6 @@
 {
 	public class GetTaskSummaryQueryFilters
 	{
-		public string[] UserIds { get; set; }
+		public string[]? UserIds { get; set; }
 	}
 }

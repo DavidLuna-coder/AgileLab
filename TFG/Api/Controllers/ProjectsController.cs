@@ -190,7 +190,7 @@ namespace TFG.Api.Controllers
 		}
 
 		[HttpPost("{id}/task-summary/search")]
-		public async Task<IActionResult> GetTaskSummary(Guid id, [FromBody] PaginatedRequestDtoBase request)
+		public async Task<IActionResult> GetTaskSummary(Guid id, [FromBody] FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters> request)
 		{
 			GetTasksSummaryQuery query = new()
 			{
@@ -198,7 +198,8 @@ namespace TFG.Api.Controllers
 				Request = new FilteredPaginatedRequestDto<GetTaskSummaryQueryFilters>
 				{
 					Page = request.Page,
-					PageSize = request.PageSize
+					PageSize = request.PageSize,
+					Filters = request.Filters
 				}
 			};
 			try
