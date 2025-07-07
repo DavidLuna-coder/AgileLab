@@ -67,6 +67,7 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 
 		private async Task<List<TaskSummaryDto>> MapToTaskSummariesAsync(OpenProjectCollection<WorkPackage> collection, long gitlabProjectId)
 		{
+			var now = DateTime.UtcNow;
 			var taskSummaries = await Task.WhenAll(collection.Embedded.Elements.Select(async wp =>
 			{
 				var gitlabMergeRequests = await openProjectClient.WorkPackages.GetGitlabMergeRequestsAsync(wp.Id);
@@ -80,11 +81,15 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 						.ToList(),
 				}).ToList();
 
+				// Una tarea está vencida si tiene DueDate en el pasado y no está cerrada
+				bool isOverdue = wp.DueDate.HasValue && wp.DueDate.Value < now && !wp.IsClosed;
+
 				return new TaskSummaryDto
 				{
 					Name = wp.Subject,
 					OpenProjectTaskId = wp.Id,
-					MergeRequests = mergeRequests
+					MergeRequests = mergeRequests,
+					IsOverdue = isOverdue
 				};
 			}));
 

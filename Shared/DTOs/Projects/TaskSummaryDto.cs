@@ -7,13 +7,14 @@
 		public List<TaskSummaryMergeRequestInfo> MergeRequests { get; set; } = new();
 		public string AsignedTo { get; set; }
 		public string Author { get; set; }
+		public bool IsOverdue { get; set; } // Nueva propiedad para indicar si la tarea está vencida
 	}
 
-	public class TaskSummaryMergeRequestInfo()
+	public class TaskSummaryMergeRequestInfo
 	{
 		public string Title { get; set; }
 		public long Id { get; set; }
-		public List<string> CommitIds { get; set; } = [];
+		public List<string> CommitIds { get; set; } = new();
 	}
 
 	public class TaskSummaryCommitInfo
