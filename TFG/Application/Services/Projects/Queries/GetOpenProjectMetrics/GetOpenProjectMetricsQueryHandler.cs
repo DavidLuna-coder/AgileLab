@@ -21,10 +21,21 @@ public class GetOpenProjectMetricsQueryHandler(IOpenProjectClient openProjectCli
 		int openProjectProjectId = project.OpenProjectId;
 		IWorkPackagesClient workPackagesClient = openProjectClient.WorkPackages;
 
-		
+		// Obtener todos los estados para saber cuáles están cerrados
+		var statusesCollection = await openProjectClient.Statuses.GetStatusesAsync();
+		var closedStatusIds = statusesCollection.Embedded.Elements.Where(s => s.IsClosed).Select(s => s.Id.ToString()).ToHashSet();
+
 		WorkPackage[] assignedTasks = await GetAssignedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
 		WorkPackage[] createdTasks = await GetCreatedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
 		WorkPackage[] closedTasks = await GetClosedTasks(openProjectProjectId, workPackagesClient, user?.OpenProjectId);
+
+		// Calcular tareas asignadas vencidas
+		int overdueAssignedTasks = assignedTasks.Count(wp =>
+			wp.DueDate.HasValue && wp.DueDate.Value < DateTime.UtcNow &&
+			wp.Links.Status != null &&
+			int.TryParse(wp.Links.Status.Href?.Split('/').LastOrDefault(), out var statusId) &&
+			!closedStatusIds.Contains(statusId.ToString())
+		);
 
 		return new OpenProjectMetricsDto
 		{
@@ -32,7 +43,8 @@ public class GetOpenProjectMetricsQueryHandler(IOpenProjectClient openProjectCli
 			OpenTasks = assignedTasks.Length,
 			ClosedTasks = closedTasks.Length,
 			AssignedTasks = assignedTasks.Length,
-			CreatedTasks = createdTasks.Length
+			CreatedTasks = createdTasks.Length,
+			OverdueAssignedTasks = overdueAssignedTasks
 		};
 	}
 

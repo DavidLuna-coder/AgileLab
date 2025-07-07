@@ -7,4 +7,5 @@ public class OpenProjectMetricsDto
 	public int ClosedTasks { get; set; }
 	public int AssignedTasks { get; set; }
 	public int CreatedTasks { get; set; }
+	public int OverdueAssignedTasks { get; set; } // Tareas asignadas vencidas
 }

@@ -68,6 +68,10 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 		private async Task<List<TaskSummaryDto>> MapToTaskSummariesAsync(OpenProjectCollection<WorkPackage> collection, long gitlabProjectId)
 		{
 			var now = DateTime.UtcNow;
+			// Obtener todos los statuses una sola vez
+			var statusesCollection = await openProjectClient.Statuses.GetStatusesAsync();
+			var statuses = statusesCollection.Embedded.Elements.ToDictionary(s => s.Id, s => s);
+
 			var taskSummaries = await Task.WhenAll(collection.Embedded.Elements.Select(async wp =>
 			{
 				var gitlabMergeRequests = await openProjectClient.WorkPackages.GetGitlabMergeRequestsAsync(wp.Id);
@@ -81,8 +85,20 @@ namespace TFG.Application.Services.Projects.Queries.GetTasksSummary
 						.ToList(),
 				}).ToList();
 
-				// Una tarea está vencida si tiene DueDate en el pasado y no está cerrada
-				bool isOverdue = wp.DueDate.HasValue && wp.DueDate.Value < now && !wp.IsClosed;
+				 // Obtener el statusId del work package
+				int? statusId = null;
+				if (wp.Links.Status != null && int.TryParse(wp.Links.Status.Href?.Split('/').LastOrDefault(), out var parsedId))
+				{
+					statusId = parsedId;
+				}
+
+				bool isClosed = false;
+				if (statusId.HasValue && statuses.TryGetValue(statusId.Value, out var status))
+				{
+					isClosed = status.IsClosed;
+				}
+
+				bool isOverdue = wp.DueDate.HasValue && wp.DueDate.Value < now && !isClosed;
 
 				return new TaskSummaryDto
 				{

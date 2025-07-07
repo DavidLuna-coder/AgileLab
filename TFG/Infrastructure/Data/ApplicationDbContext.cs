@@ -16,6 +16,8 @@ namespace TFG.Infrastructure.Data
 		public DbSet<GoRaceExperience> GoRaceExperiences { get; set; }
 		public DbSet<GoRaceProjectExperience> GoRaceProjectExperiences { get; set; }
 		public DbSet<GoRacePlatformExperience> GoRacePlatformExperiences { get; set; }
+		public DbSet<ProjectStatusSnapshot> ProjectStatusSnapshots { get; set; }
+		public DbSet<UserProjectStatusSnapshot> UserProjectStatusSnapshot { get; set; }
 
 		public ApplicationDbContext(DbContextOptions options) : base(options)
 		{

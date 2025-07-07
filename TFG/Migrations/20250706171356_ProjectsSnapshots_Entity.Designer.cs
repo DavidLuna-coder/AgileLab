@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TFG.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using TFG.Infrastructure.Data;
 namespace TFG.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250706171356_ProjectsSnapshots_Entity")]
+    partial class ProjectsSnapshots_Entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,7 +170,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("ProjectUser", (string)null);
+                    b.ToTable("ProjectUser");
                 });
 
             modelBuilder.Entity("RolUser", b =>
@@ -182,7 +185,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("RolUser", (string)null);
+                    b.ToTable("RolUser");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.ApiConfiguration", b =>
@@ -210,7 +213,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApiConfigurations", (string)null);
+                    b.ToTable("ApiConfigurations");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.GoRaceExperience", b =>
@@ -239,7 +242,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GoRaceExperiences", (string)null);
+                    b.ToTable("GoRaceExperiences");
 
                     b.HasDiscriminator<string>("ExperienceType").HasValue("Base");
 
@@ -267,7 +270,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("GoRacePlatformExperienceProject", (string)null);
+                    b.ToTable("GoRacePlatformExperienceProject");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.Notification", b =>
@@ -283,7 +286,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Notification", (string)null);
+                    b.ToTable("Notification");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.Project", b =>
@@ -316,7 +319,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.ProjectStatusSnapshot", b =>
@@ -362,7 +365,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectStatusSnapshots", (string)null);
+                    b.ToTable("ProjectStatusSnapshots");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.Rol", b =>
@@ -380,7 +383,7 @@ namespace TFG.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
@@ -528,7 +531,7 @@ namespace TFG.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProjectStatusSnapshot", (string)null);
+                    b.ToTable("UserProjectStatusSnapshot");
                 });
 
             modelBuilder.Entity("TFG.Domain.Entities.GoRacePlatformExperience", b =>

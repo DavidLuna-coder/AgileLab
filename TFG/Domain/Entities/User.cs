@@ -12,5 +12,6 @@ namespace TFG.Domain.Entities
         public string SonarQubeId { get; set; }
         public ICollection<Project> Projects { get; set; }
         public ICollection<Rol> Roles { get; set; }
-    }
+		public ICollection<UserProjectStatusSnapshot> UserProjectStatusSnapshot { get; set; }
+	}
 }
