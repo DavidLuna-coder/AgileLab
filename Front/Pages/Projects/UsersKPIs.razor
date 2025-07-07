@@ -19,29 +19,32 @@
 		</MudSelect>
 	</MudStack>
 	<MudGrid>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Commits totales" Value=@gitlabMetricsDto.TotalCommits IsLoading=isLoading Icon="@Icons.Material.Filled.History"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Commits por semana" Value=@gitlabMetricsDto.CommitsPerWeek IsLoading=isLoading Icon="@Icons.Material.Filled.Timeline"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Merge Request creadas" Value=@gitlabMetricsDto.CreatedMergeRequests IsLoading=isLoading Icon="@Icons.Material.Filled.CallSplit"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Merge request mergeadas" Value=@gitlabMetricsDto.MergedMergeRequests IsLoading=isLoading Icon="@Icons.Material.Filled.MergeType"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Total de tareas" Value=@openProjectMetricsDto.TotalTasks IsLoading=isLoading Icon="@Icons.Material.Filled.ListAlt"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Tareas asignadas" Value=@openProjectMetricsDto.AssignedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.AssignmentInd"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Tareas creadas" Value=@openProjectMetricsDto.CreatedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.AddTask"></KpiCard>
 		</MudItem>
-		<MudItem xs="12" md="3">
+		<MudItem xs="12" md="4">
 			<KpiCard Title="Tareas cerradas" Value=@openProjectMetricsDto.ClosedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.TaskAlt"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="4">
+			<KpiCard Title="Tareas asignadas vencidas" Value=@openProjectMetricsDto.OverdueAssignedTasks IsLoading=isLoading Icon="@Icons.Material.Filled.Warning"></KpiCard>
 		</MudItem>
 	</MudGrid>
 	<TaskSummaryTable SelectedUserId="@selectedUser?.Id" @ref=taskSummaryTable Class="mt-2" GetServerData="GetTasks"></TaskSummaryTable>

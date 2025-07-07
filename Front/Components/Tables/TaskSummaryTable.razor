@@ -12,6 +12,16 @@
 				<MudLink>@context.Item.OpenProjectTaskId</MudLink>
 			</CellTemplate>
 		</TemplateColumn>
+		<TemplateColumn Title="">
+			<CellTemplate>
+				@if (context.Item.IsOverdue)
+				{
+					<MudStack AlignItems="AlignItems.Center">
+						<MudAlert Severity="Severity.Warning" Dense Elevation="0" Style="width:fit-content" >Atrasada</MudAlert>
+					</MudStack>
+				}
+			</CellTemplate>
+		</TemplateColumn>
 	</Columns>
 	<ChildRowContent>
 		<MudCard Elevation="0">
