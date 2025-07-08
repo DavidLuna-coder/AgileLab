@@ -16,7 +16,7 @@
 	<MudAppBar Elevation="1">
         <MudStack Row AlignItems="AlignItems.Center">
 		    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-		    <MudImage Src="AgileLab.png" alt="AgileLab Logo" Style="max-height:40px;" />
+            <MudImage Src="@(_isDarkMode ? "AgileLabDark.png" : "AgileLab.png")" alt="AgileLab Logo" Style="height:50px;" />
         </MudStack>
 		<MudSpacer />
 		<MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="ToggleDarkMode" Color="Color.Inherit" Edge="Edge.End" />
