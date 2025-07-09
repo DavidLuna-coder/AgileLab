@@ -10,6 +10,9 @@ namespace Shared.DTOs.Experiences
 		public string ExperienceType { get; set; } // "Base", "Project", "Platform"
 		public Guid? ProjectId { get; set; }
 		public List<ProjectOwnerDto>? ProjectOwners { get; set; } // For Platform experiences
+		public int MaxQualityScore { get; set; }
+		public int ImprovementScoreFactor { get; set; }
+		public int MaxOnTimeTasksScore { get; set; }
 	}
 
 	public class CreateGoRaceExperienceDto
@@ -20,6 +23,9 @@ namespace Shared.DTOs.Experiences
 		public string ExperienceType { get; set; } // "Base", "Project", "Platform"
 		public Guid? ProjectId { get; set; }
 		public List<ProjectOwnerDto>? ProjectOwners { get; set; }
+		public int MaxQualityScore { get; set; } = 100; // Default value
+		public int ImprovementScoreFactor { get; set; } = 1; // Default value
+		public int MaxOnTimeTasksScore { get; set; } = 100; // Default value
 	}
 
 	public class UpdateGoRaceExperienceDto
@@ -29,6 +35,9 @@ namespace Shared.DTOs.Experiences
 		public string? Description { get; set; }
 		public Guid? ProjectId { get; set; }
 		public List<ProjectOwnerDto>? ProjectOwners { get; set; }
+		public int MaxQualityScore { get; set; } = 100; // Default value
+		public int ImprovementScoreFactor { get; set; } = 1; // Default value
+		public int MaxOnTimeTasksScore { get; set; } = 100; // Default value
 	}
 
 	public class ProjectOwnerDto 

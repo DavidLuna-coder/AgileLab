@@ -7,6 +7,9 @@ public class GoRaceExperience
 	public string? Token { get; set; }
 	public string? Description { get; set; }
 	public DateTimeOffset CreatedAt { get; set; }
+	public int MaxQualityScore { get; set; }
+	public int ImprovementScoreFactor { get; set; }
+	public int MaxOnTimeTasksScore { get; set; }
 }
 public class GoRaceProjectExperience : GoRaceExperience
 {

@@ -16,7 +16,7 @@ namespace TFG.Application.Services.Experiences.Commands
 		{
 			GoRaceExperience entity;
 			var dto = request.Dto;
-			if (dto.ExperienceType == "Project")
+			if (dto.ExperienceType == GoRaceExperienceTypes.Project)
 			{
 				entity = new GoRaceProjectExperience
 				{
@@ -25,10 +25,13 @@ namespace TFG.Application.Services.Experiences.Commands
 					Token = dto.Token,
 					Description = dto.Description,
 					CreatedAt = DateTimeOffset.UtcNow,
-					ProjectId = dto.ProjectId ?? Guid.Empty
+					ProjectId = dto.ProjectId ?? Guid.Empty,
+					ImprovementScoreFactor = dto.ImprovementScoreFactor,
+					MaxOnTimeTasksScore = dto.MaxOnTimeTasksScore,
+					MaxQualityScore = dto.MaxQualityScore
 				};
 			}
-			else if (dto.ExperienceType == "Platform")
+			else if (dto.ExperienceType == GoRaceExperienceTypes.Platform)
 			{
 				var projectOwnersProjectIds = dto.ProjectOwners!.Select(p => p.ProjectId).ToList();
 				var projects = await _context.Projects.Where(p => projectOwnersProjectIds.Contains(p.Id)).ToListAsync(cancellationToken);
@@ -46,7 +49,10 @@ namespace TFG.Application.Services.Experiences.Commands
 						ProjectId = p.Id,
 						Project = p,
 						OwnerEmail = request.Dto.ProjectOwners?.First(po => po.ProjectId == p.Id).Email,
-					})]
+					})],
+					MaxQualityScore = dto.MaxQualityScore,
+					MaxOnTimeTasksScore = dto.MaxOnTimeTasksScore,
+					ImprovementScoreFactor = dto.ImprovementScoreFactor
 				};
 				
 			}
@@ -58,7 +64,10 @@ namespace TFG.Application.Services.Experiences.Commands
 					Name = dto.Name,
 					Token = dto.Token,
 					Description = dto.Description,
-					CreatedAt = DateTimeOffset.UtcNow
+					CreatedAt = DateTimeOffset.UtcNow,
+					MaxQualityScore = dto.MaxQualityScore,
+					MaxOnTimeTasksScore = dto.MaxOnTimeTasksScore,
+					ImprovementScoreFactor = dto.ImprovementScoreFactor
 				};
 			}
 			_context.GoRaceExperiences.Add(entity);
