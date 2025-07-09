@@ -34,9 +34,20 @@
 				else if (experienceDto.ExperienceType == GoRaceExperienceTypes.Platform)
 				{
 					<ProjectTable @bind-ProjectOwners=projectOwners GetProjects="@GetProjectsAsync"
-				   MultiSelection
-				   @bind-SelectedProjects=selectedProjects />
+								  MultiSelection
+								  @bind-SelectedProjects=selectedProjects />
 				}
+				<MudGrid>
+					<MudItem xs="4">
+						<MudNumericField T="int" Min="0" @bind-Value="_updateExperience.MaxQualityScore" Label="Puntuación máxima de calidad" Required="true" />
+					</MudItem>
+					<MudItem xs="4">
+						<MudNumericField T="int" Min="0" @bind-Value="_updateExperience.MaxOnTimeTasksScore" Label="Puntuación máxima de tareas a tiempo" Required="true" />
+					</MudItem>
+					<MudItem xs="4">
+						<MudNumericField T="int" Min="0" @bind-Value="_updateExperience.ImprovementScoreFactor" Label="Factor de mejora" Required="true" />
+					</MudItem>
+				</MudGrid>
 				@if (selectedProjects.Count > 0)
 				{
 					<MudText>Proyectos seleccionados: @string.Join(", ", selectedProjects.Select(s => s.Name))</MudText>
@@ -76,6 +87,9 @@ else
 			Token = experienceDto.Token,
 			ProjectId = experienceDto.ProjectId,
 			ProjectOwners = experienceDto.ProjectOwners,
+			ImprovementScoreFactor = experienceDto.ImprovementScoreFactor,
+			MaxOnTimeTasksScore = experienceDto.MaxOnTimeTasksScore,
+			MaxQualityScore = experienceDto.MaxQualityScore
 		};
 
 		if (experienceDto.ExperienceType == GoRaceExperienceTypes.Project && experienceDto.ProjectId is not null)

@@ -104,7 +104,10 @@ namespace TFG.Api.Mappers
 					GoRaceProjectExperience => GoRaceExperienceTypes.Project,
 					GoRacePlatformExperience => GoRaceExperienceTypes.Platform,
 					_ => "Base"
-				}
+				},
+				ImprovementScoreFactor = exp.ImprovementScoreFactor,
+				MaxOnTimeTasksScore = exp.MaxOnTimeTasksScore,
+				MaxQualityScore = exp.MaxQualityScore
 			};
 			return dto;
 		}

@@ -16,6 +16,17 @@
 			<MudTextField T="string" @bind-Value="_createExperience.Name" Label="Nombre" Required="true" />
 			<MudTextField T="string" @bind-Value="_createExperience.Description" Label="Descripción" />
 			<MudTextField T="string" @bind-Value="_createExperience.Token" Label="Token" />
+			<MudGrid>
+				<MudItem xs="4">
+					<MudNumericField T="int" Min="0" @bind-Value="_createExperience.MaxQualityScore" Label="Puntuación máxima de calidad" Required="true" />
+				</MudItem>
+				<MudItem xs="4">
+					<MudNumericField T="int" Min="0" @bind-Value="_createExperience.MaxOnTimeTasksScore" Label="Puntuación máxima de tareas a tiempo" Required="true" />
+				</MudItem>
+				<MudItem xs="4">
+					<MudNumericField T="int" Min="0" @bind-Value="_createExperience.ImprovementScoreFactor" Label="Factor de mejora" Required="true" />
+				</MudItem>
+			</MudGrid>
 			<MudSelect T="string" @bind-Value="_createExperience.ExperienceType" Label="Tipo" Required="true">
 				<MudSelectItem Value="@GoRaceExperienceTypes.Project">Proyecto</MudSelectItem>
 				<MudSelectItem Value="@GoRaceExperienceTypes.Platform">Plataforma</MudSelectItem>
