@@ -8,6 +8,7 @@ using TFG.Application.Interfaces;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Security;
 using TFG.Application.Services.Auth;
+using TFG.Application.Services.Experiences.Commands;
 using TFG.Application.Services.OpenProjectIntegration;
 using TFG.Application.Services.Projects;
 using TFG.Infrastructure.Data;
@@ -54,6 +55,8 @@ namespace TFG.Application.Services
 				var openProjectData = context!.ApiConfigurations.First(t => t.Type == ApiConfigurationType.OpenProject);
 				return new OpenProjectHttpClient(openProjectData.BaseUrl, openProjectData.Token);
 			});
+
+			services.AddScoped<ProjectSnapshotService>();
 			return services;
 		}
 	}
