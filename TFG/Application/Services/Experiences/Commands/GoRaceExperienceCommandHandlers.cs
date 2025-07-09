@@ -87,9 +87,14 @@ namespace TFG.Application.Services.Experiences.Commands
 				.Include(e => (e as GoRacePlatformExperience).Projects)
 				.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 			if (entity == null) return null;
+			
 			entity.Name = request.Dto.Name;
 			entity.Token = request.Dto.Token;
 			entity.Description = request.Dto.Description;
+			entity.MaxQualityScore = request.Dto.MaxQualityScore;
+			entity.ImprovementScoreFactor = request.Dto.ImprovementScoreFactor;
+			entity.MaxOnTimeTasksScore = request.Dto.MaxOnTimeTasksScore;
+
 			if (entity is GoRaceProjectExperience p && request.Dto.ProjectId.HasValue)
 				p.ProjectId = request.Dto.ProjectId.Value;
 			if (entity is GoRacePlatformExperience plat && request.Dto.ProjectOwners != null)
