@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -25,8 +27,6 @@ namespace TFG.Application.Services.Experiences.Commands
 	{
 		public async Task RegisterSnapshotsAsync(CancellationToken cancellationToken = default)
         {
-            // TODO: Implementar la lógica real de snapshot
-            // Ejemplo: Recorrer proyectos y usuarios, calcular métricas y guardar snapshots
             var now = DateTime.UtcNow;
             var projects = await context.Projects.Include(p => p.Users).ToListAsync(cancellationToken);
             foreach (var project in projects)
@@ -34,15 +34,19 @@ namespace TFG.Application.Services.Experiences.Commands
 				var kpis = await GetMetrics(project, cancellationToken);
 				var gitlabMetrics = await GetGitlabMetrics(project, cancellationToken);
 				var openProjectMetrics = await GetOpenProjectMetrics(project, cancellationToken);
+				var bugs = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Bugs);
+				var	codeSmells = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.CodeSmells);
+				var vulnerabilities = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Vulnerabilities);
+				var loc = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Ncloc);
 				var snapshot = new ProjectStatusSnapshot
 				{
 					Id = Guid.NewGuid(),
 					ProjectId = project.Id,
 					SnapshotDate = now,
-					Bugs = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Bugs),
-					CodeSmells = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.CodeSmells),
-					Vulnerabilities = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Vulnerabilities),
-					Loc = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Ncloc),
+					Bugs = bugs,
+					CodeSmells = codeSmells,
+					Vulnerabilities = vulnerabilities,
+					Loc = loc,
 					ClosedTasks = openProjectMetrics.ClosedTasks,
 					OpenTasks = openProjectMetrics.OpenTasks,
 					OverdueTasks = openProjectMetrics.OverdueAssignedTasks,
@@ -50,12 +54,13 @@ namespace TFG.Application.Services.Experiences.Commands
 					MergeRequestsMerged = gitlabMetrics.MergedMergeRequests,
 				};
 
-
 				context.Set<ProjectStatusSnapshot>().Add(snapshot);
 
-				// Ejemplo para usuarios del proyecto
+				 // Guardar snapshots de todos los usuarios del proyecto
 				foreach (var user in project.Users)
 				{
+					var userGitlabMetrics = await GetGitlabMetrics(project, cancellationToken, user.Id);
+					var userOpenProjectMetrics = await GetOpenProjectMetrics(project, cancellationToken, user.Id);
 					var userSnapshot = new UserProjectStatusSnapshot
 					{
 						Id = Guid.NewGuid(),
@@ -64,7 +69,15 @@ namespace TFG.Application.Services.Experiences.Commands
 						UserId = user.Id,
 						User = user,
 						SnapshotDate = now,
-						// Rellenar métricas reales aquí
+						ClosedTasks = userOpenProjectMetrics.ClosedTasks,
+						OpenTasks = userOpenProjectMetrics.OpenTasks,
+						OverdueTasks = userOpenProjectMetrics.OverdueAssignedTasks,
+						MergeRequestsCreated = userGitlabMetrics.CreatedMergeRequests,
+						MergeRequestsMerged = userGitlabMetrics.MergedMergeRequests,
+						Bugs = bugs,
+						CodeSmells = codeSmells,
+						Vulnerabilities = vulnerabilities,
+						Loc = loc,
 					};
 					context.Set<UserProjectStatusSnapshot>().Add(userSnapshot);
 				}
@@ -81,18 +94,19 @@ namespace TFG.Application.Services.Experiences.Commands
 			return new GetProjectKpisQueryHandler(sonarQubeClient, context).Handle(query, cancellationToken);
 		}
 
-		private Task<GitlabMetricsDto> GetGitlabMetrics(Project project, CancellationToken cancellationToken)
+		private Task<GitlabMetricsDto> GetGitlabMetrics(Project project, CancellationToken cancellationToken, string? userId = null)
 		{
 			GetGitlabMetricsQuery request = new()
 			{
-				ProjectId = project.Id
+				ProjectId = project.Id,
+				UserId = userId
 			};
 			return new GetGitlabMetricsQueryHandler(gitlabClient, context).Handle(request, cancellationToken);
 		}
 
-		private Task<OpenProjectMetricsDto> GetOpenProjectMetrics(Project project, CancellationToken cancellationToken)
+		private Task<OpenProjectMetricsDto> GetOpenProjectMetrics(Project project, CancellationToken cancellationToken, string? userId = null)
 		{
-			GetOpenProjectMetricsQuery query = new() { ProjectId = project.Id };
+			GetOpenProjectMetricsQuery query = new() { ProjectId = project.Id, UserId = userId };
 			return new GetOpenProjectMetricsQueryHandler(openProjectClient, context).Handle(query, cancellationToken);
 		}
 	}

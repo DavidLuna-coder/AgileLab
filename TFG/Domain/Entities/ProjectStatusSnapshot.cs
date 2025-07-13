@@ -30,4 +30,8 @@ public class UserProjectStatusSnapshot
 	public int OverdueTasks { get; set; }
 	public int MergeRequestsCreated { get; set; }
 	public int MergeRequestsMerged { get; set; }
+	public int Bugs { get; set; }
+	public int Vulnerabilities { get; set; }
+	public int CodeSmells { get; set; }
+	public int Loc { get; set; }
 }
