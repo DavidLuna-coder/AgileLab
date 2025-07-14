@@ -42,6 +42,7 @@
     <ProjectReference Include="..\Front\Front.csproj" />
     <ProjectReference Include="..\NGitlab\NGitLab\NGitLab.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\TFG.GoRaceClient\TFG.GoRaceClient.csproj" />
     <ProjectReference Include="..\TFG.OpenProjectClient\TFG.OpenProjectClient.csproj" />
     <ProjectReference Include="..\TFG.ServiceDefaults\TFG.ServiceDefaults.csproj" />
     <ProjectReference Include="..\TFG.SonarQubeClient\TFG.SonarQubeClient.csproj" />

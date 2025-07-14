@@ -89,6 +89,7 @@ namespace TFG.Api.Mappers
 			{
 				Id = exp.Id,
 				Name = exp.Name,
+				Url = exp.Url,
 				Token = exp.Token,
 				Description = exp.Description,
 				CreatedAt = exp.CreatedAt,
