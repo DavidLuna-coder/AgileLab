@@ -10,7 +10,7 @@ namespace TFG.GoRaceClient.Dtos
 		public T Data { get; set; }
 	}
 
-	public record GoRaceDataResponseDto : GoRaceResponseDto<GoRaceActivityResultDto>
+	public record GoRaceDataResponseDto : GoRaceResponseDto<GoRaceActivityResultDto[]>
 	{
 
 	}

@@ -1,12 +1,9 @@
 # TODO
-[] Crear experiencias a nive de usuario o proyecto. Con JWT de GoRace. (Primero con usuarios)
-[] Posibles variables de Jira.
-[] Histórico de variables de proyecto. Para que pueda el profesor ver la evolución
-[] Config GoRace proyecto y usuario
-Unir con usuario representante la experiencia de plataforma 
+## Semana 14/7/25
+- Lunes: (Envío de variables ya implementadas a GoRace al crear el histórico)
+- Martes: Test de envío de GoRace
+- Miércoles: Edición de usuarios, botón de logout, edición de usuarios en proyectos como se hace en experiencias.
+- Jueves: Analizar si entran nuevas variables 
+- Viernes: POC completa, bugfixing. Lo detectado en los pasos anteriores. Analizar que entra y que se queda fuera.
 
------------------
-Tareas
-- Vulnes Bugs y Code smells se calculará la puntuación por la variación respecto al anterior
-- Puntuación por cerrar tareas, merge requests hechas etc. Al cerrar el proyecto mandar todos los datos
-
+--- BUGS EDITAR LOS USUARIOS DE UN PROYECTO CASCA NO ACTUALIZA EN LOS CLIENTES

@@ -20,22 +20,22 @@ using TFG.SonarQubeClient;
 
 namespace TFG.Application.Services.Experiences.Commands
 {
-    /// <summary>
-    /// Servicio encargado de registrar snapshots de estado de proyectos y usuarios.
-    /// </summary>
-    public class ProjectSnapshotService(ApplicationDbContext context, ISonarQubeClient sonarQubeClient, IOpenProjectClient openProjectClient, IGitLabClient gitlabClient, UserManager<User> userManager)
+	/// <summary>
+	/// Servicio encargado de registrar snapshots de estado de proyectos y usuarios.
+	/// </summary>
+	public class ProjectSnapshotService(ApplicationDbContext context, ISonarQubeClient sonarQubeClient, IOpenProjectClient openProjectClient, IGitLabClient gitlabClient, UserManager<User> userManager)
 	{
 		public async Task RegisterSnapshotsAsync(CancellationToken cancellationToken = default)
-        {
-            var now = DateTime.UtcNow;
-            var projects = await context.Projects.Include(p => p.Users).ToListAsync(cancellationToken);
-            foreach (var project in projects)
+		{
+			var now = DateTime.UtcNow;
+			var projects = await context.Projects.Include(p => p.Users).ToListAsync(cancellationToken);
+			foreach (var project in projects)
 			{
 				var kpis = await GetMetrics(project, cancellationToken);
 				var gitlabMetrics = await GetGitlabMetrics(project, cancellationToken);
 				var openProjectMetrics = await GetOpenProjectMetrics(project, cancellationToken);
 				var bugs = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Bugs);
-				var	codeSmells = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.CodeSmells);
+				var codeSmells = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.CodeSmells);
 				var vulnerabilities = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Vulnerabilities);
 				var loc = kpis.Measures.Count(m => m.Metric == SonarMetricKeys.Ncloc);
 				var snapshot = new ProjectStatusSnapshot
@@ -56,7 +56,7 @@ namespace TFG.Application.Services.Experiences.Commands
 
 				context.Set<ProjectStatusSnapshot>().Add(snapshot);
 
-				 // Guardar snapshots de todos los usuarios del proyecto
+				// Guardar snapshots de todos los usuarios del proyecto
 				foreach (var user in project.Users)
 				{
 					var userGitlabMetrics = await GetGitlabMetrics(project, cancellationToken, user.Id);
@@ -83,7 +83,12 @@ namespace TFG.Application.Services.Experiences.Commands
 				}
 			}
 			await context.SaveChangesAsync(cancellationToken);
-        }
+
+			// Actualizar el estado de las experiencias de GoRace
+			GoRaceDataSender dataSender = new(context);
+			//dataSender.CalculateProjectExperienceData();
+			await dataSender.CalculatePlatformExperienceData();
+		}
 
 		private Task<ProjectMetricsDto> GetMetrics(Project project, CancellationToken cancellationToken)
 		{

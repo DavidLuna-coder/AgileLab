@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using TFG.GoRaceClient.Dtos;
 
 namespace TFG.GoRaceClient
 {
@@ -9,7 +10,7 @@ namespace TFG.GoRaceClient
 		private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
 		public GoRaceHttpClient(string baseUrl, string token)
 		{
-			if (string.IsNullOrEmpty(baseUrl)) baseUrl = "https://api.gorace.com/";
+			if (string.IsNullOrEmpty(baseUrl)) baseUrl = "https://api-gorace.uca.es";
 			_httpClient = new HttpClient()
 			{
 				BaseAddress = new Uri(baseUrl)
@@ -42,7 +43,13 @@ namespace TFG.GoRaceClient
 
 		public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T content)
 		{
-			string json = JsonSerializer.Serialize(content, _serializerOptions) ?? string.Empty;
+			return await PostAsync(endpoint, content, null);
+		}
+
+		public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T content, JsonSerializerOptions? options)
+		{
+			var serializerOptions = options ?? _serializerOptions;
+			string json = JsonSerializer.Serialize(content, serializerOptions) ?? string.Empty;
 			var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 			var response = await _httpClient.PostAsync(endpoint, jsonContent);
 			EnsureSuccessStatusCode(response);

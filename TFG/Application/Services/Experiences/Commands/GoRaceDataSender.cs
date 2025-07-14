@@ -10,7 +10,7 @@ namespace TFG.Application.Services.Experiences.Commands
 {
 	public class GoRaceDataSender(ApplicationDbContext dbContext)
 	{
-		public void CalculatePlatformExperienceData()
+		public async Task CalculatePlatformExperienceData()
 		{
 			var experiences = dbContext.GoRacePlatformExperiences.Include(e => e.Projects).ThenInclude(p => p.Project);
 
@@ -20,8 +20,9 @@ namespace TFG.Application.Services.Experiences.Commands
 				{
 					var data = BuildExperienceSendableData(projectRelation, experience);
 					if (data == null) continue;
+					if (projectRelation.OwnerEmail == null) continue;
 
-					SendExperienceDataAsync(data.Value, experience, projectRelation.OwnerEmail);
+					await SendExperienceDataAsync(data.Value, experience, projectRelation.OwnerEmail);
 				}
 			}
 		}
@@ -149,9 +150,9 @@ namespace TFG.Application.Services.Experiences.Commands
 			return (experienceSendableData, user.Email);
 		}
 
-		private void SendExperienceDataAsync((ExperienceSendableData Data, string Manager) data, GoRaceExperience experience, string manager)
+		private Task SendExperienceDataAsync((ExperienceSendableData Data, string Manager) data, GoRaceExperience experience, string manager)
 		{
-			_ = SendProjectExperiencesData(data.Data, experience, data.Manager);
+			return SendProjectExperiencesData(data.Data, experience, data.Manager);
 		}
 
 		public async Task SendProjectExperiencesData(ExperienceSendableData experienceSendableData, GoRaceExperience experience, string manager)
@@ -160,13 +161,41 @@ namespace TFG.Application.Services.Experiences.Commands
 
 			var now = DateTime.Now;
 			var client = GoRaceApiFactory.Create(experience.Url, experience.Token);
-			GoRaceQualityRequest qualityRequest = new() { Assignment = "ACTIVITY", Email = manager, Quality = experienceSendableData.QualityScore.CalculateScore(), Time = now };
-			GoRaceImprovementRequest improvementRequest = new() { Assignment = "ACTIVITY", Email = manager, Improvement = experienceSendableData.ImprovementScore.CalculateScore(), Time = now };
-			GoRaceOnTimeTasksRequest onTimeTasksRequest = new() { Assignment = "ACTIVITY", Email = manager, OnTimeTask = experienceSendableData.OnTimeTaskScore.CalculateScore(), Time = now };
-			GoRaceMergedMergeRequest mergedMergeRequest = new() { Assignment = "ACTIVITY2", Email = manager, MergedMergeRequest = experienceSendableData.MergedMergeRequest, Time = now };
-			GoRaceClosedTasksRequest closedTasksRequest = new() { Assignment = "ACTIVITY2", Email = manager, ClosedTasks = experienceSendableData.ClosedTasks, Time = now };
 
-			List<GoRaceDataRequestBase> requests = [qualityRequest, improvementRequest, onTimeTasksRequest, mergedMergeRequest, closedTasksRequest];
+			var formattedNow = now.ToString("yyyy-MM-ddTHH:mm:sszzz");
+
+			var qualityRequest = new GoRaceDataRequest {
+				Assignment = "ACTIVITY",
+				Email = manager,
+				Time = formattedNow,
+				Extra = new() { ["Q"] = experienceSendableData.QualityScore.CalculateScore() }
+			};
+			var improvementRequest = new GoRaceDataRequest {
+				Assignment = "ACTIVITY",
+				Email = manager,
+				Time = formattedNow,
+				Extra = new() { ["IMP"] = experienceSendableData.ImprovementScore.CalculateScore() }
+			};
+			var onTimeTasksRequest = new GoRaceDataRequest {
+				Assignment = "ACTIVITY",
+				Email = manager,
+				Time = formattedNow,
+				Extra = new() { ["OTT"] = experienceSendableData.OnTimeTaskScore.CalculateScore() }
+			};
+			var mergedMergeRequest = new GoRaceDataRequest {
+				Assignment = "ACTIVITY2",
+				Email = manager,
+				Time = formattedNow,
+				Extra = new() { ["MMR"] = experienceSendableData.MergedMergeRequest }
+			};
+			var closedTasksRequest = new GoRaceDataRequest {
+				Assignment = "ACTIVITY2",
+				Email = manager,
+				Time = formattedNow,
+				Extra = new() { ["CT"] = experienceSendableData.ClosedTasks }
+			};
+
+			List<GoRaceDataRequest> requests = [qualityRequest, improvementRequest, onTimeTasksRequest, mergedMergeRequest, closedTasksRequest];
 
 			await client.SendData(requests);
 		}

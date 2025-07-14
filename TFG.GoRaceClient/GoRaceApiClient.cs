@@ -5,10 +5,10 @@ namespace TFG.GoRaceClient
 {
 	public class GoRaceApiClient(IGoRaceHttpClient goRaceHttpCLient) : IGoRaceApiClient
 	{
-		public async Task<GoRaceDataResponseDto> SendData(List<GoRaceDataRequestBase> activities)
+		public async Task<GoRaceDataResponseDto> SendData(List<GoRaceDataRequest> activities)
 		{
 			HttpResponseMessage response = await goRaceHttpCLient.PostAsync(
-				$"/api/v1/activities",
+				"/v1/api/data",
 				activities
 			);
 
