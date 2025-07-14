@@ -23,6 +23,7 @@ namespace TFG.Application.Services.Experiences.Commands
 					Id = Guid.NewGuid(),
 					Name = dto.Name,
 					Token = dto.Token,
+					Url = dto.Url,
 					Description = dto.Description,
 					CreatedAt = DateTimeOffset.UtcNow,
 					ProjectId = dto.ProjectId ?? Guid.Empty,
@@ -40,6 +41,7 @@ namespace TFG.Application.Services.Experiences.Commands
 				{
 					Id = id,
 					Name = dto.Name,
+					Url = dto.Url,
 					Token = dto.Token,
 					Description = dto.Description,
 					CreatedAt = DateTimeOffset.UtcNow,
@@ -62,6 +64,7 @@ namespace TFG.Application.Services.Experiences.Commands
 				{
 					Id = Guid.NewGuid(),
 					Name = dto.Name,
+					Url = dto.Url,
 					Token = dto.Token,
 					Description = dto.Description,
 					CreatedAt = DateTimeOffset.UtcNow,
@@ -94,6 +97,7 @@ namespace TFG.Application.Services.Experiences.Commands
 			entity.MaxQualityScore = request.Dto.MaxQualityScore;
 			entity.ImprovementScoreFactor = request.Dto.ImprovementScoreFactor;
 			entity.MaxOnTimeTasksScore = request.Dto.MaxOnTimeTasksScore;
+			entity.Url = request.Dto.Url;
 
 			if (entity is GoRaceProjectExperience p && request.Dto.ProjectId.HasValue)
 				p.ProjectId = request.Dto.ProjectId.Value;
