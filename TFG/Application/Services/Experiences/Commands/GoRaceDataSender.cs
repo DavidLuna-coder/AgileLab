@@ -27,7 +27,7 @@ namespace TFG.Application.Services.Experiences.Commands
 			}
 		}
 
-		public void CalculateProjectExperienceData()
+		public async Task CalculateProjectExperienceData()
 		{
 			var experiences = dbContext.GoRaceProjectExperiences.Include(e => e.Project).ThenInclude(p => p.Users);
 
@@ -41,7 +41,7 @@ namespace TFG.Application.Services.Experiences.Commands
 					var data = BuildUserProjectExperienceSendableData(experience, user);
 					if (data == null) continue;
 
-					SendExperienceDataAsync(data.Value, experience, user.Email);
+					await SendExperienceDataAsync(data.Value, experience, user.Email);
 				}
 			}
 		}

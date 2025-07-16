@@ -86,7 +86,7 @@ namespace TFG.Application.Services.Experiences.Commands
 
 			// Actualizar el estado de las experiencias de GoRace
 			GoRaceDataSender dataSender = new(context);
-			//dataSender.CalculateProjectExperienceData();
+			await dataSender.CalculateProjectExperienceData();
 			await dataSender.CalculatePlatformExperienceData();
 		}
 

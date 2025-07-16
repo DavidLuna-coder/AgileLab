@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -11,13 +12,13 @@ namespace TFG.Application.Services.Experiences.Commands
     /// </summary>
     public class ProjectSnapshotBackgroundService : BackgroundService
     {
-        private readonly ProjectSnapshotService _snapshotService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ProjectSnapshotBackgroundService> _logger;
         private readonly TimeSpan _interval;
 
-        public ProjectSnapshotBackgroundService(ProjectSnapshotService snapshotService, ILogger<ProjectSnapshotBackgroundService> logger, TimeSpan? interval = null)
+        public ProjectSnapshotBackgroundService(IServiceProvider serviceProvider, ILogger<ProjectSnapshotBackgroundService> logger, TimeSpan? interval = null)
         {
-            _snapshotService = snapshotService;
+            _serviceProvider = serviceProvider;
             _logger = logger;
             _interval = interval ?? TimeSpan.FromHours(1); // Por defecto cada hora
         }
@@ -29,7 +30,11 @@ namespace TFG.Application.Services.Experiences.Commands
             {
                 try
                 {
-                    await _snapshotService.RegisterSnapshotsAsync(stoppingToken);
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var snapshotService = scope.ServiceProvider.GetRequiredService<ProjectSnapshotService>();
+                        await snapshotService.RegisterSnapshotsAsync(stoppingToken);
+                    }
                     _logger.LogInformation("Snapshots registrados correctamente a las {Time}", DateTimeOffset.Now);
                 }
                 catch (Exception ex)
