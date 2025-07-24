@@ -15,5 +15,6 @@
         public ICollection<GoRacePlatformExperienceProject> PlatformExperiences { get; set; }
         public ICollection<ProjectStatusSnapshot> ProjectStatusSnapshots { get; set; }
         public ICollection<UserProjectStatusSnapshot> UserProjectStatusSnapshot { get; set; }
+        public bool IsArchived { get; set; }
 	}
 }

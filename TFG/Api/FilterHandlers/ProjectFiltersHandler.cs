@@ -23,6 +23,8 @@ namespace TFG.Api.FilterHandlers
 					  || filters.ProjectIds.Count == 0
 					  || filters.ProjectIds.Contains(p.Id));
 
+			predicate = predicate.And(p => filters.IsArchived == null || p.IsArchived == filters.IsArchived);
+
 			return predicate;
 		}
 	}

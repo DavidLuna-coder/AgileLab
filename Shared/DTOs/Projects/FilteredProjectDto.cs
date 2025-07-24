@@ -6,6 +6,7 @@
 		public required string Name { get; set; }
 		public required DateTime CreatedAt { get; set; }
 		public List<UserReferenceDto> Members { get; set; }
+        public bool IsArchived { get; set; }
 		public virtual bool Equals(FilteredProjectDto? other)
 		=> other is not null && Id == other.Id;
 
