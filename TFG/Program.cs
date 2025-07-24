@@ -70,6 +70,17 @@ builder.Services.AddRazorPages();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionBehavior<,>));
 
+// Configuración del intervalo del servicio en background desde appsettings o variable de entorno
+var snapshotIntervalMinutes = builder.Configuration.GetValue<int?>("ProjectSnapshot:IntervalMinutes") ?? 5;
+var snapshotInterval = TimeSpan.FromMinutes(snapshotIntervalMinutes);
+
+builder.Services.AddHostedService(provider =>
+    new TFG.Application.Services.Experiences.Commands.ProjectSnapshotBackgroundService(
+        provider,
+        provider.GetRequiredService<ILogger<TFG.Application.Services.Experiences.Commands.ProjectSnapshotBackgroundService>>(),
+        snapshotInterval)
+);
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

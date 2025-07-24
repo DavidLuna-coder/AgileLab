@@ -52,6 +52,9 @@ namespace TFG.Infrastructure.Data
 				   | Permissions.EditRoles
 				   | Permissions.ViewRoles
 				   | Permissions.ViewUsers
+				   | Permissions.CreateExperiences
+				   | Permissions.EditExperiences
+				   | Permissions.DeleteExperiences
 				},
 				new Rol
 				{

@@ -24,7 +24,12 @@ namespace Shared.Enums
 							 //Config
 		UpdateApiIntegrations = 1 << 15,
 
-        All = ViewAllProjects | EditProjects | DeleteProjects | CreateProjects | ViewProjectUsers | ViewProjectKpis | ViewProjectOtherUserData |
+        // Experiences
+        CreateExperiences = 1 << 16,
+        EditExperiences = 1 << 17,
+        DeleteExperiences = 1 << 18,
+
+		All = ViewAllProjects | EditProjects | DeleteProjects | CreateProjects | ViewProjectUsers | ViewProjectKpis | ViewProjectOtherUserData |
               ViewUsers | CreateUsers | EditUsers | DeleteUsers | CreateRoles | EditRoles | UpdateApiIntegrations | ViewRoles | DeleteRoles
 	}
 }
