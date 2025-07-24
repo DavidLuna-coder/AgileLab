@@ -12,24 +12,27 @@ namespace Shared.Enums
         ViewProjectUsers = 1 << 4,
         ViewProjectKpis = 1 << 5,
         ViewProjectOtherUserData = 1 << 6,
+        ArchiveProjects = 1 << 7, // Nuevo permiso para archivar proyectos
 		//Users
-		ViewUsers = 1 << 7,
-        CreateUsers = 1 << 8,
-        EditUsers = 1 << 9,
-        DeleteUsers = 1 << 10,
-        CreateRoles = 1 << 11,
-        EditRoles = 1 << 12,
-        ViewRoles = 1 << 13,
-        DeleteRoles = 1 << 14,
-							 //Config
-		UpdateApiIntegrations = 1 << 15,
+		ViewUsers = 1 << 8,
+        CreateUsers = 1 << 9,
+        EditUsers = 1 << 10,
+        DeleteUsers = 1 << 11,
+        CreateRoles = 1 << 12,
+        EditRoles = 1 << 13,
+        ViewRoles = 1 << 14,
+        DeleteRoles = 1 << 15,
+		//Config
+		UpdateApiIntegrations = 1 << 16,
 
         // Experiences
-        CreateExperiences = 1 << 16,
-        EditExperiences = 1 << 17,
-        DeleteExperiences = 1 << 18,
+        CreateExperiences = 1 << 17,
+        EditExperiences = 1 << 18,
+        DeleteExperiences = 1 << 19,
 
 		All = ViewAllProjects | EditProjects | DeleteProjects | CreateProjects | ViewProjectUsers | ViewProjectKpis | ViewProjectOtherUserData |
-              ViewUsers | CreateUsers | EditUsers | DeleteUsers | CreateRoles | EditRoles | UpdateApiIntegrations | ViewRoles | DeleteRoles
+              ArchiveProjects |
+              ViewUsers | CreateUsers | EditUsers | DeleteUsers | CreateRoles | EditRoles | UpdateApiIntegrations | ViewRoles | DeleteRoles |
+              CreateExperiences | EditExperiences | DeleteExperiences
 	}
 }

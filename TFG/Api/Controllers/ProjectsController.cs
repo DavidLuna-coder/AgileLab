@@ -15,6 +15,7 @@ using TFG.Api.Mappers;
 using TFG.Application.Interfaces.Projects;
 using TFG.Application.Services.Projects.Commands.CreateProject;
 using TFG.Application.Services.Projects.Commands.DeleteProject;
+using TFG.Application.Services.Projects.Commands.ArchiveProject;
 using TFG.Application.Services.Projects.Queries.GetGitlabMetrics;
 using TFG.Application.Services.Projects.Queries.GetMosAffectedFiles;
 using TFG.Application.Services.Projects.Queries.GetOpenProjectMetrics;
@@ -27,12 +28,13 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService, IMediator mediator) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService, IMediator mediator, ArchiveProjectCommandPermission archivePermission) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IProjectService _projectService = projectService;
 		private readonly IMediator _mediator = mediator;
+		private readonly ArchiveProjectCommandPermission _archivePermission = archivePermission;
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
@@ -265,6 +267,26 @@ namespace TFG.Api.Controllers
 			var result = await _mediator.Send(query);
 
 			return Ok(result);
+		}
+
+		[HttpPost("{id}/archive")]
+		public async Task<IActionResult> ArchiveProject(Guid id)
+		{
+			var command = new ArchiveProjectCommand { ProjectId = id, Archive = true };
+			if (!await _archivePermission.HasPermissionAsync(command))
+				throw new ForbiddenException("No tienes permisos para archivar proyectos.");
+			await _mediator.Send(command);
+			return NoContent();
+		}
+
+		[HttpPost("{id}/unarchive")]
+		public async Task<IActionResult> UnarchiveProject(Guid id)
+		{
+			var command = new ArchiveProjectCommand { ProjectId = id, Archive = false };
+			if (!await _archivePermission.HasPermissionAsync(command))
+				throw new ForbiddenException("No tienes permisos para desarchivar proyectos.");
+			await _mediator.Send(command);
+			return NoContent();
 		}
 	}
 }
