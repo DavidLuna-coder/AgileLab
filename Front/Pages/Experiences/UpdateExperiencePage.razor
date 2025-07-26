@@ -38,6 +38,10 @@
 								  MultiSelection
 								  @bind-SelectedProjects=selectedProjects />
 				}
+				@if (selectedProjects.Count > 0)
+				{
+					<MudText>Proyectos seleccionados: @string.Join(", ", selectedProjects.Select(s => s.Name))</MudText>
+				}
 				<MudGrid>
 					<MudItem xs="4">
 						<MudNumericField T="int" Min="0" @bind-Value="_updateExperience.MaxQualityScore" Label="Puntuación máxima de calidad" Required="true" />
@@ -49,10 +53,6 @@
 						<MudNumericField T="int" Min="0" @bind-Value="_updateExperience.ImprovementScoreFactor" Label="Factor de mejora" Required="true" />
 					</MudItem>
 				</MudGrid>
-				@if (selectedProjects.Count > 0)
-				{
-					<MudText>Proyectos seleccionados: @string.Join(", ", selectedProjects.Select(s => s.Name))</MudText>
-				}
 				<MudStack Row Justify="Justify.FlexEnd">
 					<MudButton Disabled=isSaving OnClick="Cancel" Variant="Variant.Filled">Cancelar</MudButton>
 					<MudButton Disabled=isSaving OnClick="UpdateExperience" Variant=Variant.Filled Color="Color.Primary">Guardar</MudButton>
