@@ -64,5 +64,17 @@ namespace Front.ApiClient.Implementations
 		{
 			return client.PutAsync<UpdateProjectDto, ProjectDto>($"{PROJECTS_ENDPOINT}/{projectId}", updatedProject);
 		}
+
+		public Task ArchiveProject(Guid projectId)
+		{
+			return client.PostAsync<object>(
+				$"{PROJECTS_ENDPOINT}/{projectId}/archive", null);
+		}
+
+		public Task UnarchiveProject(Guid projectId)
+		{
+			return client.PostAsync<object>(
+				$"{PROJECTS_ENDPOINT}/{projectId}/unarchive", null);
+		}
 	}
 }

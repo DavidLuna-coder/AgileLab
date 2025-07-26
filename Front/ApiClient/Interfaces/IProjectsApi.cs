@@ -19,5 +19,7 @@ namespace Front.ApiClient.Interfaces
         Task<List<AffectedFileDto>> GetMostAffectedFiles(Guid projectId);
         Task<GitlabMetricsDto> GetGitlabMetrics(Guid projectId, GetGitlabMetricsDto getGitlabMetricsDto);
         Task<OpenProjectMetricsDto> GetOpenProjectMetrics(Guid projectId, GetOpenProjectMetricsDto getOpenProjectMetricsDto);
-	}
+        Task ArchiveProject(Guid projectId);
+        Task UnarchiveProject(Guid projectId);
+    }
 }

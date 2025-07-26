@@ -273,24 +273,38 @@ namespace TFG.Api.Controllers
 		[HttpPost("{id}/archive")]
 		public async Task<IActionResult> ArchiveProject(Guid id)
 		{
-			var command = new ArchiveProjectCommand { ProjectId = id, Archive = true };
-			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+			var project = await _context.Projects.FindAsync(id);
+			if (project == null)
+				return NotFound();
 
-			if (!await archiveProjectCommandPermission.HasPermissionAsync(command))
+			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+			var command = new ArchiveProjectCommand { ProjectId = id, Archive = true };
+			bool isAdmin = _userInfoAccessor.UserInfo?.IsAdmin is not null && _userInfoAccessor.UserInfo.IsAdmin;
+			if (!isAdmin && !await archiveProjectCommandPermission.HasPermissionAsync(command))
 				throw new ForbiddenException("No tienes permisos para archivar proyectos.");
-			await _mediator.Send(command);
+
+			project.IsArchived = true;
+			_context.Projects.Update(project);
+			await _context.SaveChangesAsync();
 			return NoContent();
 		}
 
 		[HttpPost("{id}/unarchive")]
 		public async Task<IActionResult> UnarchiveProject(Guid id)
 		{
-			var command = new ArchiveProjectCommand { ProjectId = id, Archive = false };
-			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+			var project = await _context.Projects.FindAsync(id);
+			if (project == null)
+				return NotFound();
 
-			if (!await archiveProjectCommandPermission.HasPermissionAsync(command))
+			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+			var command = new ArchiveProjectCommand { ProjectId = id, Archive = false };
+			bool isAdmin = _userInfoAccessor.UserInfo?.IsAdmin is not null && _userInfoAccessor.UserInfo.IsAdmin;
+			if (!isAdmin && !await archiveProjectCommandPermission.HasPermissionAsync(command))
 				throw new ForbiddenException("No tienes permisos para desarchivar proyectos.");
-			await _mediator.Send(command);
+
+			project.IsArchived = false;
+			_context.Projects.Update(project);
+			await _context.SaveChangesAsync();
 			return NoContent();
 		}
 	}
