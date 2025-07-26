@@ -7,7 +7,7 @@
 <MudTable Hover @ref=_table T="FilteredProjectDto" Comparer=_comparer Bordered="true" Elevation="1" ServerData="ReloadProjects" MultiSelection="@MultiSelection" SelectedItems="SelectedProjects" SelectedItemsChanged="OnSelectedProjectsChanged">
 	<ToolBarContent>
 		<div class="d-flex align-baseline justify-center gap-3">
-			<MudText Typo="Typo.h6">Proyectos</MudText>
+			<MudText Typo="Typo.h6">@Title</MudText>
 			@if (TableActions != null)
 			{
 				@TableActions
@@ -137,6 +137,8 @@
 
 	[Parameter]
 	public EventCallback<List<ProjectOwnerDto>> ProjectOwnersChanged { get; set; }
+	[Parameter]
+	public string Title { get; set; } = "Proyectos";
 
 	private bool showOwners => ProjectOwners is not null;
 

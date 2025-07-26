@@ -12,20 +12,43 @@
 
 <PageTitle>Proyectos</PageTitle>
 
-    <Section Title="Proyectos">
-        <ProjectTable 
-            GetProjects="GetProjectsAsync"
-            OnCreateProjectClicked="NavigateToCreateProject"
-            GetProjectUrl="GetProjectUrl">
-            <TableActions>
-                <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="NavigateToCreateProject">Crear proyecto</MudButton>
-            </TableActions>
-        </ProjectTable>
-    </Section>
+<Section Title="Proyectos">
+    <MudTabs>
+        <MudTabPanel Text="Activos">
+            <ProjectTable 
+                GetProjects="GetProjectsAsync"
+                OnCreateProjectClicked="NavigateToCreateProject"
+                GetProjectUrl="GetProjectUrl">
+                <TableActions>
+                    <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="NavigateToCreateProject">Crear proyecto</MudButton>
+                </TableActions>
+            </ProjectTable>
+        </MudTabPanel>
+        <MudTabPanel Text="Archivados">
+            <ProjectTable 
+                Title="Proyectos archivados"
+                GetProjects="GetArchivedProjectsAsync"
+                OnCreateProjectClicked="NavigateToCreateProject"
+                GetProjectUrl="GetProjectUrl">
+            </ProjectTable>
+        </MudTabPanel>
+    </MudTabs>
+</Section>
 
 @code {
     private async Task<PaginatedResponseDto<FilteredProjectDto>> GetProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
     {
+        // Solo proyectos no archivados
+        request.Filters ??= new ProjectQueryParameters();
+        request.Filters.IsArchived = false;
+        return await ProjectsApi.GetProjects(request);
+    }
+
+    private async Task<PaginatedResponseDto<FilteredProjectDto>> GetArchivedProjectsAsync(FilteredPaginatedRequestDto<ProjectQueryParameters> request)
+    {
+        // Solo proyectos archivados
+        request.Filters ??= new ProjectQueryParameters();
+        request.Filters.IsArchived = true;
         return await ProjectsApi.GetProjects(request);
     }
 
