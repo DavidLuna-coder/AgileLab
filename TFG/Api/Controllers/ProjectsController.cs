@@ -23,18 +23,19 @@ using TFG.Application.Services.Projects.Queries.GetProjectsKpi;
 using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
+using TFG.Application.Security;
 
 namespace TFG.Api.Controllers
 {
 	[Route("api/projects")]
 	[ApiController]
-	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService, IMediator mediator, ArchiveProjectCommandPermission archivePermission) : ControllerBase
+	public class ProjectsController(ApplicationDbContext context, UserManager<User> userManager, IProjectService projectService, IMediator mediator, IUserInfoAccessor userInfoAccessor) : ControllerBase
 	{
 		private readonly ApplicationDbContext _context = context;
 		private readonly UserManager<User> _userManager = userManager;
 		private readonly IProjectService _projectService = projectService;
 		private readonly IMediator _mediator = mediator;
-		private readonly ArchiveProjectCommandPermission _archivePermission = archivePermission;
+		private readonly IUserInfoAccessor _userInfoAccessor = userInfoAccessor;
 
 		// POST: api/Projects/search
 		[HttpPost("search")]
@@ -273,7 +274,9 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> ArchiveProject(Guid id)
 		{
 			var command = new ArchiveProjectCommand { ProjectId = id, Archive = true };
-			if (!await _archivePermission.HasPermissionAsync(command))
+			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+
+			if (!await archiveProjectCommandPermission.HasPermissionAsync(command))
 				throw new ForbiddenException("No tienes permisos para archivar proyectos.");
 			await _mediator.Send(command);
 			return NoContent();
@@ -283,7 +286,9 @@ namespace TFG.Api.Controllers
 		public async Task<IActionResult> UnarchiveProject(Guid id)
 		{
 			var command = new ArchiveProjectCommand { ProjectId = id, Archive = false };
-			if (!await _archivePermission.HasPermissionAsync(command))
+			ArchiveProjectCommandPermission archiveProjectCommandPermission = new(_userInfoAccessor, _context);
+
+			if (!await archiveProjectCommandPermission.HasPermissionAsync(command))
 				throw new ForbiddenException("No tienes permisos para desarchivar proyectos.");
 			await _mediator.Send(command);
 			return NoContent();

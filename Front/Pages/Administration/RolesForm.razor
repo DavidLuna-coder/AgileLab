@@ -51,10 +51,25 @@
 			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.EditProjects)) Value=@permissions.HasFlag(Permissions.EditProjects) Label="Editar Proyectos" />
 		</MudItem>
 		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.ArchiveProjects)) Value=@permissions.HasFlag(Permissions.ArchiveProjects) Label="Archivar/Desarchivar Proyectos" />
+		</MudItem>
+		<MudItem>
 			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteProjects)) Value=@permissions.HasFlag(Permissions.DeleteProjects) Label="Borrar Proyectos" />
 		</MudItem>
 	</MudGrid>
 	<MudDivider />
+	<MudText Typo="Typo.subtitle1">Experiencias</MudText>
+	<MudGrid>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.CreateExperiences)) Value=@permissions.HasFlag(Permissions.CreateExperiences) Label="Crear experiencias" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.EditExperiences)) Value=@permissions.HasFlag(Permissions.EditExperiences) Label="Editar experiencias" />
+		</MudItem>
+		<MudItem>
+			<MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => PermissionsChange(value, Permissions.DeleteExperiences)) Value=@permissions.HasFlag(Permissions.DeleteExperiences) Label="Borrar experiencias" />
+		</MudItem>
+	</MudGrid>
 </MudStack>
 
 @code {
