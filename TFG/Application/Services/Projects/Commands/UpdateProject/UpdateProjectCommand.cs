@@ -33,7 +33,7 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 	{
 		var existingProject = await context.Projects
 			.Include(p => p.Users)
-			.FirstOrDefaultAsync(p => p.Id == request.ProjectId) ?? throw new NotFoundException($"El proyecto con id {request.ProjectId} no existe");
+			.FirstOrDefaultAsync(p => p.Id == request.ProjectId, cancellationToken: cancellationToken) ?? throw new NotFoundException($"El proyecto con id {request.ProjectId} no existe");
 
 		var requestUserIds = request.UsersIds ?? new List<string>();
 		var projectUserIds = existingProject.Users.Select(u => u.Id).ToList();

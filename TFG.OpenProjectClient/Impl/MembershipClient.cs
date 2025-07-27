@@ -5,11 +5,11 @@ namespace TFG.OpenProjectClient.Impl
 {
 	public class MembershipClient(IOpenProjectHttpClient httpClient) : IMembershipsClient
 	{
-		public async Task<MembershipCreated> CreateAsync(MembershipCreation membershipCreation)
+		public async Task<Membership> CreateAsync(MembershipCreation membershipCreation)
 		{
 			var response = await httpClient.PostAsync("memberships", membershipCreation);
 			string responseBody = await response.Content.ReadAsStringAsync();
-			MembershipCreated membershipCreated = JsonSerializer.Deserialize<MembershipCreated>(responseBody)!;
+			Membership membershipCreated = JsonSerializer.Deserialize<Membership>(responseBody)!;
 			return membershipCreated;
 		}
 	}

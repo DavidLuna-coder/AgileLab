@@ -2,7 +2,7 @@
 
 namespace TFG.OpenProjectClient.Models.Memberships
 {
-	public class MembershipCreated : HalResource<MembershipCreatedLinks, MembershipEmbeddedItems>
+	public class Membership : HalResource<MembershipCreatedLinks, MembershipEmbeddedItems>
 	{
 		[JsonPropertyName("id")]
 		public int Id { get; set; }

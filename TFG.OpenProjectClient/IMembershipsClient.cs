@@ -4,6 +4,7 @@ namespace TFG.OpenProjectClient
 {
 	public interface IMembershipsClient
 	{
-		Task<MembershipCreated> CreateAsync(MembershipCreation membershipCreation);
+		Task<Membership> CreateAsync(MembershipCreation membershipCreation);
+		Task DeleteAsync(int membershipId);
 	}
 }
