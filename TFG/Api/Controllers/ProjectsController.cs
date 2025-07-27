@@ -24,6 +24,7 @@ using TFG.Application.Services.Projects.Queries.GetTasksSummary;
 using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
 using TFG.Application.Security;
+using TFG.Application.Services.Projects.Commands.UpdateProject;
 
 namespace TFG.Api.Controllers
 {
@@ -94,42 +95,16 @@ namespace TFG.Api.Controllers
 		[HttpPut("{id}")]
 		public async Task<IActionResult> PutProject(Guid id, UpdateProjectDto project)
 		{
-			var existingProject = await _context.Projects
-				.Include(p => p.Users)
-				.FirstOrDefaultAsync(p => p.Id == id);
-
-			if (existingProject is null)
+			UpdateProjectCommand updateProjectCommand = new()
 			{
-				return NotFound();
-			}
+				ProjectId = id,
+				Name = project.Name,
+				Description = project.Description,
+				UsersIds = project.UsersIds
+			};
 
-			project.ToProject(existingProject);
+			var response = await _mediator.Send(updateProjectCommand);
 
-			project.UsersIds ??= [];
-			var updatedUsers = await _userManager.Users
-				.Where(u => project.UsersIds.Contains(u.Id))
-				.ToListAsync();
-			existingProject.Users.Clear(); // Remove all users
-			existingProject.Users.AddRange(updatedUsers); // Add the updated users
-			_context.Projects.Update(existingProject);
-
-			try
-			{
-				await _context.SaveChangesAsync();
-			}
-			catch (DbUpdateConcurrencyException)
-			{
-				if (!ProjectExists(id))
-				{
-					return NotFound();
-				}
-				else
-				{
-					throw;
-				}
-			}
-
-			var response = existingProject.ToProjectDto();
 			return Ok(response);
 		}
 

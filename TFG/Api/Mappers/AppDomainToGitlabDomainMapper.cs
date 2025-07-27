@@ -1,6 +1,7 @@
 ﻿using NGitLab.Models;
 using Shared.DTOs.Projects;
 using TFG.Application.Services.Projects.Commands.CreateProject;
+using TFG.Application.Services.Projects.Commands.UpdateProject;
 
 namespace TFG.Api.Mappers
 {
@@ -27,6 +28,15 @@ namespace TFG.Api.Mappers
 				VisibilityLevel = VisibilityLevel.Public,
 				TemplateName = createProjectDto.Template,
 				MergeRequestsAccessLevel = "enabled",
+			};
+		}
+
+		public static ProjectUpdate ToGitlabProjectUpdate(this UpdateProjectCommand updateProjectCommand)
+		{
+			return new ProjectUpdate()
+			{
+				Description = updateProjectCommand.Description,
+				Name = updateProjectCommand.Name,
 			};
 		}
 	}
