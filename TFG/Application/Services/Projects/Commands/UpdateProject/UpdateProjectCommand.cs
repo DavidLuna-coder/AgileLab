@@ -182,6 +182,7 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 		{
 			Id = existingProject.OpenProjectId,
 			Name = request.Name,
+			Identifier = request.Name.ToLowerInvariant().Replace(" ", "_"),
 			Description = new()
 			{
 				Raw = request.Description ?? string.Empty,
@@ -230,5 +231,12 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 				continue; // Continue even if we can't add a user
 			}
 		}
+		UpdateProjectKey updateProjectKey = new() { From = existingProject.SonarQubeProjectKey, To = request.Name.ToLowerInvariant().Replace(" ", "-") };
+		try
+		{
+			existingProject.SonarQubeProjectKey = updateProjectKey.To;
+			await sonarQubeClient.Projects.UpdateKeyAsync(updateProjectKey);
+		}
+		catch { }
 	}
 }

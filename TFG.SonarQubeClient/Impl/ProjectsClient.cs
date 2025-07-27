@@ -34,5 +34,10 @@ namespace TFG.SonarQubeClient.Impl
 
 			return metrics;
 		}
+
+		public Task UpdateKeyAsync(UpdateProjectKey updateProject)
+		{
+			return client.PostAsync($"projects/update_key?from={updateProject.From}&to={updateProject.To}");
+		}
 	}
 }
