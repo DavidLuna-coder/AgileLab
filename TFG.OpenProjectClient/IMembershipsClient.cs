@@ -1,4 +1,5 @@
-﻿using TFG.OpenProjectClient.Models.Memberships;
+﻿using TFG.OpenProjectClient.Models;
+using TFG.OpenProjectClient.Models.Memberships;
 
 namespace TFG.OpenProjectClient
 {
@@ -6,5 +7,6 @@ namespace TFG.OpenProjectClient
 	{
 		Task<Membership> CreateAsync(MembershipCreation membershipCreation);
 		Task DeleteAsync(int membershipId);
+		Task<OpenProjectCollection<Membership>> GetAsync(GetMembershipsQuery? query = null);
 	}
 }

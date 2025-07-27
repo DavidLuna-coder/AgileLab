@@ -15,5 +15,11 @@ namespace TFG.SonarQubeClient.Impl
 			string permissionString = JsonSerializer.Serialize(userPermission.Permission,jsonSerializerOptions).Trim('"');
 			await client.PostAsync($"permissions/add_user?login={userPermission.Login}&permission={permissionString.ToLowerInvariant()}&projectKey={userPermission.ProjectKey}", userPermission);
 		}
+
+		public async Task DeleteUserAsync(UserPermission userPermission)
+		{
+			string permissionString = JsonSerializer.Serialize(userPermission.Permission, jsonSerializerOptions).Trim('"');
+			await client.PostAsync($"permissions/remove_user?login={userPermission.Login}&permission={permissionString.ToLowerInvariant()}&projectKey={userPermission.ProjectKey}", userPermission);
+		}
 	}
 }

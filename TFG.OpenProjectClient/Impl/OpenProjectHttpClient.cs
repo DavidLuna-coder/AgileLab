@@ -80,5 +80,14 @@ namespace TFG.OpenProjectClient.Impl
 				throw new HttpRequestException(log);
 			}
 		}
+
+		public Task<HttpResponseMessage> PatchAsync<T>(string endpoint, T content)
+		{
+			string json = JsonSerializer.Serialize(content, _serializerOptions);
+			var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+			var response = _httpClient.PatchAsync(endpoint, jsonContent);
+			EnsureSuccessStatusCode(response.Result);
+			return response;
+		}
 	}
 }

@@ -5,5 +5,6 @@ namespace TFG.SonarQubeClient
     public interface IPermissionsClient
     {
         Task AddUserAsync(UserPermission userPermission);
+        Task DeleteUserAsync(UserPermission userPemission);
     }
 }

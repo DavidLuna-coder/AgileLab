@@ -13,9 +13,14 @@ namespace TFG.OpenProjectClient.Impl
 			return projectCreated;
 		}
 
-		public async Task DeleteAsync(int projectId)
+		public Task DeleteAsync(int projectId)
 		{
-			await httpClient.DeleteAsync($"projects/{projectId}");
+			return httpClient.DeleteAsync($"projects/{projectId}");
+		}
+
+		public Task UpdateAsync(ProjectUpdate projectUpdate)
+		{
+			return httpClient.PatchAsync($"projects/{projectUpdate.Id}", projectUpdate);
 		}
 	}
 }
