@@ -12,6 +12,7 @@ using TFG.Infrastructure.Data;
 using TFG.OpenProjectClient;
 using TFG.OpenProjectClient.Models.BasicObjects;
 using TFG.OpenProjectClient.Models.Memberships;
+using TFG.OpenProjectClient.Models.Projects;
 using TFG.SonarQubeClient;
 using TFG.SonarQubeClient.Models;
 using Project = TFG.Domain.Entities.Project;
@@ -77,7 +78,7 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 
 	private async Task UpdateProjectInGitlab(UpdateProjectCommand request, Project existingProject, List<User> usersToAdd, List<User> usersToRemove)
 	{
-		ProjectUpdate projectUpdate = request.ToGitlabProjectUpdate();
+		NGitLab.Models.ProjectUpdate projectUpdate = request.ToGitlabProjectUpdate();
 		await gitLabClient.Projects.UpdateAsync(existingProject.GitlabId, projectUpdate);
 
 		foreach (var user in usersToRemove)
@@ -120,7 +121,6 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 
 	private async Task UpdateProjectOpenProject(UpdateProjectCommand request, Project existingProject, List<User> usersToAdd, List<User> usersToRemove)
 	{
-
 		GetMembershipsQuery query = new();
 		foreach (var user in usersToRemove)
 		{
@@ -176,6 +176,20 @@ public class UpdateProjectCommandHandler(ApplicationDbContext context,
 				continue; // Continue even if we can't add a user
 			}
 		}
+
+
+		OpenProjectClient.Models.Projects.ProjectUpdate update = new()
+		{
+			Id = existingProject.OpenProjectId,
+			Name = request.Name,
+			Description = new()
+			{
+				Raw = request.Description ?? string.Empty,
+				Format = "markdown"
+			}
+		};
+
+		await openProjectClient.Projects.UpdateAsync(update);
 	}
 
 	private async Task UpdateSonarqubeProject(UpdateProjectCommand request, Project existingProject, List<User> usersToAdd, List<User> usersToRemove)
