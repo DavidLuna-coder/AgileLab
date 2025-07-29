@@ -42,38 +42,14 @@ namespace TFG.Api.Controllers
 		[HttpPost("search")]
 		public async Task<ActionResult<PaginatedResponseDto<FilteredProjectDto>>> SearchProjects([FromBody] FilteredPaginatedRequestDto<ProjectQueryParameters> request)
 		{
-			var projectsQuery = _context.Projects.AsQueryable();
-
-			// Aplicar filtros
-			IFiltersHandler<Project, ProjectQueryParameters> projectFilterHandler = new ProjectFiltersHandler();
-			var predicate = projectFilterHandler.GetFilters(request.Filters);
-			projectsQuery = projectsQuery.Where(predicate);
-
-			// Paginación
-			var totalItems = await projectsQuery.CountAsync();
-			List<Project>? projects;
-			if (request.PageSize >= 0)
+			var userId = _userInfoAccessor.UserInfo?.UserId;
+			var query = new TFG.Application.Services.Projects.Queries.SearchProjects.SearchProjectsQuery
 			{
-				projects = await projectsQuery.Include(p => p.Users)
-				.Skip((request.Page) * request.PageSize)
-				.Take(request.PageSize)
-				.ToListAsync();
-			}
-			else
-			{
-				projects = await projectsQuery.Include(p => p.Users)
-				.ToListAsync();
-			}
-
-			List<FilteredProjectDto> items = projects.Select(p => p.ToFilteredProjectDto()).ToList();
-
-			return new PaginatedResponseDto<FilteredProjectDto>
-			{
-				Items = items,
-				TotalCount = totalItems,
-				PageNumber = request.Page,
-				PageSize = request.PageSize
+				Request = request,
+				UserId = userId
 			};
+			var result = await _mediator.Send(query);
+			return result;
 		}
 
 		// GET: api/Projects/5
