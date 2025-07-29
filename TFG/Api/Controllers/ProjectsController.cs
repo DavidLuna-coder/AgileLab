@@ -80,13 +80,14 @@ namespace TFG.Api.Controllers
 		[HttpGet("{id}")]
 		public async Task<ActionResult<ProjectDto>> GetProject(Guid id)
 		{
-			Project? project = await _context.Projects.Where(p => p.Id == id).Include(p => p.Users).FirstOrDefaultAsync();
-
-			if (project == null)
+			var userId = _userInfoAccessor.UserInfo?.UserId;
+			var query = new TFG.Application.Services.Projects.Queries.GetProject.GetProjectQuery
 			{
-				return NotFound();
-			}
-			ProjectDto projectDto = project.ToProjectDto();
+				ProjectId = id,
+				UserId = userId
+			};
+
+			var projectDto = await _mediator.Send(query);
 			return projectDto;
 		}
 
@@ -211,10 +212,6 @@ namespace TFG.Api.Controllers
 			};
 			var metrics = await _mediator.Send(query);
 			return Ok(metrics);
-		}
-		private bool ProjectExists(Guid id)
-		{
-			return _context.Projects.Any(e => e.Id == id);
 		}
 
 		[HttpPost("{projectId}/gitlab-metrics")]

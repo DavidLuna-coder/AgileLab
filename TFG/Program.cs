@@ -2,6 +2,7 @@ using ApexCharts;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using TFG.Api.Middlewares;
 using TFG.Application.Security;
 using TFG.Application.Services;
@@ -69,6 +70,22 @@ builder.RegisterAppServices();
 builder.Services.AddRazorPages();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionBehavior<,>));
+
+// Registro automático de todos los IPermissionValidator<T> en el ensamblado principal
+var permissionValidatorType = typeof(TFG.Application.Security.IPermissionValidator<>);
+var assembly = Assembly.GetExecutingAssembly();
+
+foreach (var type in assembly.GetTypes())
+{
+    var interfaces = type.GetInterfaces();
+    foreach (var iface in interfaces)
+    {
+        if (iface.IsGenericType && iface.GetGenericTypeDefinition() == permissionValidatorType)
+        {
+            builder.Services.AddTransient(iface, type);
+        }
+    }
+}
 
 // Configuración del intervalo del servicio en background desde appsettings o variable de entorno
 var snapshotIntervalMinutes = builder.Configuration.GetValue<int?>("ProjectSnapshot:IntervalMinutes") ?? 5;

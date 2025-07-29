@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Shared.DTOs;
 using TFG.Domain.Results;
-using TFG.Model.Entities;
 
 namespace TFG.Application.Interfaces
 {

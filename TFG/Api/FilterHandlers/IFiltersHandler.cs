@@ -1,7 +1,4 @@
-﻿using LinqKit;
-using Shared.DTOs.Users;
-using System.Linq.Expressions;
-using TFG.Model.Entities;
+﻿using System.Linq.Expressions;
 
 namespace TFG.Api.FilterHandlers
 {
