@@ -33,9 +33,10 @@
 					else
 					{
 						<MudChart ChartType="ChartType.Donut"
-								  InputData="[kpis.Coverage, 100-kpis.Coverage]"
-								  InputLabels="@(["Cubierto", "No cubierto"])"
-								  Width="100%" />
+							  InputData="[kpis.Coverage, 100-kpis.Coverage]"
+							  InputLabels="@(new[] { "Cubierto", "No cubierto" })"
+							  ChartOptions="@(new ChartOptions { ChartPalette = new[] { "var(--mud-palette-success)", "var(--mud-palette-error)" } })"
+							  Width="100%" />
 					}
 				</MudStack>
 			</MudCardContent>

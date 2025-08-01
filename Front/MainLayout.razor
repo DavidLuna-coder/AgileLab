@@ -21,7 +21,6 @@
 		<MudSpacer />
 		<MudIconButton Icon="@(_isDarkMode? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" OnClick="ToggleDarkMode" Color="Color.Inherit" Edge="Edge.End" />
 		<MudIconButton OnClick="Logout" Icon="@Icons.Material.Filled.Logout"></MudIconButton>
-		<MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
 	</MudAppBar>
 	<MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
 		<NavMenu />
