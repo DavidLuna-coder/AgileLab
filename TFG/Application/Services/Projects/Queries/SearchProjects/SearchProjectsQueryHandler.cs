@@ -12,7 +12,7 @@ using TFG.Application.Services.Projects.Queries.SearchProjects;
 
 namespace TFG.Application.Services.Projects.Queries.SearchProjects
 {
-    public class SearchProjectsQueryHandler(ApplicationDbContext context) : IRequestHandler<SearchProjectsQuery, PaginatedResponseDto<FilteredProjectDto>>
+    public class SearchProjectsQueryHandler(ApplicationDbContext context, IUserInfoAccessor userInfoAccessor) : IRequestHandler<SearchProjectsQuery, PaginatedResponseDto<FilteredProjectDto>>
     {
         public async Task<PaginatedResponseDto<FilteredProjectDto>> Handle(SearchProjectsQuery query, CancellationToken cancellationToken)
         {
@@ -22,7 +22,8 @@ namespace TFG.Application.Services.Projects.Queries.SearchProjects
 
             // Comprobar permisos
             var userPermissions = await context.GetCombinedPermissionsAsync(userId);
-            if ((userPermissions & Permissions.ViewAllProjects) == Permissions.None)
+            bool isAdmin = userInfoAccessor.UserInfo?.IsAdmin ?? false;
+			if (!isAdmin && (userPermissions & Permissions.ViewAllProjects) == Permissions.None)
             {
                 // Solo proyectos en los que participa el usuario
                 projectsQuery = projectsQuery.Where(p => p.Users.Any(u => u.Id == userId));
