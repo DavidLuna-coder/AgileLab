@@ -7,15 +7,30 @@
 @inject IAuthenticationService AuthenticationService
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
-<div style="min-height:80vh" class="d-flex justify-center align-center">
-	<MudForm ValidationDelay="0" @ref=form Validation="validator.ValidateValues" Model="loginModel">
-		<div style="width:600px" class="d-flex justify-center align-center gap-3 flex-column">
-			<MudText Typo="Typo.h5" >Bienvenid@@, inicia sesión</MudText>
-			<MudTextField Immediate=true For="() => loginModel.Email" RequiredError="Es necesario introducir un email válido" FullWidth=true Label="Email" @bind-Value="loginModel.Email" T="string"></MudTextField>
-			<MudTextField Immediate=true For="() => loginModel.Password" RequiredError="La contraseña no puede estar vacía" FullWidth=true Label="Password" T="string" @bind-Value="loginModel.Password" InputType="InputType.Password"></MudTextField>
-			<MudButton OnClick="Submit">Submit</MudButton>
-		</div>
-	</MudForm>
+
+<div class="login-page">
+	<MudContainer MaxWidth="MaxWidth.Small" Class="login-container">
+		<MudCard Class="login-card" Elevation="4">
+			<MudCardHeader>
+				<MudStack Style="width:100%" AlignItems="AlignItems.Center" Justify="Justify.Center">
+					<MudImage Src="AgileLab.png" Alt="Logo" Style="height: 60px; margin-bottom: 0.5rem;" />
+					<MudText Typo="Typo.h6" Align="Align.Center" Class="login-header">Bienvenid@@</MudText>
+					<MudText Typo="Typo.body2" Align="Align.Center" Class="login-subtitle">Inicia sesión para continuar</MudText>
+				</MudStack>
+			</MudCardHeader>
+			<MudCardContent>
+				<MudForm ValidationDelay="0" @ref=form Validation="validator.ValidateValues" Model="loginModel">
+					<MudStack Spacing="2">
+						<MudTextField Immediate=true For="() => loginModel.Email" RequiredError="Es necesario introducir un email válido" FullWidth=true Label="Email" @bind-Value="loginModel.Email" T="string" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"></MudTextField>
+						<MudTextField Immediate=true For="() => loginModel.Password" RequiredError="La contraseña no puede estar vacía" FullWidth=true Label="Contraseña" T="string" @bind-Value="loginModel.Password" InputType="InputType.Password" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock"></MudTextField>
+						<MudButton Color=Color.Primary Variant=Variant.Filled OnClick="Submit" FullWidth="true" Class="login-button">
+							<MudIcon Icon="@Icons.Material.Filled.Login" Class="mr-2" /> Iniciar sesión
+						</MudButton>
+					</MudStack>
+				</MudForm>
+			</MudCardContent>
+		</MudCard>
+	</MudContainer>
 </div>
 
 @code {
@@ -36,8 +51,42 @@
 			}
 			catch
 			{
-				Snackbar.Add("Nombre de usuario o contraseña incorrecta");
+				Snackbar.Add("Nombre de usuario o contraseña incorrecta", Severity.Error);
 			}
 		}
 	}
 }
+
+<style>
+	.login-page {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 80vh;
+		margin: 0;
+		background-color: var(--mud-palette-background);
+	}
+
+	.login-container {
+		padding: 2rem;
+	}
+
+	.login-card {
+		padding: 2rem;
+		border-radius: 12px;
+	}
+
+	.login-header {
+		margin-bottom: 0.25rem;
+		font-weight: bold;
+	}
+
+	.login-subtitle {
+		margin-bottom: 1rem;
+		color: #6c757d;
+	}
+
+	.login-button {
+		margin-top: 1rem;
+	}
+</style>
