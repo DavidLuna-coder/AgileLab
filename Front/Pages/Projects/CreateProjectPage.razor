@@ -16,25 +16,23 @@
 <MudContainer Class="mt-5" MaxWidth="MaxWidth.Medium">
 	<Section Title="Creación de Proyecto">
 		<MudForm @ref=form Model="createProjectDto">
-			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
-			<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
-			<MudSelect Placeholder="Selecciona una plantilla de proyecto" Margin=Margin.Dense Clearable T="string" @bind-Value="@createProjectDto.Template">
-				<MudSelectItem Value="@GitlabProjectTemplates.DotNetCore">.Net Core</MudSelectItem>
-				<MudSelectItem Value="@GitlabProjectTemplates.Spring">Spring</MudSelectItem>
-				<MudSelectItem Value="@GitlabProjectTemplates.Express">Express</MudSelectItem>
-				<MudSelectItem Value="@GitlabProjectTemplates.Android">Android</MudSelectItem>
-				<MudSelectItem Value="@GitlabProjectTemplates.RubyOnRails">Ruby on Rails</MudSelectItem>
-			</MudSelect>
+			<MudStack>
+				<MudTextField Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Name" Label="Nombre" Required="true" RequiredError="Es necesario introducir el nombre del proyecto" />
+				<MudTextField AutoGrow Disabled=loading Class="mb-4" T="string" @bind-Value="@createProjectDto.Description" Label="Descripción" />
+				<MudSelect Placeholder="Selecciona una plantilla de proyecto" Margin=Margin.Dense Clearable T="string" @bind-Value="@createProjectDto.Template">
+					<MudSelectItem Value="@GitlabProjectTemplates.DotNetCore">.Net Core</MudSelectItem>
+					<MudSelectItem Value="@GitlabProjectTemplates.Spring">Spring</MudSelectItem>
+					<MudSelectItem Value="@GitlabProjectTemplates.Express">Express</MudSelectItem>
+					<MudSelectItem Value="@GitlabProjectTemplates.Android">Android</MudSelectItem>
+					<MudSelectItem Value="@GitlabProjectTemplates.RubyOnRails">Ruby on Rails</MudSelectItem>
+				</MudSelect>
 
-			<UsersSelectionTable class="mt-4" @bind-SelectedUsers=users></UsersSelectionTable>
-			@if (!loading)
-			{
-				<MudButton Disabled="loading" OnClick="CreateProject" Color="Color.Primary" Variant="Variant.Filled">Crear Proyecto</MudButton>
-			}
-			else
-			{
-				<MudButton Color="Color.Primary" Variant="Variant.Filled"><MudProgressCircular Size="Size.Small" Indeterminate=true /></MudButton>
-			}
+				<UsersSelectionTable class="mt-4" @bind-SelectedUsers=users></UsersSelectionTable>
+				<MudStack Row Justify="Justify.FlexEnd">
+					<MudButton Variant="Variant.Filled" OnClick="ReturnToProjectsPage">Cancelar</MudButton>
+					<MudButton Disabled=loading Variant="Variant.Filled" OnClick="CreateProject" Color="Color.Primary">Guardar</MudButton>
+				</MudStack>
+			</MudStack>
 		</MudForm>
 	</Section>
 </MudContainer>
@@ -43,6 +41,7 @@
 	MudForm? form;
 	bool loading;
 	HashSet<FilteredUserDto> users = [];
+
 	async Task CreateProject()
 	{
 		if (form is null) return;
@@ -68,5 +67,10 @@
 		{
 			loading = false;
 		}
+	}
+
+	void ReturnToProjectsPage()
+	{
+		Nav.NavigateTo<ProjectsPage>();
 	}
 }

@@ -10,13 +10,19 @@
 @inject IProjectsApi ProjectApi
 <PageTitle>Crear experiencia</PageTitle>
 
-<Section Title="Crear experiencia">
+<Section Title="Crear experiencia de gamificación">
 	<MudForm @ref="_form" Model="_createExperience">
 		<MudStack>
 			<MudTextField T="string" @bind-Value="_createExperience.Name" Label="Nombre" Required="true" />
 			<MudTextField T="string" @bind-Value="_createExperience.Description" Label="Descripción" />
 			<MudTextField Required T="string" @bind-Value="_createExperience.Url" Label="Url" />
-			<MudTextField T="string" @bind-Value="_createExperience.Token" Label="Token" />
+			<MudTextField T="string"
+						  @bind-Value="_createExperience.Token"
+						  InputType=tokenField
+						  Adornment="Adornment.End"
+						  OnAdornmentClick=ToggleTokenVisibility
+						  AdornmentIcon="@tokenIcon"
+						  Label="Token" />
 			<MudGrid>
 				<MudItem xs="4">
 					<MudNumericField T="int" Min="0" @bind-Value="_createExperience.MaxQualityScore" Label="Puntuación máxima de calidad" Required="true" />
@@ -40,7 +46,7 @@
 			}
 			else if (_createExperience.ExperienceType == GoRaceExperienceTypes.Platform)
 			{
-				<ProjectTable GetProjects="@GetProjectsAsync" MultiSelection @bind-ProjectOwners=projectOwners @bind-SelectedProjects=selectedProjects/>
+				<ProjectTable GetProjects="@GetProjectsAsync" MultiSelection @bind-ProjectOwners=projectOwners @bind-SelectedProjects=selectedProjects />
 			}
 
 			<MudStack Row Justify="Justify.FlexEnd">
@@ -59,6 +65,9 @@
 	HashSet<FilteredProjectDto> selectedProjects = new();
 	List<ProjectOwnerDto> projectOwners = new();
 	bool isSaving;
+	bool showToken = false;
+	InputType tokenField = InputType.Password;
+	string tokenIcon = Icons.Material.Filled.VisibilityOff;
 	async Task SaveExperience()
 	{
 		isSaving = true;
@@ -68,7 +77,7 @@
 			isSaving = false;
 			return;
 		}
-		if( _createExperience.ExperienceType == GoRaceExperienceTypes.Project)
+		if (_createExperience.ExperienceType == GoRaceExperienceTypes.Project)
 		{
 			_createExperience.ProjectId = selectedProject?.Id;
 		}
@@ -104,4 +113,10 @@
 		return await ProjectApi.GetProjects(request);
 	}
 
+	void ToggleTokenVisibility()
+	{
+		showToken = !showToken;
+		tokenField = showToken ? InputType.Text : InputType.Password;
+		tokenIcon = showToken ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+	}
 }

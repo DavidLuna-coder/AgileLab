@@ -11,7 +11,7 @@ namespace TFG.Api.Controllers
     {
         private readonly IAuthService _authService = authService;
 
-        [HttpPost("register")]
+        /*[HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationDto registrationDto)
         {
             try
@@ -25,7 +25,7 @@ namespace TFG.Api.Controllers
             {
                 return BadRequest();
             }
-        }
+        }*/
         [AllowAnonymous]
 		[HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto model)

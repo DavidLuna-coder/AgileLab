@@ -56,6 +56,7 @@ namespace TFG.Api.Mappers
 				FirstName = user.FirstName,
 				LastName = user.LastName,
 				Email = user.Email!,
+				IsAdmin = user.IsAdmin
 			};
 		}
 

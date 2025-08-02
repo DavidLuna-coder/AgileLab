@@ -21,11 +21,15 @@ else
 	<Section Title="@project.Name">
 		<ChildContent>
 			<MudForm Model="model" @ref="_form">
-				<MudTextField Label="Nombre" @bind-Value="model.Name" For="() => model.Name" Required />
-				<MudTextField Class="mt-2" Label="Descripción" @bind-Value="model.Description" For="() => model.Description" />
-				<UsersSelectionTable Class="mt-4" @bind-SelectedUsers="users"></UsersSelectionTable>
-				<MudButton OnClick="UpdateProject" Color="Color.Primary" Variant="Variant.Filled">Guardar</MudButton>
-				<MudButton OnClick="GoToProjectPage" Variant="Variant.Filled">Cancelar</MudButton>
+				<MudStack>
+					<MudTextField Label="Nombre" @bind-Value="model.Name" For="() => model.Name" Required />
+					<MudTextField AutoGrow Class="mt-2" Label="Descripción" @bind-Value="model.Description" For="() => model.Description" />
+					<UsersSelectionTable Class="mt-4" @bind-SelectedUsers="users"></UsersSelectionTable>
+					<MudStack Row Justify="Justify.FlexEnd">
+						<MudButton OnClick="GoToProjectPage" Variant="Variant.Filled">Cancelar</MudButton>
+						<MudButton OnClick="UpdateProject" Color="Color.Primary" Variant="Variant.Filled">Guardar</MudButton>
+					</MudStack>
+				</MudStack>
 			</MudForm>
 		</ChildContent>
 	</Section>
@@ -49,7 +53,7 @@ else
 			await ProjectStateService.LoadProject(_projectId);
 		}
 		project = ProjectStateService.CurrentProject!;
-		model.Description = project.Description; 
+		model.Description = project.Description;
 		model.Name = project.Name;
 		model.UsersIds = project.UsersIds;
 		await base.OnInitializedAsync();

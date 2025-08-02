@@ -19,7 +19,13 @@
 				<MudTextField T="string" @bind-Value="_updateExperience.Name" Label="Nombre" Required />
 				<MudTextField T="string" @bind-Value="_updateExperience.Description" Label="Descripción" />
 				<MudTextField Required T="string" @bind-Value="_updateExperience.Url" Label="Url" />
-				<MudTextField T="string" @bind-Value="_updateExperience.Token" Label="Token" />
+				<MudTextField T="string"
+				  @bind-Value="_updateExperience.Token"
+				  InputType=tokenField
+				  Adornment="Adornment.End"
+				  OnAdornmentClick=ToggleTokenVisibility
+				  AdornmentIcon="@tokenIcon"
+				  Label="Token" />
 				@if (experienceDto.ExperienceType == GoRaceExperienceTypes.Project)
 				{
 					<MudAutocomplete @bind-Value=selectedProject
@@ -77,6 +83,9 @@ else
 	List<ProjectOwnerDto> projectOwners = new();
 	bool isSaving;
 	bool isLoading;
+	bool showToken = false;
+	InputType tokenField = InputType.Password;
+	string tokenIcon = Icons.Material.Filled.VisibilityOff;
 	protected override async Task OnInitializedAsync()
 	{
 		isLoading = true;
@@ -167,4 +176,12 @@ else
 		projectOwners = experienceDto.ProjectOwners ?? [];
 		selectedProjects = result.Items.ToHashSet();
 	}
+
+	void ToggleTokenVisibility()
+	{
+		showToken = !showToken;
+		tokenField = showToken ? InputType.Text : InputType.Password;
+		tokenIcon = showToken ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+	}
+
 }

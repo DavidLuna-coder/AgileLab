@@ -11,7 +11,7 @@
 
 
 <Section Title="Usuarios">
-	<MudTable Hover Class="@Class" @ref=table T="FilteredUserDto" MultiSelection="true" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
+	<MudTable Hover Class="@Class" @ref=table T="FilteredUserDto" ServerData="ReloadUsers" Comparer="comparer" @bind-SelectedItems="selectedUsers">
 		<ToolBarContent>
 			<MudStack Spacing="4" Row>
 				<MudText Typo="Typo.h6">Usuarios</MudText>
@@ -27,7 +27,12 @@
 			<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
 			<MudTd DataLabel="Email">@context.Email</MudTd>
 			<MudTd DataLabel="Acciones">
-				<MudButton Variant="Variant.Text" DropShadow Color="Color.Error" OnClick="@(() => Delete(context.Id))" StartIcon="@Icons.Material.Filled.Delete">Eliminar</MudButton>
+				<MudButton Variant="Variant.Text"
+			   DropShadow
+			   Color="Color.Error"
+			   Disabled=context.IsAdmin
+			   OnClick="@(() => Delete(context.Id))"
+			   StartIcon="@Icons.Material.Filled.Delete">Eliminar</MudButton>
 			</MudTd>
 		</RowTemplate>
 		<PagerContent>

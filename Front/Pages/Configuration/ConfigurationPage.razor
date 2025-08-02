@@ -18,8 +18,10 @@
 				{
 					<MudStack>
 						<MudTextField @bind-Value=GitlabaseUrl Class="mb-4" T="string" Label="Url Base" />
-						<MudTextField @bind-Value=GitlabToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
-						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.Gitlab, GitlabaseUrl, GitlabToken)">Guardar</MudButton>
+						<MudTextField @bind-Value=GitlabToken Label="Token" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudStack AlignItems="AlignItems.End">
+							<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.Gitlab, GitlabaseUrl, GitlabToken)">Guardar</MudButton>
+						</MudStack>
 					</MudStack>
 				}
 			</MudTabPanel>
@@ -32,8 +34,10 @@
 				{
 					<MudStack>
 						<MudTextField @bind-Value=SonarqubeBaseUrl Class="mb-4" T="string" Label="Url Base" />
-						<MudTextField @bind-Value=SonarqubeToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
-						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.SonarQube, SonarqubeBaseUrl, SonarqubeToken)">Guardar</MudButton>
+						<MudTextField @bind-Value=SonarqubeToken Label="Token" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudStack AlignItems="AlignItems.End">
+							<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.SonarQube, SonarqubeBaseUrl, SonarqubeToken)">Guardar</MudButton>
+						</MudStack>
 					</MudStack>
 				}
 			</MudTabPanel>
@@ -46,8 +50,10 @@
 				{
 					<MudStack>
 						<MudTextField @bind-Value=OpenProjectBaseUrl Class="mb-4" T="string" Label="Url Base" />
-						<MudTextField @bind-Value=OpenProjectToken Label="Password" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
-						<MudButton Style="width:100%" Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.OpenProject, OpenProjectBaseUrl, OpenProjectToken)">Guardar</MudButton>
+						<MudTextField @bind-Value=OpenProjectToken Label="Token" Variant="Variant.Text" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="ShowApiKey" />
+						<MudStack AlignItems="AlignItems.End">
+							<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => UpdateApiIntegration(ApiConfigurationType.OpenProject, OpenProjectBaseUrl, OpenProjectToken)">Guardar</MudButton>
+						</MudStack>
 					</MudStack>
 				}
 			</MudTabPanel>
