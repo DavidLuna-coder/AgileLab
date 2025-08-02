@@ -33,10 +33,18 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		request.UsersIds ??= new List<string>();
 
 		var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userInfo.UserId) ?? throw new NotFoundException("User does not exist");
+
+		// Verify all users in request.UsersIds exist
+		var projectUsers = await dbContext.Users.Where(u => request.UsersIds.Contains(u.Id)).ToListAsync();
+		if (projectUsers.Count != request.UsersIds.Count)
+		{
+			throw new NotFoundException("One or more users do not exist");
+		}
+
 		long? gitlabId = null;
 		string? sonarQubeProjectKey = null;
 		int? openprojectProjectId = null;
-		IEnumerable<User> projectUsers = await dbContext.Users.Where(u => request.UsersIds.Any(id => id == u.Id)).ToListAsync();
+
 		try
 		{
 			var gitlabProject = await CreateAndConfigureGitlabProject(request, user, projectUsers);

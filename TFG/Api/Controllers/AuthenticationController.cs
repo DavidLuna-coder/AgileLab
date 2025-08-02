@@ -26,6 +26,7 @@ namespace TFG.Api.Controllers
                 return BadRequest();
             }
         }*/
+
         [AllowAnonymous]
 		[HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
