@@ -6,7 +6,6 @@ using NGitLab;
 using Microsoft.Extensions.Logging;
 using TFG.Application.Security;
 using Microsoft.EntityFrameworkCore;
-using NGitLab.Models;
 using User = TFG.Domain.Entities.User;
 using TFG.Tests.Fakes;
 using TFG.Application.Dtos;

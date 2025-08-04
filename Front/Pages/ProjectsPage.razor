@@ -4,12 +4,14 @@
 @using Front.Components.Tables
 @using Front.Helpers
 @using Front.Pages.Projects
+@using Front.Services.StateService
 @using Microsoft.AspNetCore.Components.Forms
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
+@using Shared.Enums
 @inject IProjectsApi ProjectsApi
 @inject NavigationManager Nav
-
+@inject IUserService UserService
 <PageTitle>Proyectos</PageTitle>
 
 <Section Title="Proyectos">
@@ -20,7 +22,10 @@
                 OnCreateProjectClicked="NavigateToCreateProject"
                 GetProjectUrl="GetProjectUrl">
                 <TableActions>
-                    <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="NavigateToCreateProject">Crear proyecto</MudButton>
+                    @if((UserService.Permissions & Permissions.CreateProjects) != 0)
+                    {
+                        <MudButton Variant=Variant.Filled Color="Color.Primary" OnClick="NavigateToCreateProject">Crear proyecto</MudButton>
+                    }
                 </TableActions>
             </ProjectTable>
         </MudTabPanel>

@@ -1,7 +1,6 @@
-﻿namespace TFG.Application.Security
+﻿namespace TFG.Application.Security;
+
+public interface IPermissionValidator<in TRequest>
 {
-	public interface IPermissionValidator<in TRequest>
-	{
-		Task<bool> HasPermissionAsync(TRequest request);
-	}
+	Task<bool> HasPermissionAsync(TRequest request);
 }

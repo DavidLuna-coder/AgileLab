@@ -4,13 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
+using Shared.Enums;
 using System.Threading.Tasks;
 using TFG.Api.FilterHandlers;
 using TFG.Api.Mappers;
+using TFG.Application.Security;
 using TFG.Application.Services.Users.Commands.DeleteUser;
 using TFG.Application.Services.Users.Commands.EditUser;
 using TFG.Application.Services.Users.Commands.RegisterUser;
 using TFG.Domain.Entities;
+using TFG.Infrastructure.Data;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,7 +22,7 @@ namespace TFG.Api.Controllers
 {
 	[Route("api/users")]
 	[ApiController]
-	public class UsersController(UserManager<User> userManager, IMediator mediator) : ControllerBase
+	public class UsersController(UserManager<User> userManager, IMediator mediator, IUserInfoAccessor userInfoAccessor, ApplicationDbContext context) : ControllerBase
 	{
 		private readonly UserManager<User> _userManager = userManager;
 		// GET: api/<UsersController>
@@ -102,6 +105,19 @@ namespace TFG.Api.Controllers
 			await mediator.Send(command);
 
 			return NoContent();
+		}
+
+		[HttpGet("my-permissions")]
+		public async Task<IActionResult> GetMyPermissions()
+		{
+			var userId = userInfoAccessor.UserInfo?.UserId ?? throw new Exception("UserId is null");
+
+			if (userInfoAccessor.UserInfo.IsAdmin)
+				return Ok(Permissions.All);
+
+			var userPermissions = await context.GetCombinedPermissionsAsync(userId);
+
+			return Ok(userPermissions);
 		}
 	}
 }

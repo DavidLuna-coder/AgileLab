@@ -3,7 +3,10 @@
 @using Front.Pages.Administration
 @using Front.Pages.Configuration
 @using Front.Pages.Users
+@using Front.Services.StateService
+@using Shared.Enums
 @inject NavigationManager Nav
+@inject IUserService UserService
 <MudStack Style="height:100%" Spacing="0" Justify="Justify.SpaceBetween">
 	<MudStack Spacing="0">
 		<MudItem>
@@ -15,30 +18,39 @@
 			</MudNavLink>
 		</MudItem>
 
-		<MudItem>
-			<MudNavLink Href="@(Nav.GetUrl<RolesPage>())">
-				<div class="d-flex flex-row gap-3 align-center">
-					<MudIcon Icon="@Icons.Material.Filled.Lock" />
-					<MudText>Roles</MudText>
-				</div>
-			</MudNavLink>
-		</MudItem>
-		<MudItem>
-			<MudNavLink Href="@(Nav.GetUrl<UsersPage>())">
-				<div class="d-flex flex-row gap-3 align-center">
-					<MudIcon Icon="@Icons.Material.Filled.Person" />
-					<MudText>Usuarios</MudText>
-				</div>
-			</MudNavLink>
-		</MudItem>
-		<MudItem>
-			<MudNavLink Href="@(Nav.GetUrl<ExperiencesPage>())">
-				<div class="d-flex flex-row gap-3 align-center">
-					<MudIcon Icon="@Icons.Material.Filled.Explore" />
-					<MudText>Gamificación</MudText>
-				</div>
-			</MudNavLink>
-		</MudItem>
+		@if ((UserService.Permissions & Permissions.ViewRoles) != 0)
+		{
+			<MudItem>
+				<MudNavLink Href="@(Nav.GetUrl<RolesPage>())">
+					<div class="d-flex flex-row gap-3 align-center">
+						<MudIcon Icon="@Icons.Material.Filled.Lock" />
+						<MudText>Roles</MudText>
+					</div>
+				</MudNavLink>
+			</MudItem>
+		}
+		@if ((UserService.Permissions & Permissions.ViewUsers) != 0)
+		{
+			<MudItem>
+				<MudNavLink Href="@(Nav.GetUrl<UsersPage>())">
+					<div class="d-flex flex-row gap-3 align-center">
+						<MudIcon Icon="@Icons.Material.Filled.Person" />
+						<MudText>Usuarios</MudText>
+					</div>
+				</MudNavLink>
+			</MudItem>			
+		}
+		@if ((UserService.Permissions & (Permissions.CreateExperiences | Permissions.EditExperiences | Permissions.DeleteExperiences) ) != 0)
+		{
+			<MudItem>
+				<MudNavLink Href="@(Nav.GetUrl<ExperiencesPage>())">
+					<div class="d-flex flex-row gap-3 align-center">
+						<MudIcon Icon="@Icons.Material.Filled.Explore" />
+						<MudText>Gamificación</MudText>
+					</div>
+				</MudNavLink>
+			</MudItem>
+		}
 	</MudStack>
 	<MudItem>
 		<MudNavLink Href="@(Nav.GetUrl<ConfigurationPage>())">
@@ -50,6 +62,6 @@
 	</MudItem>
 </MudStack>
 
-@code {
-
+@code{
 }
+

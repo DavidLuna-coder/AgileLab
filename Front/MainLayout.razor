@@ -2,11 +2,13 @@
 @using Front.Components
 @using Front.Helpers
 @using Front.Pages
+@using Front.Services.StateService
 @using MudBlazor
 @using Microsoft.JSInterop
 @inherits LayoutComponentBase
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager Nav
+@inject IUserService UserService
 
 <MudThemeProvider @ref="_mudThemeProvider" Theme="_myTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -23,7 +25,10 @@
 		<MudIconButton OnClick="Logout" Icon="@Icons.Material.Filled.Logout"></MudIconButton>
 	</MudAppBar>
 	<MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-		<NavMenu />
+        @if (UserService.Permissions is not null)
+        {
+            <NavMenu />
+        }
 	</MudDrawer>
 	<MudMainContent>
 		@if (isAuthenticated)
@@ -34,9 +39,9 @@
 </MudLayout>
 
 @code {
-	bool isAuthenticated = false;
-	bool _drawerOpen = true;
-	bool _isDarkMode = false;
+    bool isAuthenticated = false;
+    bool _drawerOpen = true;
+    bool _isDarkMode = false;
     MudThemeProvider _mudThemeProvider;
     MudTheme _myTheme = new MudTheme
     {
@@ -97,10 +102,12 @@
         }
     };
 
-	protected override async Task OnInitializedAsync()
-	{
-		await AuthenticationService.Initialize();
-		if (!AuthenticationService.IsAuthenticated())
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthenticationService.Initialize();
+        await UserService.InitializeAsync();
+        StateHasChanged();
+        if (!AuthenticationService.IsAuthenticated())
 		{
 			Nav.NavigateTo<Login>();
 		}

@@ -1,6 +1,7 @@
 ﻿using Front.ApiClient.Interfaces;
 using Shared.DTOs.Pagination;
 using Shared.DTOs.Users;
+using Shared.Enums;
 
 namespace Front.ApiClient.Implementations
 {
@@ -23,6 +24,11 @@ namespace Front.ApiClient.Implementations
 		{
 			var response = await _apiHttpClient.PostAsync<FilteredPaginatedRequestDto<GetUsersQueryParameters>, PaginatedResponseDto<FilteredUserDto>>($"{BASE_URL}/search", queryParameters);
 			return response;
+		}
+
+		public Task<Permissions> GetMyPermissions()
+		{
+			return _apiHttpClient.GetAsync<Permissions>($"{BASE_URL}/my-permissions");
 		}
 
 		public Task<UserDto> Update(string id, EditUserDto dto, CancellationToken cancellationToken = default)
