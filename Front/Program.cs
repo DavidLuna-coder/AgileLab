@@ -19,7 +19,12 @@ builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<IApiHttpClient, ApiHttpClient>();
+builder.Services.AddScoped<IApiHttpClient, ApiHttpClient>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var baseAddress = builder.HostEnvironment.BaseAddress;
+    return new ApiHttpClient(configuration, baseAddress);
+});
 builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
 builder.Services.AddScoped<IUsersApi, UsersApi>();
 builder.Services.AddScoped<IApiIntegrationsApi, ApiIntegrationsApi>();

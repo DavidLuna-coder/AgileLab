@@ -10,9 +10,9 @@ namespace Front.ApiClient.Implementations
         private readonly string _backendBaseAddress;
         private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerDefaults.Web);
         public HttpClient Client { get; }
-        public ApiHttpClient(IConfiguration configuration)
+        public ApiHttpClient(IConfiguration configuration, string baseAddress)
         {
-            _backendBaseAddress = configuration["Backend:BaseAddress"]!;
+            _backendBaseAddress = baseAddress ?? configuration["Backend:BaseAddress"]!;
             Client = new HttpClient()
             {
                 BaseAddress = new Uri(_backendBaseAddress)
