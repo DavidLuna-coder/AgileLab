@@ -45,6 +45,11 @@ namespace TFG.Api.Mappers
 				FirstName = user.FirstName,
 				LastName = user.LastName,
 				Email = user.Email!,
+				Roles = user.Roles?.Select(r => new FilteredUserRolDto
+				{
+					Id = r.Id,
+					Name = r.Name,
+				}).ToList() ?? []
 			};
 		}
 

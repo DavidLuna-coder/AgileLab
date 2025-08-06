@@ -27,8 +27,12 @@
 		<RowTemplate>
 			<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
 			<MudTd DataLabel="Email">@context.Email</MudTd>
-			<MudTd DataLabel="Roles"><MudText>@(string.Join(",", context.Roles.Select(r => r.Name)))</MudText></MudTd>
+			<MudTd DataLabel="Roles"><MudText>@(string.Join(", ", context.Roles.Select(r => r.Name)))</MudText></MudTd>
 			<MudTd DataLabel="Acciones">
+				<MudButton Variant="Variant.Text"
+						   Color="Color.Primary"
+						   StartIcon="@Icons.Material.Filled.Edit"
+						   OnClick="@(() => EditUser(context.Id))">Editar</MudButton>
 				<MudButton Variant="Variant.Text"
 						   DropShadow
 						   Color="Color.Error"
@@ -81,5 +85,14 @@
 	{
 		await UsersApi.Delete(userId);
 		await table.ReloadServerData();
+	}
+
+	void EditUser(string userId)
+	{
+		Dictionary<string, object> parameters = new()
+		{
+			{ nameof(EditUserPage.UserId), userId }
+		};
+		Nav.NavigateTo<EditUserPage>(parameters);
 	}
 }

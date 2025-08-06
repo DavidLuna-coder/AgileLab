@@ -1,0 +1,74 @@
+@page "/users/edit/{UserId}"
+@using Front.ApiClient.Interfaces
+@using Front.Components
+@using Shared.DTOs.Roles
+@using Shared.DTOs.Users
+@inject IRolesApi RolesApi
+@inject IUsersApi UsersApi
+@inject NavigationManager Nav
+
+<PageTitle>Editar usuario</PageTitle>
+
+<Section Title="Editar usuario">
+    <MudForm @ref=form Model="editUserDto">
+        <MudStack>
+            <MudText Typo="Typo.subtitle1">Roles</MudText>
+            <MudGrid>
+                @foreach (var rol in rolDtos)
+                {
+                    <MudItem>
+                        <MudSwitch T="bool" Color="Color.Primary" ValueChanged=@((bool value) => RolChange(rol.Id, value)) Value=editUserDto.RolesIds!.Contains(rol.Id) Label="@rol.Name" />
+                    </MudItem>
+                }
+            </MudGrid>
+            <MudStack Row Justify="Justify.FlexEnd">
+                <MudButton Variant="Variant.Filled" OnClick="ReturnToUsersPage">Cancelar</MudButton>
+                <MudButton Disabled=isUpdating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
+            </MudStack>
+        </MudStack>
+    </MudForm>
+</Section>
+
+@code {
+    [Parameter] public string UserId { get; set; }
+    EditUserDto editUserDto = new EditUserDto() { RolesIds = new List<Guid>() };
+    List<RolDto> rolDtos = new List<RolDto>();
+    bool isUpdating = false;
+    MudForm form;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolDtos = [.. await RolesApi.GetRoles()];
+        var user = await UsersApi.GetUserById(UserId);
+        editUserDto.RolesIds = user.Roles.Select(r => r.Id).ToList();
+    }
+
+    void RolChange(Guid rolId, bool value)
+    {
+        if (value && !editUserDto.RolesIds!.Contains(rolId))
+        {
+            editUserDto.RolesIds.Add(rolId);
+        }
+        else if (!value && editUserDto.RolesIds!.Contains(rolId))
+        {
+            editUserDto.RolesIds.Remove(rolId);
+        }
+    }
+
+    void ReturnToUsersPage()
+    {
+        Nav.NavigateTo("/users");
+    }
+
+    async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            isUpdating = true;
+            await UsersApi.Update(UserId, editUserDto);
+            isUpdating = false;
+            ReturnToUsersPage();
+        }
+    }
+}

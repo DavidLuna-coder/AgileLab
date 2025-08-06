@@ -11,5 +11,6 @@ namespace Front.ApiClient.Interfaces
 		Task Delete(string id, CancellationToken cancellationToken = default);
 		Task<UserDto> Update(string id, EditUserDto dto, CancellationToken cancellationToken = default);
 		Task<Permissions> GetMyPermissions();
+		Task<UserDto> GetUserById(string id, CancellationToken cancellationToken = default);
 	}
 }

@@ -12,6 +12,7 @@ using TFG.Application.Security;
 using TFG.Application.Services.Users.Commands.DeleteUser;
 using TFG.Application.Services.Users.Commands.EditUser;
 using TFG.Application.Services.Users.Commands.RegisterUser;
+using TFG.Application.Services.Users.Queries.GetUserById;
 using TFG.Application.Services.Users.Queries.SearchUsers;
 using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
@@ -37,14 +38,11 @@ namespace TFG.Api.Controllers
 
 		// GET api/<UsersController>/5
 		[HttpGet("{id}")]
-		public IActionResult Get(string id)
+		public async Task<IActionResult> Get(string id)
 		{
-			var usersQuery = _userManager.Users.AsQueryable();
-			User? user = usersQuery.FirstOrDefault(u => u.Id == id);
-			if (user == null) return NotFound();
-
-			UserDto userDto = user.ToUserDto();
-			return Ok(userDto);
+			var query = new GetUserByIdQuery() { UserId = id };
+			var result = await mediator.Send(query);
+			return Ok(result);
 		}
 
 		// POST api/<UsersController>

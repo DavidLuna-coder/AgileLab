@@ -35,5 +35,10 @@ namespace Front.ApiClient.Implementations
 		{
 			return _apiHttpClient.PutAsync<EditUserDto, UserDto>($"{BASE_URL}/{id}", dto);
 		}
+
+		public Task<UserDto> GetUserById(string id, CancellationToken cancellationToken = default)
+		{
+			return _apiHttpClient.GetAsync<UserDto>($"{BASE_URL}/{id}");
+		}
 	}
 }
