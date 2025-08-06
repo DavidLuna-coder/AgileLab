@@ -9,7 +9,7 @@
 
 <PageTitle>Editar usuario</PageTitle>
 
-<Section Title="Editar usuario">
+<Section Title="@($"{user.FirstName} {user.LastName}")">
     <MudForm @ref=form Model="editUserDto">
         <MudStack>
             <MudText Typo="Typo.subtitle1">Roles</MudText>
@@ -32,6 +32,7 @@
 @code {
     [Parameter] public string UserId { get; set; }
     EditUserDto editUserDto = new EditUserDto() { RolesIds = new List<Guid>() };
+    UserDto user = new();
     List<RolDto> rolDtos = new List<RolDto>();
     bool isUpdating = false;
     MudForm form;
@@ -39,7 +40,7 @@
     protected override async Task OnInitializedAsync()
     {
         rolDtos = [.. await RolesApi.GetRoles()];
-        var user = await UsersApi.GetUserById(UserId);
+        user = await UsersApi.GetUserById(UserId);
         editUserDto.RolesIds = user.Roles.Select(r => r.Id).ToList();
     }
 

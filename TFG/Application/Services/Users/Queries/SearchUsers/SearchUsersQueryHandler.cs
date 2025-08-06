@@ -1,3 +1,4 @@
+using LinqKit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Pagination;
@@ -23,7 +24,7 @@ public class SearchUsersQueryHandler : IRequestHandler<SearchUsersQuery, Paginat
 		var usersQuery = _context.Users.AsQueryable();
 		IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();
 		// Apply filters
-		var predicate = filtersHandler.GetFilters(request.Filters);
+		var predicate = filtersHandler.GetFilters(request.Filters).And(u => !u.IsAdmin);
 		usersQuery = usersQuery.Where(predicate);
 
 		// Pagination
