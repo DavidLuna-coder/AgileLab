@@ -75,7 +75,8 @@ namespace TFG.Api.Controllers
 				UserName = value.UserName,
 				FirstName = value.FirstName,
 				LastName = value.LastName,
-				Language = value.Language
+				Language = value.Language,
+				Roles = value.Roles ?? new List<Guid>()
 			};
 
 			await mediator.Send(command);

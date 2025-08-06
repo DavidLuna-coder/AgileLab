@@ -9,9 +9,7 @@ namespace Front.Services.StateService
 
 		public async Task InitializeAsync()
 		{
-			if (Permissions is null || Permissions == 0)
-				Permissions = await usersApi.GetMyPermissions();
-			Console.WriteLine(Permissions);
+			Permissions = await usersApi.GetMyPermissions();
 		}
 
 	}

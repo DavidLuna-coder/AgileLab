@@ -105,12 +105,16 @@
     protected override async Task OnInitializedAsync()
     {
         await AuthenticationService.Initialize();
-        await UserService.InitializeAsync();
-        StateHasChanged();
+        Console.WriteLine(AuthenticationService.IsAuthenticated());
+
         if (!AuthenticationService.IsAuthenticated())
-		{
-			Nav.NavigateTo<Login>();
-		}
+        {
+            Nav.NavigateTo<Login>();
+        }
+        else
+        {
+            await UserService.InitializeAsync();
+        }
 		isAuthenticated = true;
 		await base.OnInitializedAsync();
 	}

@@ -8,13 +8,14 @@
 @using Shared.DTOs.Pagination
 @using Shared.DTOs.Projects
 @using Shared.DTOs.Users
+@using Shared.Enums
 
 @inject IProjectsApi ProjectsApi
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
 @inject IUsersApi UsersApi
 @inject ProjectStateService ProjectStateService
-
+@inject IUserService UserService
 @if (loading)
 {
 	<MudProgressLinear Indeterminate />
@@ -24,32 +25,41 @@ else
 	<Section Title="@project.Name">
 		<Actions>
 			<MudStack Row Spacing="2" AlignItems="AlignItems.Center">
-				<MudTooltip Text="Editar">
-					<MudButton OnClick="OnEditButtonClick" Color="Color.Primary" Size="Size.Small">
-						<MudIcon Icon="@Icons.Material.Filled.Edit" />
-					</MudButton>
-				</MudTooltip>
-				@if (!project.IsArchived)
+				@if ((UserService.Permissions & Permissions.EditProjects) != 0)
 				{
-					<MudTooltip Text="Archivar">
-						<MudButton Color="Color.Warning" OnClick="ArchiveProject" Size="Size.Small">
-							<MudIcon Icon="@Icons.Material.Filled.Archive" />
+					<MudTooltip Text="Editar">
+						<MudButton OnClick="OnEditButtonClick" Color="Color.Primary" Size="Size.Small">
+							<MudIcon Icon="@Icons.Material.Filled.Edit" />
 						</MudButton>
 					</MudTooltip>
 				}
-				else
+				@if ((UserService.Permissions & Permissions.ArchiveProjects) != 0)
 				{
-					<MudTooltip Text="Desarchivar">
-						<MudButton Color="Color.Success" OnClick="UnarchiveProject" Size="Size.Small">
-							<MudIcon Icon="@Icons.Material.Filled.Unarchive" />
+					@if (!project.IsArchived)
+					{
+						<MudTooltip Text="Archivar">
+							<MudButton Color="Color.Warning" OnClick="ArchiveProject" Size="Size.Small">
+								<MudIcon Icon="@Icons.Material.Filled.Archive" />
+							</MudButton>
+						</MudTooltip>
+					}
+					else
+					{
+						<MudTooltip Text="Desarchivar">
+							<MudButton Color="Color.Success" OnClick="UnarchiveProject" Size="Size.Small">
+								<MudIcon Icon="@Icons.Material.Filled.Unarchive" />
+							</MudButton>
+						</MudTooltip>
+					}
+				}
+				@if ((UserService.Permissions & Permissions.DeleteProjects) != 0)
+				{
+					<MudTooltip Text="Eliminar">
+						<MudButton OnClick="DeleteProject" Color="Color.Error" Size="Size.Small" Style="margin-left:16px;">
+							<MudIcon Icon="@Icons.Material.Filled.Delete" />
 						</MudButton>
 					</MudTooltip>
 				}
-				<MudTooltip Text="Eliminar">
-					<MudButton OnClick="DeleteProject" Color="Color.Error" Size="Size.Small" Style="margin-left:16px;">
-						<MudIcon Icon="@Icons.Material.Filled.Delete" />
-					</MudButton>
-				</MudTooltip>
 			</MudStack>
 		</Actions>
 		<ChildContent>
@@ -57,25 +67,31 @@ else
 				<MudTabPanel Text="Resumen">
 					<ProjectSummary Project="project" />
 				</MudTabPanel>
-				<MudTabPanel Text="Usuarios">
-					<MudText Typo="Typo.h6">Usuarios</MudText>
-					<MudTable Hover T="FilteredUserDto" Class="mt-4" ServerData="ReloadUsers">
-						<HeaderContent>
-							<MudTh>Nombre</MudTh>
-							<MudTh>Email</MudTh>
-						</HeaderContent>
-						<RowTemplate>
-							<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
-							<MudTd DataLabel="Email">@context.Email</MudTd>
-						</RowTemplate>
-					</MudTable>
-				</MudTabPanel>
-				<MudTabPanel Text="Tareas">
-					<UsersKPIs ProjectId="@projectId" />
-				</MudTabPanel>
-				<MudTabPanel Text="Kpis">
-					<SonarQubeKpis ProjectId="@ProjectId" />
-				</MudTabPanel>
+				@if ((UserService.Permissions & Permissions.ViewProjectUsers) != 0)
+				{
+					<MudTabPanel Text="Usuarios">
+						<MudText Typo="Typo.h6">Usuarios</MudText>
+						<MudTable Hover T="FilteredUserDto" Class="mt-4" ServerData="ReloadUsers">
+							<HeaderContent>
+								<MudTh>Nombre</MudTh>
+								<MudTh>Email</MudTh>
+							</HeaderContent>
+							<RowTemplate>
+								<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
+								<MudTd DataLabel="Email">@context.Email</MudTd>
+							</RowTemplate>
+						</MudTable>
+					</MudTabPanel>					
+				}
+				@if ((UserService.Permissions & Permissions.ViewProjectKpis) != 0)
+				{
+					<MudTabPanel Text="Tareas">
+						<UsersKPIs ProjectId="@projectId" />
+					</MudTabPanel>
+					<MudTabPanel Text="Kpis">
+						<SonarQubeKpis ProjectId="@ProjectId" />
+					</MudTabPanel>
+				}
 			</MudTabs>
 		</ChildContent>
 	</Section>
@@ -90,6 +106,7 @@ else
 	bool loading = true;
 	protected override async Task OnInitializedAsync()
 	{
+		Console.WriteLine(UserService.Permissions);
 		try
 		{
 			if (ProjectStateService.CurrentProject == null || ProjectStateService.CurrentProject.Id != projectId)

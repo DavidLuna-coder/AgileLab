@@ -10,6 +10,6 @@ public class GetOpenProjectMetricsQueryPermissions(IUserInfoAccessor userInfoAcc
 	{
 		var userId = userInfoAccessor.UserInfo?.UserId ?? throw new Exception("UserId is null");
 		var userPermissions = await context.GetCombinedPermissionsAsync(userId);
-		return (userPermissions & Permissions.CreateProjects) != Permissions.None;
+		return (userPermissions & Permissions.ViewProjectKpis) != Permissions.None;
 	}
 }
