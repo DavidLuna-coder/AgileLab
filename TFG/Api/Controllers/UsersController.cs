@@ -70,7 +70,7 @@ namespace TFG.Api.Controllers
 		[HttpPut("{id}")]
 		public async Task<IActionResult> Put(string id, [FromBody] EditUserDto request)
 		{
-			EditUserCommand command = new()
+			var command = new EditUserCommand
 			{
 				UserId = id,
 				RolesIds = request.RolesIds
