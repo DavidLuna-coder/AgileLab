@@ -82,7 +82,6 @@
 	{
 		if (active) permissions |= permission;
 		else permissions &= ~permission;
-		Console.WriteLine($"Permissions {(int)permissions}");
 		StateHasChanged();
 		PermissionsChanged.InvokeAsync(permissions);
 	}

@@ -21,18 +21,20 @@
 		<HeaderContent>
 			<MudTh>Nombre</MudTh>
 			<MudTh>Email</MudTh>
+			<MudTh>Roles</MudTh>
 			<MudTh>Acciones</MudTh>
 		</HeaderContent>
 		<RowTemplate>
 			<MudTd DataLabel="Nombre">@($"{context.FirstName} {context.LastName}")</MudTd>
 			<MudTd DataLabel="Email">@context.Email</MudTd>
+			<MudTd DataLabel="Roles"><MudText>@(string.Join(",", context.Roles.Select(r => r.Name)))</MudText></MudTd>
 			<MudTd DataLabel="Acciones">
 				<MudButton Variant="Variant.Text"
-			   DropShadow
-			   Color="Color.Error"
-			   Disabled=context.IsAdmin
-			   OnClick="@(() => Delete(context.Id))"
-			   StartIcon="@Icons.Material.Filled.Delete">Eliminar</MudButton>
+						   DropShadow
+						   Color="Color.Error"
+						   Disabled=context.IsAdmin
+						   OnClick="@(() => Delete(context.Id))"
+						   StartIcon="@Icons.Material.Filled.Delete">Eliminar</MudButton>
 			</MudTd>
 		</RowTemplate>
 		<PagerContent>

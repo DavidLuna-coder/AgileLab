@@ -9,26 +9,27 @@
 @inject NavigationManager Nav
 
 <Section Title="Edición de rol">
-	<MudStack>
-		@if (isLoading)
-		{
-			<MudProgressCircular Indeterminate Color="Color.Primary" Size="Size.Large" />
-		}
-		else if (rol == null)
-		{
-			<MudText Typo="Typo.h6">No se encontró el rol.</MudText>
-		}
-		else
-		{
-			<MudTextField @bind-Value=model.Name Required RequiredError="El rol debe tener un nombre"> </MudTextField>
-			<RolesForm @bind-Permissions=model.Permissions />
-			<MudStack Row Justify="Justify.FlexEnd">
-				<MudButton Variant="Variant.Filled" OnClick="ReturnToRolesPage">Cancelar</MudButton>
-				<MudButton Disabled=isUpdating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
-			</MudStack>
-		}
-	</MudStack>
-
+	<MudForm Model="model">
+		<MudStack>
+			@if (isLoading)
+			{
+				<MudProgressCircular Indeterminate Color="Color.Primary" Size="Size.Large" />
+			}
+			else if (rol == null)
+			{
+				<MudText Typo="Typo.h6">No se encontró el rol.</MudText>
+			}
+			else
+			{
+				<MudTextField For="() => model.Name" Label="Nombre" @bind-Value=model.Name Required RequiredError="El rol debe tener un nombre"> </MudTextField>
+				<RolesForm @bind-Permissions=model.Permissions />
+				<MudStack Row Justify="Justify.FlexEnd">
+					<MudButton Variant="Variant.Filled" OnClick="ReturnToRolesPage">Cancelar</MudButton>
+					<MudButton Disabled=isUpdating Variant="Variant.Filled" OnClick=Save Color=Color.Primary>Guardar</MudButton>
+				</MudStack>
+			}
+		</MudStack>
+	</MudForm>
 </Section>
 
 @code {

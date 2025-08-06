@@ -12,6 +12,7 @@ using TFG.Application.Security;
 using TFG.Application.Services.Users.Commands.DeleteUser;
 using TFG.Application.Services.Users.Commands.EditUser;
 using TFG.Application.Services.Users.Commands.RegisterUser;
+using TFG.Application.Services.Users.Queries.SearchUsers;
 using TFG.Domain.Entities;
 using TFG.Infrastructure.Data;
 
@@ -27,29 +28,11 @@ namespace TFG.Api.Controllers
 		private readonly UserManager<User> _userManager = userManager;
 		// GET: api/<UsersController>
 		[HttpPost("search")]
-		public IActionResult Get(FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
+		public async Task<IActionResult> Get([FromBody] FilteredPaginatedRequestDto<GetUsersQueryParameters> request)
 		{
-			var usersQuery = _userManager.Users.AsQueryable();
-			IFiltersHandler<User, GetUsersQueryParameters> filtersHandler = new UserFiltersHandler();
-
-			var predicate = filtersHandler.GetFilters(request.Filters);
-			usersQuery = usersQuery.Where(predicate);
-
-			if (request.PageSize >= 0)
-			{
-				usersQuery = usersQuery.Skip((request.Page) * request.PageSize).Take(request.PageSize);
-			}
-
-			List<User> users = [.. usersQuery];
-			List<FilteredUserDto> usersDto = users.Select(u => u.ToFilteredUserDto()).ToList();
-			PaginatedResponseDto<FilteredUserDto> response = new()
-			{
-				Items = usersDto,
-				TotalCount = usersQuery.Count(),
-				PageNumber = request.Page,
-				PageSize = request.PageSize
-			};
-			return Ok(response);
+			var query = new SearchUsersQuery { Request = request };
+			var result = await mediator.Send(query);
+			return Ok(result);
 		}
 
 		// GET api/<UsersController>/5
