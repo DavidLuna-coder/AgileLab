@@ -4,62 +4,70 @@
 @using Shared.DTOs.Projects.Metrics
 @inject IProjectsApi ProjectsApi
 
-<MudGrid>
-	<!-- 1. Bugs, Code Smells y vulnerabilidades -->
+<MudStack>
+	@if (showAlert)
+	{
+		<MudAlert Severity="Severity.Warning">Es necesario configurar la integración entre Gitlab y SonarQube para obtener las métricas del proyecto</MudAlert>
+	}
+	<MudGrid>
+		<!-- 1. Bugs, Code Smells y vulnerabilidades -->
 
-	<MudItem xs="12" md="3">
-		<KpiCard Title="Líneas de código" Value=@kpis.NCLoc IsLoading=isLoading Icon="@Icons.Material.Filled.Code"></KpiCard>
-	</MudItem>
-	<MudItem xs="12" md="3">
-		<KpiCard Title="Vulnerabilidades" Value=@kpis.Vulnerabilities IsLoading=isLoading Icon="@Icons.Material.Filled.Security"></KpiCard>
-	</MudItem>
-	<MudItem xs="12" md="3">
-		<KpiCard Title="Bugs" Value=@kpis.Bugs IsLoading=isLoading Icon="@Icons.Material.Filled.BugReport"></KpiCard>
-	</MudItem>
-	<MudItem xs="12" md="3">
-		<KpiCard Title="Code Smells" Value=@kpis.Smells IsLoading=isLoading Icon="@Icons.Material.Filled.Build"></KpiCard>
-	</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Líneas de código" Value=@kpis.NCLoc IsLoading=isLoading Icon="@Icons.Material.Filled.Code"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Vulnerabilidades" Value=@kpis.Vulnerabilities IsLoading=isLoading Icon="@Icons.Material.Filled.Security"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Bugs" Value=@kpis.Bugs IsLoading=isLoading Icon="@Icons.Material.Filled.BugReport"></KpiCard>
+		</MudItem>
+		<MudItem xs="12" md="3">
+			<KpiCard Title="Code Smells" Value=@kpis.Smells IsLoading=isLoading Icon="@Icons.Material.Filled.Build"></KpiCard>
+		</MudItem>
 
-	<!-- 3. Cobertura Meter un gauge -->
-	<MudItem xs="12" md="4">
-		<MudCard Style="height:100%">
-			<MudCardHeader><MudText Typo="Typo.subtitle1">Cobertura</MudText></MudCardHeader>
-			<MudCardContent class="d-flex justify-center">
-				<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-					@if (isLoading)
+		<!-- 3. Cobertura Meter un gauge -->
+		<MudItem xs="12" md="4">
+			<MudCard Style="height:100%">
+				<MudCardHeader><MudText Typo="Typo.subtitle1">Cobertura</MudText></MudCardHeader>
+				<MudCardContent class="d-flex justify-center">
+					<MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+						@if (isLoading)
+						{
+							<MudSkeleton SkeletonType="SkeletonType.Circle" Width="150px" Height="150px" />
+						}
+						else
+						{
+							<MudChart ChartType="ChartType.Donut"
+									  InputData="[kpis.Coverage, 100-kpis.Coverage]"
+									  InputLabels="@(new[] { "Cubierto", "No cubierto" })"
+									  ChartOptions="@(new ChartOptions { ChartPalette = new[] { "var(--mud-palette-success)", "var(--mud-palette-error)" } })"
+									  Width="100%" />
+						}
+					</MudStack>
+				</MudCardContent>
+			</MudCard>
+		</MudItem>
+
+		<!-- 4. Ficheros más afectados -->
+		<MudItem xs="12" md="8">
+			<MudCard>
+				<MudCardHeader><MudText Typo="Typo.subtitle1">Ficheros con más problemas</MudText></MudCardHeader>
+				<MudCardContent>
+					@if (!isLoading)
 					{
-						<MudSkeleton SkeletonType="SkeletonType.Circle" Width="150px" Height="150px" />
+						<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(fileNames)" ChartSeries="chartSeries" />
 					}
 					else
 					{
-						<MudChart ChartType="ChartType.Donut"
-							  InputData="[kpis.Coverage, 100-kpis.Coverage]"
-							  InputLabels="@(new[] { "Cubierto", "No cubierto" })"
-							  ChartOptions="@(new ChartOptions { ChartPalette = new[] { "var(--mud-palette-success)", "var(--mud-palette-error)" } })"
-							  Width="100%" />
+						<MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="100%" />
 					}
-				</MudStack>
-			</MudCardContent>
-		</MudCard>
-	</MudItem>
+				</MudCardContent>
+			</MudCard>
+		</MudItem>
+	</MudGrid>
 
-	<!-- 4. Ficheros más afectados -->
-	<MudItem xs="12" md="8">
-		<MudCard>
-			<MudCardHeader><MudText Typo="Typo.subtitle1">Ficheros con más problemas</MudText></MudCardHeader>
-			<MudCardContent>
-				@if (!isLoading)
-				{
-					<MudChart Width="100%" ChartType="ChartType.Bar" XAxisLabels="@(fileNames)" ChartSeries="chartSeries" />
-				}
-				else
-				{
-					<MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="100%" />
-				}
-			</MudCardContent>
-		</MudCard>
-	</MudItem>
-</MudGrid>
+</MudStack>
+
 
 @code {
 	[Parameter]
@@ -71,31 +79,41 @@
 	private SummaryKpi kpis = new();
 	private bool isLoading = true;
 	private string[] fileNames = [];
-
+	bool showAlert = false;
 	protected override async Task OnInitializedAsync()
 	{
+		List<AffectedFileDto> mostAffectedFiles = new();
+		projectMetrics = new() { Measures = [] };
+
 		var projectMetricsTask = ProjectsApi.GetProjectMetrics(projectId);
 		var projectMostAffectedFilesTask = ProjectsApi.GetMostAffectedFiles(projectId);
 
 		projectMetrics = await projectMetricsTask;
-		var test = await projectMostAffectedFilesTask;
+		mostAffectedFiles = await projectMostAffectedFilesTask;
+		showAlert = false;
+		if (projectMetrics.Measures.Count == 0)
+		{
+			showAlert = true;
+		}
+
+
 		kpis = new()
 		{
-			NCLoc = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Ncloc).Value),
-			Vulnerabilities = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Vulnerabilities).Value),
-			Bugs = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Bugs).Value),
-			Smells = int.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.CodeSmells).Value),
-			Coverage = double.Parse(projectMetrics.Measures.First(p => p.Metric == SonarMetricKeys.Coverage).Value),
+			NCLoc = int.Parse(projectMetrics.Measures.FirstOrDefault(p => p.Metric == SonarMetricKeys.Ncloc)?.Value ?? "0"),
+			Vulnerabilities = int.Parse(projectMetrics.Measures.FirstOrDefault(p => p.Metric == SonarMetricKeys.Vulnerabilities)?.Value ?? "0"),
+			Bugs = int.Parse(projectMetrics.Measures.FirstOrDefault(p => p.Metric == SonarMetricKeys.Bugs)?.Value ?? "0"),
+			Smells = int.Parse(projectMetrics.Measures.FirstOrDefault(p => p.Metric == SonarMetricKeys.CodeSmells)?.Value ?? "0"),
+			Coverage = double.Parse(projectMetrics.Measures.FirstOrDefault(p => p.Metric == SonarMetricKeys.Coverage)?.Value ?? "0"),
 		};
 
 		chartSeries = new()
-		{
-			new(){ Name = "Líneas de código", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Ncloc).Select(m => double.Parse(m.Value)).ToArray() },
-			new(){ Name = "Vulnerabilidades", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Vulnerabilities).Select(m => double.Parse(m.Value)).ToArray() },
-			new(){ Name = "Bugs", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Bugs).Select(m => double.Parse(m.Value)).ToArray() },
-			new(){ Name = "Code Smells", Data = test.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.CodeSmells).Select(m => double.Parse(m.Value)).ToArray() },
-		};
-		fileNames = test.Select(f => f.Name).ToArray();
+			{
+				new(){ Name = "Líneas de código", Data = mostAffectedFiles.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Ncloc).Select(m => double.Parse(m.Value)).ToArray() },
+				new(){ Name = "Vulnerabilidades", Data = mostAffectedFiles.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Vulnerabilities).Select(m => double.Parse(m.Value)).ToArray() },
+				new(){ Name = "Bugs", Data = mostAffectedFiles.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.Bugs).Select(m => double.Parse(m.Value)).ToArray() },
+				new(){ Name = "Code Smells", Data = mostAffectedFiles.SelectMany(t => t.Measures).Where(m => m.Metric == SonarMetricKeys.CodeSmells).Select(m => double.Parse(m.Value)).ToArray() },
+			};
+		fileNames = mostAffectedFiles.Select(f => f.Name).ToArray();
 		isLoading = false;
 	}
 
