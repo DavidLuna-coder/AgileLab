@@ -82,6 +82,7 @@ namespace TFG.Application.Services.Users.Commands.RegisterUser
 				Password = request.Password,
 				Name = $"{request.FirstName} {request.LastName}",
 				Username = request.UserName,
+				SkipConfirmation = true,
 			};
 
 			NGitLab.Models.User gitlabUser = await gitLabClient.Users.CreateAsync(user);

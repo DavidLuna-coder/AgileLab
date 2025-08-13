@@ -32,11 +32,15 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		IUserInfo userInfo = userInfoAccessor.UserInfo;
 		request.UsersIds ??= new List<string>();
 
-		var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userInfo.UserId) ?? throw new NotFoundException("User does not exist");
+		var owner = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userInfo.UserId) ?? throw new NotFoundException("User does not exist");
 
 		// Verify all users in request.UsersIds exist
-		var projectUsers = await dbContext.Users.Where(u => request.UsersIds.Contains(u.Id)).ToListAsync();
-		if (projectUsers.Count != request.UsersIds.Count)
+		var projectUsers = await dbContext.Users.Where(u => request.UsersIds.Contains(u.Id) && u.Id != userInfo.UserId).ToListAsync();
+		if(owner is not null)
+		{
+			projectUsers.Add(owner);
+		}
+		if (projectUsers.Count < request.UsersIds.Count - 1)
 		{
 			throw new NotFoundException("One or more users do not exist");
 		}
@@ -47,12 +51,12 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 
 		try
 		{
-			var gitlabProject = await CreateAndConfigureGitlabProject(request, user, projectUsers);
+			var gitlabProject = await CreateAndConfigureGitlabProject(request, owner, projectUsers);
 			gitlabId = gitlabProject.Id;
 			sonarQubeProjectKey = request.Name.ToLowerInvariant().Replace(" ", "-");
 			string sonarQubeRepositoryIdentifier = gitlabProject.Id.ToString();
 			BoundedProject sonarQubeProject = await CreateAndConfigureSonarQubeProject(request, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
-			OPProjectCreated opProjectCreated = await CreateAndConfigureOpenProjectProject(request, projectUsers);
+			OPProjectCreated opProjectCreated = await CreateAndConfigureOpenProjectProject(request, projectUsers, owner);
 			openprojectProjectId = opProjectCreated.Id;
 			Project createdProject = await CreateProjectInDatabase(request, projectUsers, gitlabProject, sonarQubeProjectKey, opProjectCreated.Id);
 
@@ -145,7 +149,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		throw lastException!;
 	}
 
-	private async Task<OPProjectCreated> CreateAndConfigureOpenProjectProject(CreateProjectCommand projectDto, IEnumerable<User> users)
+	private async Task<OPProjectCreated> CreateAndConfigureOpenProjectProject(CreateProjectCommand projectDto, IEnumerable<User> users, User owner)
 	{
 		OPProjectCreation openProjectProjectCreation = new()
 		{
@@ -160,11 +164,12 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 			Active = true,
 		};
 		OPProjectCreated opProjectCreated = await openProjectClient.Projects.CreateAsync(openProjectProjectCreation);
-		foreach (int userOpenProjectId in users.Select(u => int.Parse(u.OpenProjectId)))
+		foreach (User projectUser in users)
 		{
+			int[] roles = projectUser.Id == owner.Id ? [8] : [6]; // Owner role is 8, Developer role is 6
 			MembershipCreation membershipCreation = new()
 			{
-				Links = MembershipCreationLinksBuilder.Build(userOpenProjectId, [6], opProjectCreated.Id)
+				Links = MembershipCreationLinksBuilder.Build(int.Parse(projectUser.OpenProjectId), roles, opProjectCreated.Id)
 			};
 			await openProjectClient.Memberships.CreateAsync(membershipCreation);
 		}
