@@ -58,7 +58,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 			BoundedProject sonarQubeProject = await CreateAndConfigureSonarQubeProject(request, sonarQubeProjectKey, sonarQubeRepositoryIdentifier, projectUsers);
 			OPProjectCreated opProjectCreated = await CreateAndConfigureOpenProjectProject(request, projectUsers, owner);
 			openprojectProjectId = opProjectCreated.Id;
-			Project createdProject = await CreateProjectInDatabase(request, projectUsers, gitlabProject, sonarQubeProjectKey, opProjectCreated.Id);
+			Project createdProject = await CreateProjectInDatabase(request, projectUsers, gitlabProject, sonarQubeProjectKey, opProjectCreated.Id, owner);
 
 			return createdProject.ToProjectDto();
 		}
@@ -69,7 +69,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 		}
 	}
 
-	private async Task<Project> CreateProjectInDatabase(CreateProjectCommand projectDto, IEnumerable<User> projectUsers, GitlabProject gitlabProjectResult, string sonarQubeProjectKey, int openProjectProjectId)
+	private async Task<Project> CreateProjectInDatabase(CreateProjectCommand projectDto, IEnumerable<User> projectUsers, GitlabProject gitlabProjectResult, string sonarQubeProjectKey, int openProjectProjectId, User owner)
 	{
 		//Create the project in the database
 		Project newProject = new()
@@ -80,7 +80,7 @@ public class CreateProjectCommandHandler(IUserInfoAccessor userInfoAccessor,
 			SonarQubeProjectKey = sonarQubeProjectKey,
 			GitlabId = gitlabProjectResult.Id.ToString(),
 			OpenProjectId = openProjectProjectId,
-			Users = projectUsers.ToList(),
+			Users = projectUsers.Where(pu => pu.Id != owner.Id).ToList(),
 			CreatedAt = DateTime.UtcNow
 		};
 
